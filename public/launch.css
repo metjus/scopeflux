@@ -1,0 +1,21 @@
+/* Launch flow: task guidance and readable, useful summaries. */
+.quick-start { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; margin: 0 0 20px; padding: 22px 24px; border: 1px solid var(--border,#d9dfd3); border-radius: 12px; background: #fff; }
+.quick-start p { margin: 0; font-size: 13px; line-height: 1.6; }
+.quick-start strong,.quick-start span { display: block; }
+.quick-start strong { color: #252b22; margin-bottom: 5px; font-size: 14px; }
+.quick-start span { color: #526048; }
+.source-explainer { margin-bottom: 24px; font-size: 13px; line-height: 1.7; color: #526048; }
+.source-explainer summary,.radar-journal > summary,.watch-rule-details > summary { cursor: pointer; color: #252b22; padding: 12px 0; font-weight: 600; }
+.source-explainer p { max-width: 78ch; }
+.radar-journal > summary { padding: 20px 24px; font-size: 15px; }
+.radar-journal:not([open]) { padding-block: 0; }
+.analysis-summary { padding: 16px 20px; margin: 16px 0 24px; background: #edf3e6; color: #34452c; border-inline-start: 3px solid #42632d; border-radius: 6px; font-size: 14px; line-height: 1.7; }
+.share-result { margin: 16px 0; padding: 16px; background: #fff; border: 1px solid #d9dfd3; border-radius: 10px; }
+.share-result label { display: block; margin-bottom: 8px; font-size: 13px; }
+.share-result input { width: 100%; min-width: 0; min-height: 44px; padding: 10px 12px; border: 1px solid #bac5b2; border-radius: 6px; font: inherit; color: #252b22; }
+.access-panel { padding: 28px; font-size: 14px; line-height: 1.8; }
+.access-panel p { max-width: 78ch; }
+.access-panel h3 { margin-top: 24px; }
+.watch-rule-details { margin-top: 12px; }
+.radar-card h3 { overflow-wrap: anywhere; }
+@media (max-width:720px) { .quick-start { grid-template-columns: 1fr; gap: 16px; padding: 18px; } .quick-start strong { margin-bottom: 2px; } .share-result input { font-size: 16px; } .access-panel { padding: 20px; } }

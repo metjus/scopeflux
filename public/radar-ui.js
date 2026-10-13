@@ -1,3 +1,4 @@
+import { radarComparisonMessage, exportTopicBrief } from './launch-summary.js';
 import { observation, recordCheck, feedChanges, topicKey, exploreTopicUrl, topicObservations, exportChecks, filterRadar, exportRadarView } from './radar.js';
 
 const statusLabels = { baseline: 'First recorded check', new: 'New since comparison check', returning: 'Returned since comparison check', continuing: 'Present in both checks', 'not-listed': 'No longer listed' };
@@ -14,7 +15,7 @@ export function initRadar({ $, $$, esc, countryName, toast, pro, download, getCh
     if (index >= 0) next = topics.filter((_, i) => i !== index);
     else {
       const limit = getPlan() === 'pro' ? 50 : 5;
-      if (topics.length + getSeriesCount() >= limit) { toast('This tier supports ' + limit + ' saved topics and series. View plans to try more.'); location.hash = 'plans'; return; }
+      if (topics.length + getSeriesCount() >= limit) { toast('This browser workspace holds up to ' + limit + ' saved topics and series. Remove an item before saving another.'); location.hash = 'plans'; return; }
       next = [{ country, title, savedAt: new Date().toISOString() }, ...topics];
     }
     const persisted = setTopics(next);
@@ -29,8 +30,8 @@ export function initRadar({ $, $$, esc, countryName, toast, pro, download, getCh
     $$('[data-live-save]').forEach(button => button.addEventListener('click', () => toggleTopic(button.dataset.market, button.dataset.liveSave)));
     $$('[data-live-import]').forEach(button => button.addEventListener('click', () => {
       $('#import-name').value = button.dataset.liveImport.slice(0, 120);
-      $('#import-unit').value = 'Interest index'; location.hash = 'imports';
-      toast('Export Interest over time as CSV from Google Trends, then import it here. RSS has no historical series.');
+      $('#import-unit').value = 'Values'; location.hash = 'imports';
+      toast('Import a dated CSV from your chosen data source. RSS provides current topics, not historical series.');
     }));
   }
 
@@ -74,22 +75,23 @@ export function initRadar({ $, $$, esc, countryName, toast, pro, download, getCh
     $('#radar-compare').innerHTML = '<option value="latest">' + (earlier.length ? 'Previous check · ' + esc(timeText(earlier.at(-1).fetchedAt)) : 'Record another check to compare') + '</option>' + earlier.toReversed().map(check => '<option value="' + esc(check.fetchedAt) + '">' + esc(timeText(check.fetchedAt)) + ' · ' + check.items.length + ' topics</option>').join('');
     $('#radar-compare').value = compareAt; $('#radar-compare').disabled = !earlier.length;
     const changes = feedChanges(getChecks(), data, compareAt === 'latest' ? null : compareAt), selected = $('#radar-view').value;
-    $('#radar-view-help').textContent = changes.previous ? 'Comparing recorded feeds for ' + countryName(data.country) + '. New topics were not seen in retained checks up to the selected check; returned topics were seen before it. Missing topics are absent from this feed, not necessarily no longer trending.' : 'This is your first recorded check for this market. Refresh later to compare changes. Saved topics can be filtered immediately; no historical search curve is created.';
+    $('#radar-view-help').textContent = radarComparisonMessage(changes, countryName(data.country));
     const settings = { view: selected, query: $('#radar-filter').value.trim(), sort: $('#radar-sort').value, archived };
     const items = filterRadar(changes, { ...settings, saved: getTopics() });
     visibleState = { changes, items, settings };
+    $('#export-radar-brief').disabled = !items.length; $('#share-radar').disabled = false;
     $('#export-radar-view').disabled = !items.length; $('#export-radar-view .pro-label').hidden = getPlan() === 'pro';
     $('#radar-archive-note').hidden = !archived; $('#radar-archive-context').textContent = archived ? 'Saved snapshot · ' + countryName(data.country) + ' · Recorded ' + timeText(data.fetchedAt) + '. News links were not stored. Refresh live to retrieve a new feed.' : '';
     $('#radar-refresh').textContent = archived ? 'Refresh live ↻' : 'Refresh ↻';
     $('#radar-view-all').textContent = archived ? 'Selected snapshot' : 'Current feed';
-    $('#radar-summary').innerHTML = [[archived ? 'Snapshot topics' : 'Current feed', changes.items.length, 'all'], ['New since comparison', changes.previous ? changes.counts.new : '—', 'new'], ['Returned since comparison', changes.previous ? changes.counts.returning : '—', 'returning'], ['No longer listed', changes.previous ? changes.counts.missing : '—', 'not-listed']].map(([label, value, view]) => '<button type="button" class="radar-summary-filter" data-radar-view="' + view + '" aria-pressed="' + (selected === view) + '" aria-controls="radar-grid" ' + (!changes.previous && view !== 'all' ? 'disabled' : '') + '><strong>' + value + '</strong><span>' + label + '</span></button>').join('');
+    $('#radar-summary').innerHTML = [[archived ? 'Snapshot topics' : 'Current feed', changes.items.length, 'all'], ['New topics', changes.previous ? changes.counts.new : '—', 'new'], ['Returned topics', changes.previous ? changes.counts.returning : '—', 'returning'], ['Missing from feed', changes.previous ? changes.counts.missing : '—', 'not-listed']].map(([label, value, view]) => '<button type="button" class="radar-summary-filter" data-radar-view="' + view + '" aria-pressed="' + (selected === view) + '" aria-controls="radar-grid" ' + (!changes.previous && view !== 'all' ? 'disabled' : '') + '><strong>' + value + '</strong><span>' + label + '</span></button>').join('');
     $$('[data-radar-view]').forEach(button => button.addEventListener('click', () => { $('#radar-view').value = button.dataset.radarView; render(); }));
     $('#radar-status').textContent = items.length + (archived ? ' matching topics · Saved snapshot · ' : ' matching topics · ') + countryName(data.country) + ' · Retrieved ' + timeText(data.fetchedAt) + (changes.previous ? ' · Compared with ' + timeText(changes.previous.fetchedAt) : '') + (storageAvailable ? '' : ' · Journal changes are session-only.');
     $('#radar-grid').innerHTML = items.length ? items.map(item => {
       const sourceItem = data.items.find(topic => topicKey(data.country, topic.title) === topicKey(data.country, item.title));
       const news = (sourceItem?.news ?? []).filter(article => typeof article.title === 'string' && safeUrl(article.url)).slice(0, 3);
       const isTracked = tracked(data.country, item.title);
-      return '<article class="radar-card live-radar-card"><div class="radar-category"><span>' + esc(countryName(data.country).toUpperCase()) + '</span><span>GOOGLE RSS</span></div><span class="feed-status ' + item.status + '">' + statusLabels[item.status] + '</span><h3>' + esc(item.title) + '</h3><div class="radar-growth">' + esc(item.trafficBucket ?? 'Not supplied') + '</div><p>' + (item.status === 'not-listed' ? 'Bucket at the selected comparison check' : 'Traffic bucket supplied by Google') + '</p>' + (item.bucketChanged ? '<p class="bucket-change">Bucket changed: ' + esc(item.previousBucket) + ' → ' + esc(item.trafficBucket) + '. Exact traffic change is unknown.</p>' : '') + '<p class="radar-date">Feed publication · ' + esc(timeText(item.publishedAt)) + '</p><div class="radar-news">' + (news.length ? news.map(article => '<a href="' + esc(safeUrl(article.url)) + '" target="_blank" rel="noopener noreferrer">' + esc(article.title) + '<small>' + esc(article.publisher ?? '') + ' ↗</small></a>').join('') : '<p>' + (item.status === 'not-listed' ? 'Absent from this selected RSS snapshot. This does not mean the trend ended.' : archived ? 'News links were not retained with this saved check.' : 'No news links supplied.') + '</p>') + '</div><div class="live-radar-actions"><button class="outline-btn ' + (isTracked ? 'topic-tracked' : '') + '" data-live-save="' + esc(item.title) + '" data-market="' + data.country + '" aria-pressed="' + isTracked + '">' + (isTracked ? 'Saved ✓' : 'Save topic +') + '</button><a class="outline-btn" href="' + esc(exploreTopicUrl(data.country, item.title)) + '" target="_blank" rel="noopener noreferrer">Google ↗</a>' + '<button class="outline-btn" data-live-import="' + esc(item.title) + '">Import CSV ↗</button>' + '</div></article>';
+      return '<article class="radar-card live-radar-card"><div class="radar-category"><span>' + esc(countryName(data.country).toUpperCase()) + '</span><span>GOOGLE RSS</span></div><span class="feed-status ' + item.status + '">' + statusLabels[item.status] + '</span><h3>' + esc(item.title) + '</h3><div class="radar-growth">' + esc(item.trafficBucket ?? 'Not supplied') + '</div><p>' + (item.status === 'not-listed' ? 'Traffic label at the earlier refresh' : 'Source traffic label · not an exact count') + '</p>' + (item.bucketChanged ? '<p class="bucket-change">Bucket changed: ' + esc(item.previousBucket) + ' → ' + esc(item.trafficBucket) + '. Exact traffic change is unknown.</p>' : '') + '<p class="radar-date">Feed publication · ' + esc(timeText(item.publishedAt)) + '</p><div class="radar-news">' + (news.length ? news.map(article => '<a href="' + esc(safeUrl(article.url)) + '" target="_blank" rel="noopener noreferrer">' + esc(article.title) + '<small>' + esc(article.publisher ?? '') + ' ↗</small></a>').join('') : '<p>' + (item.status === 'not-listed' ? 'Absent from this selected RSS snapshot. This does not mean the trend ended.' : archived ? 'News links were not retained with this saved check.' : 'No news links supplied.') + '</p>') + '</div><div class="live-radar-actions"><button class="outline-btn ' + (isTracked ? 'topic-tracked' : '') + '" data-live-save="' + esc(item.title) + '" data-market="' + data.country + '" aria-pressed="' + isTracked + '">' + (isTracked ? 'Saved ✓' : 'Save topic +') + '</button>' + '<button class="outline-btn" data-live-import="' + esc(item.title) + '">Analyze my CSV ↗</button>' + '</div></article>';
     }).join('') : '<div class="empty-state"><h3>' + (!changes.previous && !['all','saved'].includes(selected) ? 'Record another check to compare.' : 'No topics match this view.') + '</h3><p>' + (selected === 'saved' ? 'Save a topic from this market first, or clear the view filters.' : 'Clear the view filters or choose another market.') + '</p><button type="button" class="outline-btn" id="radar-empty-reset">Reset view ↻</button></div>';
     if (!items.length) $('#radar-empty-reset').addEventListener('click',resetView);
     bindTopicButtons();
@@ -98,6 +100,7 @@ export function initRadar({ $, $$, esc, countryName, toast, pro, download, getCh
   async function load() {
     const requestVersion = ++version, country = $('#radar-region').value;
     controller?.abort(); controller = new AbortController(); data = null; loadingCountry = country; archived = false; visibleState = null;
+    $('#export-radar-brief').disabled = true; $('#share-radar').disabled = true; $('#radar-share-result').hidden = true;
     $('#export-radar-view').disabled = true; $('#radar-archive-note').hidden = true; $('#radar-refresh').textContent = 'Refresh ↻';
     $('#radar-source').href = 'https://trends.google.com/trending/rss?geo=' + country;
     $('#radar-refresh').disabled = true; $('#radar-grid').setAttribute('aria-busy', 'true');
@@ -186,6 +189,7 @@ export function initRadar({ $, $$, esc, countryName, toast, pro, download, getCh
     storageAvailable = setChecks([]); clearPending = false;
     $('#clear-radar-journal').textContent = 'Clear local journal'; $('#cancel-clear-journal').hidden = true;
     controller?.abort(); version++; data = null; loadingCountry = null; archived = false; visibleState = null;
+    $('#export-radar-brief').disabled = true; $('#share-radar').disabled = true; $('#radar-share-result').hidden = true;
     $('#export-radar-view').disabled = true; $('#radar-archive-note').hidden = true; $('#radar-refresh').textContent = 'Refresh ↻';
     $('#radar-refresh').disabled = false; $('#radar-grid').setAttribute('aria-busy', 'false');
     $('#radar-summary').innerHTML = '';
@@ -196,6 +200,20 @@ export function initRadar({ $, $$, esc, countryName, toast, pro, download, getCh
     if (storageAvailable) toast('Local journal cleared. Saved topics and series remain.');
   });
   $('#cancel-clear-journal').addEventListener('click', () => { clearPending = false; $('#clear-radar-journal').textContent = 'Clear local journal'; $('#cancel-clear-journal').hidden = true; });
+  $('#export-radar-brief').addEventListener('click', () => {
+    if (!visibleState?.items.length || !data) return;
+    download(exportTopicBrief(visibleState.changes, visibleState.items, data, countryName(data.country)), 'scopeflux-topic-brief.txt', 'text/plain;charset=utf-8');
+    toast('Brief downloaded with source labels and available news links.');
+  });
+  $('#share-radar').addEventListener('click', () => {
+    if (!visibleState || !data) return;
+    const url = new URL(location.href); url.search = ''; url.hash = 'radar';
+    url.searchParams.set('market', data.country);
+    if (visibleState.settings.query) url.searchParams.set('q', visibleState.settings.query);
+    $('#radar-share-link').value = url.href; $('#radar-share-result').hidden = false;
+    $('#radar-share-link').focus(); $('#radar-share-link').select();
+    toast('Copy this link to share the latest feed for this market and filter.');
+  });
   $('#close-live-topic').addEventListener('click', () => $('#live-topic-dialog').close());
   return { render, load, renderSaved, renderJournal, hasData: () => Boolean(data) };
 }

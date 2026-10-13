@@ -1,54 +1,38 @@
-# ScopeFlux na Cloudflare Free
+# ScopeFlux free launch update
 
-Balík obsahuje aktuálny web, CSV import/export a serverové RSS načítanie.
-Nasadenie ešte nebolo vykonané. Oficiálne Google a Bing API nie sú pripojené.
-Voliteľný DataForSEO adaptér ostáva vypnutý.
+This update is for the EXISTING metjus/scopeflux repository and Cloudflare Worker.
+Do not create a new repository or Worker. Domain settings stay as configured.
 
-## Nasadenie cez terminál
-1. Nainštaluj Node.js 22 alebo novší z https://nodejs.org/.
-2. Rozbaľ ZIP. Otvor terminál v priečinku, kde je package.json.
-3. Spusti postupne:
+## Update
+1. Unzip this package.
+2. Open metjus/scopeflux on GitHub, choose Add file > Upload files.
+3. Upload the CONTENTS of this folder, including public/ and lib/, replacing existing files.
+   package.json, wrangler.json and worker.mjs must stay at repository root.
+4. Commit changes to the Cloudflare-connected branch.
+5. Wait for Cloudflare's existing deployment to succeed, then open scopeflux.io.
 
-```sh
-npm install
-npx wrangler login
-npm run deploy
-```
+Build command stays empty. Deploy command stays npx wrangler deploy.
+No API credentials, advertising account or paid plan are needed for this beta.
 
-Prihlásenie sa otvorí v prehliadači. Vyber svoj Cloudflare účet.
-Použi Workers Free; balík nepotrebuje platený plán, databázu ani R2.
-Po deploy sa zobrazí dočasná adresa na workers.dev.
+## Useful tools
+- Current RSS topics with reporting links and honest source traffic labels.
+- Save topics and compare recorded manual refreshes in the same market.
+- Export the filtered feed as CSV or a plain-text brief with available news links.
+- Share market/filter URLs; only public filters are shared, not local data.
+- Import dated CSV values, compare up to five series, calculate seasonality and export.
 
-## Pripojenie domény
-Cloudflare → Workers & Pages → scopeflux → Settings → Domains & Routes
-→ Add → Custom Domain → scopeflux.io → Add Custom Domain.
-Cloudflare vytvorí DNS a HTTPS certifikát. Doména musí mať aktívnu Cloudflare zónu.
-Rovnakým postupom môžeš pridať www.scopeflux.io; je to samostatný názov.
-Ak Cloudflare hlási konflikt existujúceho CNAME, skontroluj DNS tejto domény.
-Nevytváraj A záznam s náhodnou IP adresou.
+## Check after deployment
+1. Open scopeflux.io without a hash: real RSS discovery is the default.
+2. Select Slovakia and Czechia. Confirm feeds or a clear source-unavailable message.
+3. Save a topic, refresh later and select an earlier refresh to compare.
+4. Filter topics, download CSV and brief, and open the shared view in a new browser tab.
+5. Import a CSV, inspect the summary/units, compare and export it.
+6. Check on mobile: navigation, labels, topic cards and chart scrolling.
 
-## Alternatíva: GitHub
-Nahraj rozbalené súbory do vlastného GitHub repozitára.
-V Cloudflare Workers & Pages vytvor Worker pripojením tohto repozitára.
-Build command nechaj prázdny; deploy command: npx wrangler deploy.
-Root directory: koreň repozitára, kde je wrangler.json.
-Potom pridaj Custom Domain podľa postupu vyššie.
+Everything is free. No advertising, ad blocker restriction, historical keyword API,
+account system, background refresh, notification or forecast is active.
+RSS is attributed to Google's public source. Feed coverage varies.
+Your imported values, saved topics and past refreshes stay in the current browser.
+They do not synchronize between devices. Keep CSV exports as your own backups.
 
-## Kontrola po nasadení
-- Navigácia a mobilné menu; zmena témy v Exploreri.
-- Radar: Slovensko a USA, obnovenie feedu a detail témy.
-- CSV import, analýza a export so zachovanými hodnotami.
-- /api/keyword vracia JSON s ready:false. Chýbajúce API nenahrádza dáta demom.
-
-Staré údaje uložené v prehliadači sa na novú doménu automaticky neprenesú.
-CSV môžeš znova importovať. Nie sú implementované účty ani cloudové používateľské úložisko.
-Cloudflare verzia bude po nasadení verejná; nemá súkromné prihlásenie ChatGPT Sites.
-
-## Free limity
-Statické súbory: bezplatné neobmedzené požiadavky.
-Worker/API: 100 000 požiadaviek denne a 10 ms CPU na požiadavku.
-Čakanie na RSS nie je CPU čas. Skutočné využitie overíme po nasadení.
-Externé platené API nie sú zahrnuté v bezplatnom hostingu.
-
-https://developers.cloudflare.com/workers/platform/pricing/
-https://developers.cloudflare.com/workers/configuration/routing/custom-domains/
+Automated checks pass; rendered browser/mobile QA remains to be completed.
