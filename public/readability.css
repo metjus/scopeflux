@@ -5,118 +5,324 @@
   --text-green: #42632d;
 }
 
-.nav-caption, .nav-kbd, .breadcrumb, .eyebrow, .global-label,
-.cost-label, .suggestions, .suggestions button, .notice, .data-notice,
-.result-heading > div > span, .metric-label, .metric-label span,
-.metric-value > span, .metric small, .panel-heading p, .chart-legend,
-.chart-footer, .chart-footer > span:last-child, .insight-bottom,
-.count-badge, .table-tab, .text-btn, .table-footer, footer,
-.radar-toolbar, .radar-card .radar-category, .radar-card p,
-.saved-item p, .empty-state p, .plan-card p, .plan-card li,
-.price small, .source-card p, .plan-note p, .form-help,
-.anomaly-item small, .anomaly-empty, .coverage-panel dt,
-.form-bottom > span, .comparison-summary h4, .comparison-summary small,
-.market-choices > span, .market-detail, .season-month small,
-.season-month .season-bar span, .season-method, .year-grid > span,
-.watch-summary small, .watch-card-top p, .rule-form label,
-.rule-status:not(.triggered), .section-title > span, .import-item p,
-.radar-news small, .radar-summary span, .radar-view-controls > label,
-.journal-toolbar > label, .journal-row, .journal-empty, .journal-method,
-.live-watch-card p, .live-watch-card dt, .radar-comparison-help,
-.live-activity-summary span, .live-topic-filters label,
-.explorer-source-row > span, .credit-box p, .credit-box strong small {
+.nav-caption,
+.nav-kbd,
+.breadcrumb,
+.eyebrow,
+.global-label,
+.cost-label,
+.suggestions,
+.suggestions button,
+.notice,
+.data-notice,
+.result-heading > div > span,
+.metric-label,
+.metric-label span,
+.metric-value > span,
+.metric small,
+.panel-heading p,
+.chart-legend,
+.chart-footer,
+.chart-footer > span:last-child,
+.insight-bottom,
+.count-badge,
+.table-tab,
+.text-btn,
+.table-footer,
+footer,
+.radar-toolbar,
+.radar-card .radar-category,
+.radar-card p,
+.saved-item p,
+.empty-state p,
+.plan-card p,
+.plan-card li,
+.price small,
+.source-card p,
+.plan-note p,
+.form-help,
+.anomaly-item small,
+.anomaly-empty,
+.coverage-panel dt,
+.form-bottom > span,
+.comparison-summary h4,
+.comparison-summary small,
+.market-choices > span,
+.market-detail,
+.season-month small,
+.season-month .season-bar span,
+.season-method,
+.year-grid > span,
+.watch-summary small,
+.watch-card-top p,
+.rule-form label,
+.rule-status:not(.triggered),
+.section-title > span,
+.import-item p,
+.radar-news small,
+.radar-summary span,
+.radar-view-controls > label,
+.journal-toolbar > label,
+.journal-row,
+.journal-empty,
+.journal-method,
+.live-watch-card p,
+.live-watch-card dt,
+.radar-comparison-help,
+.live-activity-summary span,
+.live-topic-filters label,
+.explorer-source-row > span,
+.credit-box p,
+.credit-box strong small {
   color: var(--text-supporting);
 }
 
-.sample-tag { color: var(--text-green) !important; font-size: 12px !important; }
-.positive, .metric-value .green-pill, .radar-card .radar-growth,
-.source-card a, .table-footer a, .method-link,
-.source-card .status-pill, .save-row.saved { color: var(--text-green); }
-.negative { color: #87502b; }
-.intent { color: #526048; }
-.intent.commercial { color: #566135; }
-.intent.question { color: #405d78; }
+.sample-tag {
+  color: var(--text-green) !important;
+  font-size: 12px !important;
+}
+.positive,
+.metric-value .green-pill,
+.radar-card .radar-growth,
+.source-card a,
+.table-footer a,
+.method-link,
+.source-card .status-pill,
+.save-row.saved {
+  color: var(--text-green);
+}
+.negative {
+  color: #87502b;
+}
+.intent {
+  color: #526048;
+}
+.intent.commercial {
+  color: #566135;
+}
+.intent.question {
+  color: #405d78;
+}
 
-.nav-caption, .nav-kbd, .workspace small, .profile small,
-.credit-title, .credit-box p, .credit-box strong small,
-.demo-badge, .eyebrow, .global-label, .cost-label,
-.sample-tag, .pro-label, .metric-label, .metric small,
-.chart-legend, .chart-footer, .table-footer, footer,
-.radar-card .radar-category, .radar-news small, .form-help {
+.nav-caption,
+.nav-kbd,
+.workspace small,
+.profile small,
+.credit-title,
+.credit-box p,
+.credit-box strong small,
+.demo-badge,
+.eyebrow,
+.global-label,
+.cost-label,
+.sample-tag,
+.pro-label,
+.metric-label,
+.metric small,
+.chart-legend,
+.chart-footer,
+.table-footer,
+footer,
+.radar-card .radar-category,
+.radar-news small,
+.form-help {
   font-size: 12px;
   line-height: 1.6;
 }
-.page-heading p, .source-card p, .plan-note p,
-.notice, .data-notice, .panel-heading p, .empty-state p {
+.page-heading p,
+.source-card p,
+.plan-note p,
+.notice,
+.data-notice,
+.panel-heading p,
+.empty-state p {
   font-size: 14px;
   line-height: 1.7;
 }
-.breadcrumb, .radar-toolbar, .rule-form label,
-.radar-view-controls > label, .journal-toolbar > label,
-.live-topic-filters label { font-size: 13px; }
-nav > a { font-size: 13px; }
-.radar-toolbar { flex-wrap: wrap; }
-.radar-toolbar select, .radar-toolbar button { font-size: 13px; }
-.form-help { overflow-wrap: anywhere; }
-.page h2, .page h3, .page h4, .multi-legend span,
-.chart-legend span { overflow-wrap: anywhere; }
-.metrics, .comparison-summary { min-width: 0; }
-.metric, .watch-card-top > div, .import-item > div { min-width: 0; }
-.sidebar { overflow-y: auto; }
-.sidebar > .brand, .workspace, .sidebar-bottom { flex-shrink: 0; }
-.rule-form label { flex-wrap: wrap; }
-.rule-form select { max-width: 100%; }
-.live-topic-dialog { max-height: calc(100dvh - 32px); overflow-y: auto; }
-button:focus-visible, a:focus-visible, input:focus-visible,
-select:focus-visible, textarea:focus-visible, summary:focus-visible {
+.breadcrumb,
+.radar-toolbar,
+.rule-form label,
+.radar-view-controls > label,
+.journal-toolbar > label,
+.live-topic-filters label {
+  font-size: 13px;
+}
+nav > a {
+  font-size: 13px;
+}
+.radar-toolbar {
+  flex-wrap: wrap;
+}
+.radar-toolbar select,
+.radar-toolbar button {
+  font-size: 13px;
+}
+.form-help {
+  overflow-wrap: anywhere;
+}
+.page h2,
+.page h3,
+.page h4,
+.multi-legend span,
+.chart-legend span {
+  overflow-wrap: anywhere;
+}
+.metrics,
+.comparison-summary {
+  min-width: 0;
+}
+.metric,
+.watch-card-top > div,
+.import-item > div {
+  min-width: 0;
+}
+.sidebar {
+  overflow-y: auto;
+}
+.sidebar > .brand,
+.workspace,
+.sidebar-bottom {
+  flex-shrink: 0;
+}
+.rule-form label {
+  flex-wrap: wrap;
+}
+.rule-form select {
+  max-width: 100%;
+}
+.live-topic-dialog {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
   outline-color: #4f7132;
 }
-.chart-point:hover, .chart-point:focus { fill: #4f7132; }
-.chart-wrap svg text { fill: var(--text-supporting); font-size: 12px; }
-input::placeholder, textarea::placeholder { color: var(--muted); opacity: 1; }
+.chart-point:hover,
+.chart-point:focus {
+  fill: #4f7132;
+}
+.chart-wrap svg text {
+  fill: var(--text-supporting);
+  font-size: 12px;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
 
 @media (max-width: 720px) {
-  .page { font-size: 14px; }
-  .page label, .page small, .page .form-help,
-  .page .metric-label, .page .chart-legend, .page .chart-footer,
-  .page .table-footer, .page .table-tab, .page .status-pill,
-  .page .feed-status, .page .season-month small,
-  .page .panel-heading h3, footer, footer > a:last-child {
+  .page {
+    font-size: 14px;
+  }
+  .page label,
+  .page small,
+  .page .form-help,
+  .page .metric-label,
+  .page .chart-legend,
+  .page .chart-footer,
+  .page .table-footer,
+  .page .table-tab,
+  .page .status-pill,
+  .page .feed-status,
+  .page .season-month small,
+  .page .panel-heading h3,
+  footer,
+  footer > a:last-child {
     font-size: 12px;
     line-height: 1.6;
   }
-  .page input, .page select, .page textarea,
-  .page .rule-form select, .page .rule-form input,
-  .page .radar-toolbar input, .page .radar-toolbar select {
+  .page input,
+  .page select,
+  .page textarea,
+  .page .rule-form select,
+  .page .rule-form input,
+  .page .radar-toolbar input,
+  .page .radar-toolbar select {
     font-size: 16px;
     max-width: 100%;
   }
-  .page input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
-  .page select { min-height: 44px; }
-  .page button, .page .outline-btn, .page .text-btn {
+  .page input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  .page select {
+    min-height: 44px;
+  }
+  .page button,
+  .page .outline-btn,
+  .page .text-btn {
     font-size: 13px;
     min-height: 40px;
   }
-  .page .icon-btn, .page .save-row { min-width: 40px; }
-  .page .page-heading p, .page .panel-heading p,
-  .page .insight-panel p, .page .notice { font-size: 14px; }
-  .page .metric-value .green-pill, .page .metric-value > span { font-size: 12px; }
-  .result-actions { max-width: none; }
-  .result-heading { flex-wrap: wrap; gap: 14px; }
-  .result-actions { justify-content: flex-start; }
-  .sample-tag { text-align: left; }
-  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .rule-form select { width: auto; }
-  .table-search { max-width: none; flex: 1; min-width: 0; }
-  .table-search input { width: 100%; min-width: 0; }
-  footer { font-size: 12px; }
-  .chart-wrap { overflow-x: auto; }
-  .chart-wrap svg { min-width: 560px; }
-  .chart-wrap svg text { font-size: 17px; }
+  .page .icon-btn,
+  .page .save-row {
+    min-width: 40px;
+  }
+  .page .page-heading p,
+  .page .panel-heading p,
+  .page .insight-panel p,
+  .page .notice {
+    font-size: 14px;
+  }
+  .page .metric-value .green-pill,
+  .page .metric-value > span {
+    font-size: 12px;
+  }
+  .result-actions {
+    max-width: none;
+  }
+  .result-heading {
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .result-actions {
+    justify-content: flex-start;
+  }
+  .sample-tag {
+    text-align: left;
+  }
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rule-form select {
+    width: auto;
+  }
+  .table-search {
+    max-width: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .table-search input {
+    width: 100%;
+    min-width: 0;
+  }
+  footer {
+    font-size: 12px;
+  }
+  .chart-wrap {
+    overflow-x: auto;
+  }
+  .chart-wrap svg {
+    min-width: 560px;
+  }
+  .chart-wrap svg text {
+    font-size: 17px;
+  }
 }
 
 @media (max-width: 380px) {
-  .metrics { grid-template-columns: 1fr; }
-  .page .rule-form label, .page .rule-form > select { width: 100%; }
-  .page .rule-form label > select { flex: 1; min-width: 0; }
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+  .page .rule-form label,
+  .page .rule-form > select {
+    width: 100%;
+  }
+  .page .rule-form label > select {
+    flex: 1;
+    min-width: 0;
+  }
 }
