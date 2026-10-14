@@ -2,11 +2,10 @@
 // (public/js/data/wikipedia-client.js). No live network: fetch is replaced.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { historyResponse } from '../lib/wikipedia.mjs';
+import { historyResponse } from '../lib/sources/wikipedia.mjs';
 import { validateHistory, fetchWikipediaSeries } from '../public/js/data/wikipedia-client.js';
 
-const json = body =>
-  new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json' } });
+const json = body => new Response(JSON.stringify(body), { headers: { 'Content-Type': 'application/json' } });
 
 // A fake Wikimedia: one search hit, then `days` daily view counts.
 function fakeWikimedia(calls) {

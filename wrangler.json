@@ -15,7 +15,9 @@
       "/api/*"
     ]
   },
-  "vars": {
-    "TREND_API_ENABLED": "false"
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
   }
 }

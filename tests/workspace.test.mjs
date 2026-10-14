@@ -1,11 +1,7 @@
 // Browser data rules: what is restored from storage and how exports are labelled.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {
-  restoreDatasetCollections,
-  restoreHistory,
-  validDataset,
-} from '../public/js/data/workspace-data.js';
+import { restoreDatasetCollections, restoreHistory, validDataset } from '../public/js/data/workspace-data.js';
 import { dataStatus } from '../public/js/data/exports.js';
 
 const records = Array.from({ length: 6 }, (_, i) => ({ date: '2026-01-0' + (i + 1), value: i }));
@@ -20,7 +16,15 @@ const wikiSeries = {
   fetchedAt: '2026-10-14T10:00:00.000Z',
   records,
 };
-const csvSeries = { id: 'c1', kind: 'imported', source: 'csv', query: 'Sales', country: '', unit: 'Sales', records };
+const csvSeries = {
+  id: 'c1',
+  kind: 'imported',
+  source: 'csv',
+  query: 'Sales',
+  country: '',
+  unit: 'Sales',
+  records,
+};
 
 test('Wikipedia and CSV series are valid; generated demo series are not', () => {
   assert.ok(validDataset(wikiSeries));

@@ -1,0 +1,33 @@
+{
+ "items": [
+  {
+   "project": "en.wikipedia",
+   "access": "all-access",
+   "year": "2026",
+   "month": "10",
+   "day": "13",
+   "articles": [
+    {
+     "article": "Main_Page",
+     "views": 5000000,
+     "rank": 1
+    },
+    {
+     "article": "Special:Search",
+     "views": 900000,
+     "rank": 2
+    },
+    {
+     "article": "Godot_(game_engine)",
+     "views": 3200,
+     "rank": 3
+    },
+    {
+     "article": "Steady_topic",
+     "views": 3000,
+     "rank": 4
+    }
+   ]
+  }
+ ]
+}
