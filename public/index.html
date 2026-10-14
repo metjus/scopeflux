@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f5f6f2" />
     <meta
       name="description"
-      content="Discover current RSS topics, save a local watchlist, compare refreshes and analyze your CSV data. Free trend tools with clear sources and exports. No account required."
+      content="Discover current RSS topics, look up Wikipedia article views, save a local watchlist and analyze your CSV data. Free trend tools with clear sources. No account required."
     />
     <title>ScopeFlux — Free RSS discovery and CSV analytics</title>
     <link rel="canonical" href="https://scopeflux.io/" />
@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="/imports.css" />
     <link rel="stylesheet" href="/readability.css" />
     <link rel="stylesheet" href="/launch.css" />
-    <script type="module" src="/app.js"></script>
+    <script type="module" src="/js/main.js"></script>
   </head>
   <body>
     <noscript
@@ -84,7 +84,7 @@
       <div class="sidebar-bottom">
         <div class="credit-box">
           <span class="credit-title">Free beta access</span>
-          <p>RSS discovery and CSV analytics. No subscription or credits.</p>
+          <p>RSS discovery, Wikipedia views and CSV analytics. No subscription or credits.</p>
           <a href="#plans" class="upgrade">How access works ↗</a>
         </div>
         <a href="#sources" class="profile"
@@ -142,8 +142,8 @@
               <div class="eyebrow"><span></span>YOUR DATA, EXPLAINED</div>
               <h1>See what your<br />data is doing.</h1>
               <p>
-                Import a CSV to see how your values change, compare series and check seasonal
-                patterns. Generated examples let you try the tools before importing.
+                Look up daily Wikipedia article views for any topic, or import a CSV to see how your
+                own values change, compare series and check seasonal patterns.
               </p>
             </div>
             <div class="heading-actions">
@@ -156,29 +156,27 @@
             <div class="explorer-source-row">
               <label for="explorer-mode">Data to analyze</label
               ><select id="explorer-mode">
-                <option value="demo" selected>Try generated example</option>
+                <option value="topic" selected>Look up a topic on Wikipedia</option>
                 <option value="loaded">Analyze my imported data</option></select
               ><span>Analyze your own data with <a href="#imports">CSV import ↗</a></span>
             </div>
-            <div id="explorer-demo-controls">
+            <div id="explorer-topic-controls">
               <div class="search-main">
                 <label for="keyword" class="sr-only">Topic or search term</label
                 ><span data-icon="search"></span
                 ><input
                   id="keyword"
-                  aria-describedby="search-form-error live-api-status live-api-error"
-                  maxlength="120"
-                  value="3d printing"
-                  placeholder="Explore any topic, product, or idea…"
+                  aria-describedby="search-form-error"
+                  maxlength="100"
+                  placeholder="Any topic, e.g. matcha"
                   required
                   autocomplete="off"
-                /><button id="search-submit" class="search-button" type="submit">
-                  Analyze demo ↗
-                </button>
+                /><button id="search-submit" class="search-button" type="submit">Analyze ↗</button>
               </div>
               <div class="search-options">
                 <div class="filter-control">
-                  <span data-icon="globe"></span><label for="country" class="sr-only">Country</label
+                  <span data-icon="globe"></span
+                  ><label for="country" class="sr-only">Market (Wikipedia edition)</label
                   ><select id="country"></select>
                 </div>
                 <div class="filter-control">
@@ -192,10 +190,9 @@
                     <option value="1825">Past 5 years</option>
                   </select>
                 </div>
-                <select id="source" hidden aria-label="Demo generator">
-                  <option value="synthetic">Generated demo</option></select
-                ><span id="source-icon" hidden></span
-                ><span class="cost-label" id="search-cost">Generated example · free</span>
+                <span class="cost-label" id="search-cost"
+                  >Wikipedia article views per day · free</span
+                >
               </div>
             </div>
             <div id="explorer-loaded-controls" hidden>
@@ -205,37 +202,31 @@
                   ><select id="explorer-dataset" aria-describedby="explorer-loaded-help"></select>
                 </div>
                 <button id="explorer-loaded-open" type="submit" class="search-button">
-                  Open analysis · free ↗</button
+                  Open analysis ↗</button
                 ><a href="#imports" class="outline-btn">Import CSV ↗</a>
               </div>
               <p id="explorer-loaded-help" class="form-help"></p>
             </div>
             <p id="search-form-error" class="form-error search-form-error" role="alert" hidden></p>
-            <div id="live-api-info" hidden>
-              <p id="live-api-status" role="status" aria-live="polite"></p>
-              <p id="live-api-help" class="form-help"></p>
-              <p id="live-api-error" class="form-error" role="alert" hidden></p>
-            </div>
           </form>
-          <div class="suggestions" id="demo-suggestions">
-            <span>Try a demo topic</span><button data-query="ai agents">ai agents ↗</button
+          <div class="suggestions" id="topic-suggestions">
+            <span>Try a topic</span><button data-query="ai agents">ai agents ↗</button
             ><button data-query="3d printing">3d printing</button
             ><button data-query="matcha">matcha</button
             ><button data-query="solar panels">solar panels</button>
           </div>
-          <div id="analysis-result">
+          <div id="analysis-result" hidden>
             <div class="result-heading">
               <div>
-                <h2 id="result-title">3d printing</h2>
+                <h2 id="result-title"></h2>
                 <span id="result-context"></span>
               </div>
               <div class="result-actions">
-                <span class="sample-tag" id="data-badge">SAMPLE DATA</span
+                <span class="sample-tag" id="data-badge"></span
                 ><button id="save-topic" class="outline-btn">
                   <span data-icon="bookmark"></span>Track topic</button
                 ><button id="export" class="outline-btn">
                   <span data-icon="download"></span>Export series
-                  <span class="pro-label" hidden></span>
                 </button>
               </div>
             </div>
@@ -276,8 +267,9 @@
                 <div>
                   <dt>Latest value</dt>
                   <dd>
-                    The most recent observation, in the original data unit. An interest index
-                    measures relative search interest; it is not a count of people or searches.
+                    The most recent observation, in the original data unit. Wikipedia views count
+                    article reads, not searches; an interest index is relative, not a count of
+                    people.
                   </dd>
                 </div>
                 <div>
@@ -353,7 +345,8 @@
               <a href="#compare"
                 ><span data-icon="compare"></span>Compare with another topic <span>↗</span></a
               ><a href="#markets" id="explorer-market-link"
-                ><span data-icon="globe"></span>Try demo market comparison <span>↗</span></a
+                ><span data-icon="globe"></span>Compare across Wikipedia languages
+                <span>↗</span></a
               ><a href="#seasonality"
                 ><span data-icon="calendar"></span>Understand seasonality <span>↗</span></a
               >
@@ -380,47 +373,6 @@
                 <a href="#sources" class="method-link">View calculations & data methods ↗</a>
               </article>
             </div>
-            <article class="panel keyword-panel">
-              <div class="panel-heading">
-                <div>
-                  <h3>
-                    Related topic explorer <span id="table-count" class="count-badge">24</span>
-                  </h3>
-                  <p>Illustrative related phrases · not suggestions from a live provider.</p>
-                </div>
-                <div class="table-filters">
-                  <button class="table-tab active" data-type="all">All phrases</button
-                  ><button class="table-tab" data-type="question">Questions</button
-                  ><button class="table-tab" data-type="commercial">Products & services</button>
-                </div>
-              </div>
-              <div class="table-toolbar">
-                <div class="table-search">
-                  <span data-icon="search"></span
-                  ><label class="sr-only" for="table-filter">Filter related phrases</label
-                  ><input id="table-filter" placeholder="Filter phrases…" />
-                </div>
-                <button id="sort" class="text-btn">Change: high to low ↓</button>
-              </div>
-              <div class="table-scroll">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Related phrase</th>
-                      <th>Type</th>
-                      <th>Latest index</th>
-                      <th>Recent change</th>
-                      <th>Signal</th>
-                      <th><span class="sr-only">Track</span></th>
-                    </tr>
-                  </thead>
-                  <tbody id="keyword-rows"></tbody>
-                </table>
-              </div>
-              <div class="table-footer">
-                <span id="table-footer"></span><a id="unlock-link" hidden href="#plans"></a>
-              </div>
-            </article>
           </div>
         </section>
         <section class="page" id="page-radar">
@@ -486,7 +438,7 @@
             ><button id="radar-refresh" class="outline-btn" type="button">Refresh ↻</button
             ><button id="radar-reset" class="text-btn" type="button">Reset view</button
             ><button id="export-radar-view" class="outline-btn" type="button" disabled>
-              Export CSV <span class="pro-label" hidden></span></button
+              Export CSV</button
             ><button id="export-radar-brief" class="outline-btn" type="button" disabled>
               Download brief</button
             ><button id="share-radar" class="text-btn" type="button" disabled>
@@ -550,8 +502,7 @@
               <label for="journal-market">Market</label
               ><select id="journal-market">
                 <option value="all">All recorded markets</option></select
-              ><button id="export-radar-journal" class="outline-btn">
-                Export journal <span class="pro-label" hidden></span></button
+              ><button id="export-radar-journal" class="outline-btn">Export journal</button
               ><button id="clear-radar-journal" class="text-btn">Clear local journal</button
               ><button id="cancel-clear-journal" class="text-btn" hidden>Cancel</button>
             </div>
@@ -579,9 +530,7 @@
           <div class="watch-toolbar">
             <button id="evaluate-watchlist" class="search-button">Evaluate rules now ↗</button
             ><a href="#explorer" class="outline-btn">Add a topic</a
-            ><button id="watch-report" class="outline-btn">
-              Export watchlist report <span class="pro-label" hidden></span>
-            </button>
+            ><button id="watch-report" class="outline-btn">Export watchlist report</button>
           </div>
           <div id="watch-summary" class="watch-summary"></div>
           <div class="section-title">
@@ -643,7 +592,7 @@
                 <div class="compare-source-entry">
                   <label for="compare-mode">Data to compare</label
                   ><select id="compare-mode">
-                    <option value="sample">Demo topics · editable</option>
+                    <option value="topics">Wikipedia topics · type your own</option>
                     <option value="imported">Loaded series & CSV data</option>
                   </select>
                 </div>
@@ -651,7 +600,7 @@
                   <label for="compare-input">Your topics, separated by commas</label
                   ><input
                     id="compare-input"
-                    value="3d printing, ai agents"
+                    value="coffee, matcha"
                     placeholder="e.g. coffee, matcha"
                     maxlength="600"
                     aria-describedby="compare-form-help compare-error"
@@ -659,24 +608,21 @@
                   />
                 </div>
               </div>
-              <p id="compare-demo-context" class="form-help">
-                Demo settings: <span id="compare-demo-settings"></span> ·
-                <a href="#explorer">Change in Explorer ↗</a>
+              <p id="compare-topic-context" class="form-help">
+                Wikipedia settings: <span id="compare-topic-settings"></span> ·
+                <a href="#explorer">Change in CSV analytics ↗</a>
               </p>
               <div id="compare-import-options" class="dataset-checkboxes" hidden></div>
               <div class="form-bottom">
-                <span id="compare-form-help"
-                  >Enter your own topics. Demo comparisons use synthetic data and the explorer’s
-                  country, period and source settings.</span
-                ><button id="compare-submit" class="search-button">Compare topics · free ↗</button>
+                <span id="compare-form-help">Enter 2–5 topics. Each is looked up on Wikipedia.</span
+                ><button id="compare-submit" class="search-button">Compare topics ↗</button>
               </div>
               <p id="compare-error" class="form-error" role="alert" hidden></p>
             </form>
           </article>
           <div class="data-notice">
             Comparison rebases each series to 100 using its first seven common observations. This
-            measures relative growth, not which topic has more searches. Missing dates are not
-            filled.
+            measures relative growth, not which topic is more popular. Missing dates are not filled.
           </div>
           <div class="analysis-export-bar">
             <p>
@@ -685,7 +631,6 @@
             </p>
             <button id="export-comparison" class="outline-btn" type="button" disabled>
               <span data-icon="download"></span>Export comparison CSV
-              <span class="pro-label" hidden></span>
             </button>
           </div>
           <article class="panel comparison-panel">
@@ -715,19 +660,19 @@
             <div class="eyebrow">FOLLOW A TOPIC ACROSS BORDERS</div>
             <h1>One topic.<br />A world of signals.</h1>
             <p>
-              Try market comparison with generated examples. These values do not measure real demand
-              in any country.
+              Compare how one topic’s Wikipedia article views changed in different language
+              editions. A language edition is only a rough stand-in for a country.
             </p>
           </div>
           <article class="panel tool-panel">
             <form id="markets-form">
               <div class="form-grid">
                 <div>
-                  <label for="market-topic">Demo topic</label
+                  <label for="market-topic">Topic</label
                   ><input
                     id="market-topic"
-                    value="3d printing"
-                    maxlength="120"
+                    placeholder="e.g. matcha"
+                    maxlength="100"
                     aria-describedby="market-error"
                     required
                   />
@@ -735,9 +680,9 @@
                 <div>
                   <label for="market-period">Time range</label
                   ><select id="market-period">
-                    <option value="90">Past 90 days</option>
+                    <option value="90" selected>Past 90 days</option>
                     <option value="365">Past 12 months</option>
-                    <option value="1095" selected>Past 3 years</option>
+                    <option value="1095">Past 3 years</option>
                   </select>
                 </div>
               </div>
@@ -747,9 +692,8 @@
               </div>
               <div class="form-bottom">
                 <span
-                  >Market analysis uses synthetic data. Relative growth does not measure market
-                  size.</span
-                ><button class="search-button">Analyze markets · free ↗</button>
+                  >Uses Wikipedia article views. Relative change does not measure market size.</span
+                ><button id="market-submit" class="search-button">Analyze markets ↗</button>
               </div>
               <p id="market-error" class="form-error" role="alert" hidden></p>
             </form>
@@ -757,7 +701,7 @@
           <article class="panel">
             <div class="panel-heading">
               <div>
-                <h3>Demo growth by market</h3>
+                <h3>Recent change by language edition</h3>
                 <p id="market-caption" role="status" aria-live="polite">
                   Run the analysis for market-level trends.
                 </p>
@@ -771,15 +715,15 @@
             <div class="eyebrow">SEE THE PATTERNS THAT RETURN</div>
             <h1>When does your<br />topic peak?</h1>
             <p>
-              Find the strongest months in your historical data, or try the tool with a generated
-              demo.
+              Find the strongest months for a topic’s Wikipedia article views, or in your own
+              historical data.
             </p>
           </div>
           <article class="panel tool-panel season-controls">
             <div class="season-source-control">
               <label for="season-source">Data source</label
               ><select id="season-source" aria-describedby="season-data-help">
-                <option value="demo">Generated demo</option>
+                <option value="topic">Wikipedia topic</option>
                 <option value="imported">Loaded series & CSV data</option>
               </select>
             </div>
@@ -791,7 +735,7 @@
               </div>
               <a href="#imports" class="outline-btn">Import another CSV ↗</a>
             </div>
-            <form id="season-demo-form" class="season-demo-form">
+            <form id="season-topic-form" class="season-topic-form">
               <div class="season-form-grid">
                 <div>
                   <label for="season-topic">Topic</label
@@ -800,7 +744,7 @@
                     type="text"
                     aria-describedby="season-data-help season-form-error"
                     placeholder="e.g. coffee, running shoes, solar panels"
-                    maxlength="120"
+                    maxlength="100"
                     required
                   />
                 </div>
@@ -817,10 +761,8 @@
                 </div>
               </div>
               <div class="form-bottom">
-                <span
-                  >Seasonality needs at least two calendar years with data in every month. Demo
-                  analyses are free.</span
-                ><button type="submit" class="search-button">Analyze demo · free ↗</button>
+                <span>Seasonality needs at least two calendar years with data in every month.</span
+                ><button id="season-submit" type="submit" class="search-button">Analyze ↗</button>
               </div>
               <p id="season-form-error" class="form-error" role="alert" hidden></p>
             </form>
@@ -839,7 +781,6 @@
             </p>
             <button id="export-seasonality" class="outline-btn" type="button" disabled>
               <span data-icon="download"></span>Export seasonality CSV
-              <span class="pro-label" hidden></span>
             </button>
           </div>
           <div id="season-content"></div>
@@ -924,12 +865,12 @@
               <p class="form-help">
                 Use YYYY-MM-DD or YYYY-MM dates and at least six observations. Values must be
                 non-negative numbers. Values such as &lt;1 need a numeric choice in your file before
-                import. Imports and calculations use no demo credits.
+                import.
               </p>
               <div id="import-error" class="form-error" role="alert" hidden></div>
               <div class="form-bottom">
                 <button id="download-template" class="text-btn" type="button">
-                  Download a demo CSV with two topics ↓</button
+                  Download a blank CSV template ↓</button
                 ><button id="import-submit" class="search-button" type="submit" disabled>
                   Review your CSV first ↗
                 </button>
@@ -967,9 +908,9 @@
           <article class="panel access-panel">
             <h2>Everything in this beta is free</h2>
             <p>
-              RSS discovery, topic saving, refresh comparisons, CSV imports, series comparisons,
-              seasonality and exports are available without an account, payment or credits. No
-              advertising or ad blocker restriction is active.
+              RSS discovery, Wikipedia article views, topic saving, refresh comparisons, CSV
+              imports, series comparisons, seasonality and exports are available without an account,
+              payment or credits. No advertising or ad blocker restriction is active.
             </p>
             <h3>What is stored?</h3>
             <p>
@@ -985,8 +926,7 @@
             <h3>What this beta does not do</h3>
             <p>
               It does not provide an official historical search API, automatic monitoring, email
-              alerts or forecasts. Generated examples are clearly labeled and do not measure real
-              demand.
+              alerts or forecasts. It never shows generated or sample numbers.
             </p>
             <a href="#radar" class="outline-btn">Discover current topics ↗</a>
             <a href="#imports" class="outline-btn">Analyze my CSV ↗</a>
@@ -1010,22 +950,25 @@
               <a href="#imports">Import CSV data ↗</a>
             </article>
             <article class="panel source-card">
-              <span data-icon="layers"></span>
-              <h2>Generated examples</h2>
-              <span class="status-pill">Demo · synthetic observations</span>
+              <span data-icon="globe"></span>
+              <h2>Wikipedia article views</h2>
+              <span class="status-pill">Wikimedia pageviews API · daily</span>
               <p>
-                Explore the analysis tools with generated examples. Demo values are not measured
-                demand, search volume or market forecasts.
+                Daily views of the Wikipedia article that best matches a topic, in one language
+                edition. Views are article reads, not searches. A language edition is only a rough
+                stand-in for a country, and name matching is imperfect (“Apple” the company vs the
+                fruit).
               </p>
-              <a href="#explorer">Explore a demo ↗</a>
+              <a href="#explorer">Look up a topic ↗</a>
             </article>
           </div>
           <div class="plan-note">
             <h3>Data provenance</h3>
             <p>
-              ScopeFlux analyzes imported CSV series and clearly labeled generated examples. Radar
-              retrieves Google’s public RSS feed. No historical keyword API is connected. The source
-              of imported files is supplied by the user and has not been independently verified.
+              ScopeFlux analyzes Wikipedia article views and imported CSV series. Radar retrieves
+              Google’s public RSS feed. No historical keyword API is connected, and no generated or
+              sample values are shown anywhere. The source of imported files is supplied by the user
+              and has not been independently verified.
             </p>
             <h3>Recent growth & acceleration</h3>
             <p>

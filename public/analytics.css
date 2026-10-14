@@ -1465,7 +1465,7 @@ footer > a:last-child {
 .season-source-control {
   max-width: 320px;
 }
-.season-demo-form {
+.season-topic-form {
   margin-top: 20px;
 }
 .season-controls .season-selection {
@@ -1876,7 +1876,7 @@ footer > a:last-child {
   margin-left: auto;
 }
 .explorer-source-row a,
-#compare-demo-context a {
+#compare-topic-context a {
   color: #4f7132;
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1914,7 +1914,7 @@ footer > a:last-child {
 .suggestions {
   margin-top: 0;
 }
-#compare-demo-context {
+#compare-topic-context {
   font-size: 12px;
   line-height: 1.8;
   margin-top: 16px;

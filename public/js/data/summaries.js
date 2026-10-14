@@ -1,8 +1,8 @@
-import { summarize } from './analytics.js';
+// Plain-English sentences and text exports built from stored data.
+import { summarize } from './statistics.js';
 
 export function describeSeries(dataset) {
   const stats = summarize(dataset.records);
-  const label = dataset.kind === 'sample' ? 'Generated example: ' : '';
   const percent = value => Math.abs(value).toLocaleString('en', { maximumFractionDigits: 1 });
   const unit = dataset.unit || 'units';
   const latest = stats.latest.toLocaleString('en', { maximumFractionDigits: 2 });
@@ -21,7 +21,6 @@ export function describeSeries(dataset) {
           stats.window +
           '.';
   return (
-    label +
     'Latest value: ' +
     latest +
     ' ' +

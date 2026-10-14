@@ -1,4 +1,4 @@
-import { COUNTRIES, csvCell } from './model.js';
+import { COUNTRIES, csvCell } from './countries.js';
 
 const countries = new Set(COUNTRIES);
 const validTime = value => typeof value === 'string' && Number.isFinite(Date.parse(value));

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "wrangler dev --compatibility-date 2026-05-22",
     "deploy": "wrangler deploy",
     "check": "wrangler deploy --dry-run",
     "test": "node --test tests/*.test.mjs"

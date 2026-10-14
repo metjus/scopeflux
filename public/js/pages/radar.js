@@ -1,4 +1,10 @@
-import { radarComparisonMessage, exportTopicBrief } from './launch-summary.js';
+// "Discover trends" page (#radar) and the saved RSS topics on "Saved topics".
+// Loads the Google RSS feed for a market, records each load as a "check" in the
+// browser and compares checks to show new, returning and missing topics.
+import { radarComparisonMessage, exportTopicBrief } from '../data/summaries.js';
+import { $, $$, esc, toast, download, countryName } from '../ui/dom.js';
+import { workspace, persist, updateSavedCount, MAX_SAVED } from '../state.js';
+import { analyzeTopic } from './explorer.js';
 import {
   observation,
   recordCheck,
@@ -9,7 +15,7 @@ import {
   exportChecks,
   filterRadar,
   exportRadarView,
-} from './radar.js';
+} from '../data/radar.js';
 
 const statusLabels = {
   baseline: 'First recorded check',
@@ -28,23 +34,20 @@ function safeUrl(value) {
   }
 }
 
-export function initRadar({
-  $,
-  $$,
-  esc,
-  countryName,
-  toast,
-  pro,
-  download,
-  getChecks,
-  setChecks,
-  getTopics,
-  setTopics,
-  getPlan,
-  getSeriesCount,
-  updateBalance,
-  refreshWatchlist,
-}) {
+const getChecks = () => workspace.radarChecks;
+const setChecks = value => {
+  workspace.radarChecks = value;
+  return persist();
+};
+const getTopics = () => workspace.liveTopics;
+const setTopics = value => {
+  workspace.liveTopics = value;
+  return persist();
+};
+const getSeriesCount = () => workspace.saved.length;
+
+// refreshWatchlist: re-render the Saved topics page if it is open.
+export function initRadar({ refreshWatchlist }) {
   let data = null,
     version = 0,
     controller = null,
@@ -64,20 +67,18 @@ export function initRadar({
     let next;
     if (index >= 0) next = topics.filter((_, i) => i !== index);
     else {
-      const limit = getPlan() === 'pro' ? 50 : 5;
-      if (topics.length + getSeriesCount() >= limit) {
+      if (topics.length + getSeriesCount() >= MAX_SAVED) {
         toast(
           'This browser workspace holds up to ' +
-            limit +
+            MAX_SAVED +
             ' saved topics and series. Remove an item before saving another.',
         );
-        location.hash = 'plans';
         return;
       }
       next = [{ country, title, savedAt: new Date().toISOString() }, ...topics];
     }
     const persisted = setTopics(next);
-    updateBalance();
+    updateSavedCount();
     renderSaved();
     refreshWatchlist();
     if (data) render();
@@ -95,15 +96,11 @@ export function initRadar({
         toggleTopic(button.dataset.market, button.dataset.liveSave),
       ),
     );
-    $$('[data-live-import]').forEach(button =>
-      button.addEventListener('click', () => {
-        $('#import-name').value = button.dataset.liveImport.slice(0, 120);
-        $('#import-unit').value = 'Values';
-        location.hash = 'imports';
-        toast(
-          'Import a dated CSV from your chosen data source. RSS provides current topics, not historical series.',
-        );
-      }),
+    // Look the topic up on Wikipedia in the same market.
+    $$('[data-live-history]').forEach(button =>
+      button.addEventListener('click', () =>
+        analyzeTopic(button.dataset.liveHistory, { country: button.dataset.market }),
+      ),
     );
   }
 
@@ -147,7 +144,6 @@ export function initRadar({
     );
     $('#export-radar-journal').disabled = !visible.length;
     $('#clear-radar-journal').disabled = !getChecks().length;
-    $('#export-radar-journal .pro-label').hidden = getPlan() === 'pro';
   }
 
   function openCheck(key) {
@@ -234,7 +230,6 @@ export function initRadar({
     $('#export-radar-brief').disabled = !items.length;
     $('#share-radar').disabled = false;
     $('#export-radar-view').disabled = !items.length;
-    $('#export-radar-view .pro-label').hidden = getPlan() === 'pro';
     $('#radar-archive-note').hidden = !archived;
     $('#radar-archive-context').textContent = archived
       ? 'Saved snapshot · ' +
@@ -347,9 +342,11 @@ export function initRadar({
               '">' +
               (isTracked ? 'Saved ✓' : 'Save topic +') +
               '</button>' +
-              '<button class="outline-btn" data-live-import="' +
+              '<button class="outline-btn" data-live-history="' +
               esc(item.title) +
-              '">Analyze my CSV ↗</button>' +
+              '" data-market="' +
+              data.country +
+              '">Wikipedia views ↗</button>' +
               '</div></article>'
             );
           })
@@ -508,7 +505,7 @@ export function initRadar({
       ' Radar topics · ' +
       (getSeriesCount() + topics.length) +
       ' / ' +
-      (getPlan() === 'pro' ? 50 : 5) +
+      MAX_SAVED +
       ' total saved';
     $('#live-topic-status').textContent =
       shown.length +
@@ -634,7 +631,6 @@ export function initRadar({
       toast('There are no visible topics to export.');
       return;
     }
-    if (!pro('Radar view exports')) return;
     download(
       exportRadarView(visibleState.changes, visibleState.items, visibleState.settings),
       'scopeflux-radar-' +
@@ -657,7 +653,6 @@ export function initRadar({
   });
   $('#journal-market').addEventListener('change', renderJournal);
   $('#export-radar-journal').addEventListener('click', () => {
-    if (!pro('Radar journal exports')) return;
     const checks = getChecks().filter(
       check => $('#journal-market').value === 'all' || check.country === $('#journal-market').value,
     );
