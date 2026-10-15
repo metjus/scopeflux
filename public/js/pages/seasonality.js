@@ -94,7 +94,7 @@ function yearGridHtml(d, data) {
       monthly
         .map(
           v =>
-            '<div class="month-cell" style="background:rgba(149,186,103,' +
+            '<div class="month-cell" style="background:rgba(255,46,99,' +
             Math.max(0.08, Math.min(0.9, (v / avg) * 0.5)) +
             ')" title="Monthly index ' +
             fmt((v / avg) * 100) +

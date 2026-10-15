@@ -85,8 +85,8 @@ export function initRadar({ refreshWatchlist }) {
     if (persisted)
       toast(
         index >= 0
-          ? 'Radar topic removed.'
-          : 'Radar topic saved in this browser. Checks update when you load its market.',
+          ? 'RSS topic removed.'
+          : 'RSS topic saved in this browser. Checks update when you load its market.',
       );
   }
 
@@ -138,7 +138,7 @@ export function initRadar({ refreshWatchlist }) {
               '">Open snapshot ↗</button></div>',
           )
           .join('')
-      : '<div class="journal-empty">No checks recorded. Open Radar to request your first feed.</div>';
+      : '<div class="journal-empty">No checks recorded. Open the RSS list to request your first feed.</div>';
     $$('[data-open-check]').forEach(button =>
       button.addEventListener('click', () => openCheck(button.dataset.openCheck)),
     );
@@ -470,7 +470,7 @@ export function initRadar({ refreshWatchlist }) {
               '</strong></div>',
           )
           .join('')
-      : '<p class="journal-empty">No retained checks for this market. Open it in Radar to record a check.</p>';
+      : '<p class="journal-empty">No retained checks for this market. Open it in the RSS list to record a check.</p>';
     $('#live-topic-dialog').showModal();
   }
 
@@ -502,7 +502,7 @@ export function initRadar({ refreshWatchlist }) {
       );
     $('#live-topic-count').textContent =
       topics.length +
-      ' Radar topics · ' +
+      ' RSS topics · ' +
       (getSeriesCount() + topics.length) +
       ' / ' +
       MAX_SAVED +
@@ -511,7 +511,7 @@ export function initRadar({ refreshWatchlist }) {
       shown.length +
       ' of ' +
       topics.length +
-      ' saved Radar topics shown · Status uses the last recorded check in each topic’s market.';
+      ' saved RSS topics shown · Status uses the last recorded check in each topic’s market.';
     $('#live-activity-summary').innerHTML = [
       ['Saved topics', entries.length],
       ['Listed at last check', entries.filter(x => x.summary.latest?.present).length],
@@ -583,8 +583,8 @@ export function initRadar({ refreshWatchlist }) {
         (topics.length ? 'No saved topics match.' : 'Follow the topics you discover.') +
         '</h3><p>' +
         (topics.length
-          ? 'Reset the filters to see all your saved Radar topics.'
-          : 'Save a real Google RSS topic from Radar to keep track of its recorded appearances.') +
+          ? 'Reset the filters to see all your saved RSS topics.'
+          : 'Save a real Google RSS topic from the RSS list to keep track of its recorded appearances.') +
         '</p>' +
         (topics.length
           ? '<button id="live-topic-empty-reset" class="outline-btn" type="button">Reset filters ↻</button>'
@@ -661,7 +661,7 @@ export function initRadar({ refreshWatchlist }) {
       return;
     }
     download(exportChecks(checks), 'scopeflux-radar-journal.csv');
-    toast('Radar journal exported with retrieval times and original traffic buckets.');
+    toast('RSS journal exported with retrieval times and original traffic buckets.');
   });
   $('#clear-radar-journal').addEventListener('click', () => {
     if (!clearPending) {

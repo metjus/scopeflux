@@ -21,6 +21,8 @@ Every request: timeout, response size limit, `User-Agent: ScopeFlux/1.0
   `https://{lang}.wikipedia.org/w/rest.php/v1/search/page?q={text}&limit=1`
 - **Already implemented:** `lib/wikipedia.mjs` (`resolveArticle`, `pageviews`,
   `historyResponse`, `WIKI_LANGUAGES`) with tests. Reuse it.
+- **As built (Oct 2026):** if yesterday's top list is not published yet, the day before is used.
+  Days with no entry in the per-article answer count as 0 views.
 - **Notes:** Wikimedia requires a descriptive User-Agent. Yesterday's data may not be
   complete early in the UTC day — always end the window at the last complete day.
   Filter non-articles from top lists (Main_Page, Special:, Wikipedia:, File:, etc.).
@@ -34,6 +36,9 @@ Every request: timeout, response size limit, `User-Agent: ScopeFlux/1.0
 - **Endpoint:**
   `https://hn.algolia.com/api/v1/search_by_date?query={text}&tags=story&numericFilters=created_at_i>{from},created_at_i<{to}&hitsPerPage={n}`
   Bucket the returned `created_at_i` by UTC day to build the series.
+- **As built (Oct 2026):** `hitsPerPage=1000` (Algolia's maximum), `restrictSearchableAttributes=title`,
+  `typoTolerance=false`, `attributesToRetrieve=created_at_i`. If more than 1,000 stories match,
+  the older days are marked unknown (null), never zero. Rate limit: 10,000 requests/hour per IP.
 - **Notes:** check the documented rate limit and the max `hitsPerPage`.
   Global only — no per-country data. Very few stories for non-tech topics is normal,
   not an error.
@@ -50,6 +55,13 @@ Every request: timeout, response size limit, `User-Agent: ScopeFlux/1.0
   `https://api.gdeltproject.org/api/v2/doc/doc?query={query}&mode=timelinevolraw&timespan=14d&format=json`
   For a market add `sourcecountry:{code}` inside the query (check GDELT's country
   code list — it is not always ISO).
+- **As built (Oct 2026):** `startdatetime`/`enddatetime` instead of `timespan`, so days line up
+  with the other sources. Short ranges come back in 15-minute steps; they are added up per day.
+  The market filter uses country *names* (`sourcecountry:slovakia`), because GDELT's two-letter
+  codes are FIPS, not ISO (Slovakia is `LO`, Germany `GM`). Names live in `lib/config.mjs`.
+  Characters GDELT treats as operators (`:` `(` …) are removed; multi-word names are quoted;
+  names under 3 characters are not searched. Plain-text answers mean "no data". The pipeline
+  waits 5.5 s between GDELT calls (third-party docs say 1 request per 5 s).
 - **Notes:** GDELT asks clients to keep request rates low — find the current
   guidance and throttle to it. Multi-word topics need quotes. Very short or very
   common words may be rejected; treat that as "no data", not a crash.
@@ -62,6 +74,8 @@ Every request: timeout, response size limit, `User-Agent: ScopeFlux/1.0
   A list, not a measurement — it is never drawn as a line.
 - **Endpoint:** `https://trends.google.com/trending/rss?geo={COUNTRY}` — already
   implemented in `lib/trending.mjs` (`/api/trending`). Wrap it, do not rewrite it.
+- **As built (Oct 2026):** each pipeline run stores the day's listings in D1 (`rss_listings`);
+  "listed within 7 days" counts today, because the feed is live.
 - **Notes:** traffic labels like "200+" are buckets, not counts. Missing from the
   feed does not mean the topic went quiet. History only exists from the day
   ScopeFlux starts storing snapshots.

@@ -2,7 +2,7 @@
 import { $$, esc, fmt } from './dom.js';
 
 // One colour per series, in order.
-export const SERIES_COLORS = ['#779e4c', '#6a98ad', '#b49563', '#9379a9', '#ba7474'];
+export const SERIES_COLORS = ['#FF2E63', '#FFD166', '#A78BFA', '#6FD39A', '#FF9A4D'];
 
 export function emptyChart(label) {
   return '<text x="380" y="118" text-anchor="middle" class="chart-empty">' + esc(label) + '</text>';
@@ -27,7 +27,7 @@ export function chartSvg(datasets, { id = 'main', points = true } = {}) {
   let svg =
     '<defs><linearGradient id="fill-' +
     id +
-    '" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b8d499" stop-opacity=".32"/><stop offset="1" stop-color="#eaf3dc" stop-opacity=".02"/></linearGradient></defs>';
+    '" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#FF2E63" stop-opacity=".28"/><stop offset="1" stop-color="#FF2E63" stop-opacity="0"/></linearGradient></defs>';
 
   // Horizontal gridlines with value labels.
   for (let i = 0; i < 5; i++) {
@@ -36,9 +36,9 @@ export function chartSvg(datasets, { id = 'main', points = true } = {}) {
     svg +=
       '<path d="M36 ' +
       py +
-      'H746" stroke="#e9efe1" stroke-dasharray="3 4"/><text x="27" y="' +
+      'H746" stroke="#231E2C" stroke-dasharray="3 4"/><text x="27" y="' +
       (py + 3) +
-      '" text-anchor="end" fill="#8ca27b" font-size="9">' +
+      '" text-anchor="end" fill="#6F6880" font-size="9">' +
       fmt(v, maximum < 1 ? 3 : 1) +
       '</text>';
   }
@@ -48,7 +48,7 @@ export function chartSvg(datasets, { id = 'main', points = true } = {}) {
     svg +=
       '<text x="' +
       x(t) +
-      '" y="230" fill="#829970" font-size="9" text-anchor="' +
+      '" y="230" fill="#6F6880" font-size="9" text-anchor="' +
       (i === 0 ? 'start' : i === 4 ? 'end' : 'middle') +
       '">' +
       new Date(t).toLocaleDateString('en', { month: 'short', year: '2-digit', timeZone: 'UTC' }) +

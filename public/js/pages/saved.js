@@ -1,12 +1,14 @@
-// "Saved topics" page (#saved), series part: watchlist snapshots with optional
-// threshold rules. (Saved RSS topics are rendered by pages/radar.js.)
+// "Saved topics" page (#saved): saved Discover topics, and watchlist snapshots
+// with optional threshold rules. (Saved RSS topics are rendered by pages/radar.js.)
 import { summarize, evaluateRule } from '../data/statistics.js';
 import { dataStatus } from '../data/exports.js';
 import { csvCell } from '../data/countries.js';
 import { $, $$, esc, fmt, pct, icon, toast, download, countryName } from '../ui/dom.js';
 import { sparkline } from '../ui/chart.js';
-import { workspace, persist, seriesLabel, updateSavedCount } from '../state.js';
+import { workspace, persist, seriesLabel, updateSavedCount, toggleTrendTopic } from '../state.js';
 import { openDataset } from './explorer.js';
+import { topicLink } from './topic.js';
+import { marketName } from '../data/sources-info.js';
 
 const DEFAULT_RULE = { metric: 'change', direction: 'above', threshold: 20, enabled: false };
 
@@ -84,7 +86,7 @@ export function renderWatchlist() {
   const enabled = saved.filter(x => x.rule?.enabled),
     triggered = enabled.filter(x => x.evaluation?.triggered);
   $('#watch-summary').innerHTML = [
-    ['Tracked topics', saved.length + liveTopics.length],
+    ['Tracked topics', saved.length + liveTopics.length + workspace.trendTopics.length],
     ['Enabled rules', enabled.length],
     ['Triggered on last check', triggered.length],
   ]
@@ -155,7 +157,7 @@ function evaluateWatchlist() {
 
 function watchReport() {
   if (!workspace.saved.length) {
-    toast('Add a series snapshot first. Radar observations export from the feed journal.');
+    toast('Add a series snapshot first. RSS observations export from the feed journal.');
     return;
   }
   const header = [
@@ -210,4 +212,49 @@ function watchReport() {
 export function initSaved() {
   $('#evaluate-watchlist').addEventListener('click', evaluateWatchlist);
   $('#watch-report').addEventListener('click', watchReport);
+}
+
+// Topics saved from Discover or a topic page. They link back to the topic page,
+// which fetches fresh numbers; nothing is stored about them except the name.
+export function renderTrendTopics() {
+  const list = workspace.trendTopics;
+  $('#trend-topic-count').textContent = list.length ? list.length + ' saved' : '';
+  if (!list.length) {
+    $('#trend-topic-list').innerHTML =
+      '<div class="empty-state"><h3>No saved trends yet</h3><p>Save a topic from Discover trends or a topic page to find it here.</p><a href="#discover" class="btn">Discover trends</a></div>';
+    return;
+  }
+  $('#trend-topic-list').innerHTML = list
+    .map(
+      (t, index) =>
+        '<article class="saved-item"><div><h3>' +
+        esc(t.title) +
+        '</h3><p>Saved ' +
+        esc(
+          new Date(t.savedAt).toLocaleDateString('en', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          }),
+        ) +
+        ' · ' +
+        esc(marketName(t.market)) +
+        '</p></div><div class="trend-row-actions"><a class="btn" href="' +
+        esc(topicLink(t.key, t.market, t.title)) +
+        '">Open topic</a><button type="button" class="text-btn" data-trend-remove="' +
+        index +
+        '" aria-label="Remove ' +
+        esc(t.title) +
+        '">Remove</button></div></article>',
+    )
+    .join('');
+  $$('[data-trend-remove]').forEach(b =>
+    b.addEventListener('click', () => {
+      const topic = list[Number(b.dataset.trendRemove)];
+      toggleTrendTopic(topic);
+      toast(topic.title + ' removed from saved topics');
+      renderTrendTopics();
+      renderWatchlist();
+    }),
+  );
 }

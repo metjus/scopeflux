@@ -10,7 +10,7 @@ export function initNavigation({
   const toggle = doc.querySelector('#menu-toggle'),
     dismiss = doc.querySelector('#menu-close'),
     backdrop = doc.querySelector('#menu-backdrop');
-  const media = win.matchMedia('(max-width: 720px)');
+  const media = win.matchMedia('(max-width: 900px)');
   let opened = false;
   function sync() {
     const modal = media.matches && opened;

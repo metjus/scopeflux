@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="theme-color" content="#f5f6f2" />
+    <meta name="theme-color" content="#15121a" />
     <meta
       name="description"
-      content="Discover current RSS topics, look up Wikipedia article views, save a local watchlist and analyze your CSV data. Free trend tools with clear sources. No account required."
+      content="See which topics are rising across Wikipedia, Hacker News, news coverage and Google’s daily trends — each number with its source. Free, no account."
     />
-    <title>ScopeFlux — Free RSS discovery and CSV analytics</title>
+    <title>ScopeFlux — Discover rising topics across free public sources</title>
     <link rel="canonical" href="https://scopeflux.io/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="ScopeFlux" />
@@ -21,77 +21,59 @@
     <meta name="twitter:card" content="summary" />
     <link
       rel="icon"
-      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23252b22'/%3E%3Cpath d='M13 45L27 31l9 7 16-22M40 16h12v12' fill='none' stroke='%23c5f575' stroke-width='6'/%3E%3C/svg%3E"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='g' cx='.3' cy='.25' r='.75'%3E%3Cstop offset='0' stop-color='%23FF9A4D'/%3E%3Cstop offset='.62' stop-color='%23FF2E63'/%3E%3Cstop offset='1' stop-color='%23C41744'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='10' fill='url(%23g)'/%3E%3C/svg%3E"
     />
-    <link rel="stylesheet" href="/style.css" />
-    <link rel="stylesheet" href="/analytics.css" />
-    <link rel="stylesheet" href="/imports.css" />
-    <link rel="stylesheet" href="/readability.css" />
-    <link rel="stylesheet" href="/launch.css" />
+    <link rel="stylesheet" href="/styles/tokens.css" />
+    <link rel="stylesheet" href="/styles/base.css" />
+    <link rel="stylesheet" href="/styles/layout.css" />
+    <link rel="stylesheet" href="/styles/components.css" />
+    <link rel="stylesheet" href="/styles/discover.css" />
+    <link rel="stylesheet" href="/styles/topic.css" />
+    <link rel="stylesheet" href="/styles/sources.css" />
+    <link rel="stylesheet" href="/styles/pages.css" />
     <script type="module" src="/js/main.js"></script>
   </head>
   <body>
     <noscript
       ><p class="storage-status">
-        ScopeFlux needs JavaScript for RSS loading, local storage and CSV analysis. Enable
-        JavaScript to use the tools.
+        ScopeFlux needs JavaScript to load sources and charts. Enable JavaScript to use it.
       </p></noscript
     >
     <a href="#main" id="skip-to-content" class="skip-link">Skip to main content</a>
-    <aside class="sidebar" id="sidebar" aria-label="Workspace navigation">
-      <button
-        id="menu-close"
-        class="icon-btn menu-close"
-        type="button"
-        aria-label="Close navigation"
-      >
-        ×
-      </button>
-      <a class="brand" href="#explorer" aria-label="ScopeFlux home"
-        ><span class="brand-icon"
-          ><svg viewBox="0 0 24 24"><path d="m4 17 6-6 4 3 6-9M15 5h5v5" /></svg></span
-        >scope<span>flux</span><span class="brand-dot">.</span></a
-      >
-      <div class="workspace">
-        <span class="workspace-icon">SF</span>
-        <div>My workspace<small>Personal workspace</small></div>
-        <span class="tiny-pill">BETA</span>
+    <aside class="sidebar" id="sidebar" aria-label="Site navigation">
+      <div class="sidebar-head">
+        <a class="brand" href="#discover" aria-label="ScopeFlux home"
+          ><span class="brand-mark" aria-hidden="true"></span
+          ><span class="brand-name">ScopeFlux</span></a
+        >
+        <button
+          id="menu-close"
+          class="icon-btn menu-close"
+          type="button"
+          aria-label="Close navigation"
+        >
+          <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8" /></svg>
+        </button>
       </div>
-      <div class="nav-caption">RESEARCH</div>
-      <nav aria-label="Main navigation">
-        <a href="#radar" data-page="radar"
-          ><span data-icon="radar"></span>Discover trends<span class="dot"></span
-        ></a>
-        <a href="#explorer" data-page="explorer"
-          ><span data-icon="search"></span>CSV analytics<span class="nav-kbd">⌘ K</span></a
-        >
-        <a href="#compare" data-page="compare"><span data-icon="compare"></span>Compare topics</a>
-        <a href="#seasonality" data-page="seasonality"
-          ><span data-icon="calendar"></span>Seasonality</a
-        >
+      <nav class="nav-group" aria-label="Main navigation">
+        <a href="#discover" data-page="discover"><span class="nav-mark"></span>Discover trends</a>
+        <a href="#explorer" data-page="explorer"><span class="nav-mark"></span>CSV analytics</a>
+        <a href="#compare" data-page="compare"><span class="nav-mark"></span>Compare topics</a>
+        <a href="#seasonality" data-page="seasonality"><span class="nav-mark"></span>Seasonality</a>
       </nav>
-      <div class="nav-caption second-caption">WORKSPACE</div>
-      <nav aria-label="Workspace navigation">
+      <nav class="nav-group nav-work" aria-label="Workspace navigation">
         <a href="#saved" data-page="saved"
-          ><span data-icon="bookmark"></span>Saved topics<span class="nav-count" id="saved-count"
+          ><span class="nav-mark"></span>Saved topics<span class="nav-count" id="saved-count"
             >0</span
           ></a
         >
-        <a href="#imports" data-page="imports"><span data-icon="upload"></span>Import data</a>
-        <a href="#plans" data-page="plans"><span data-icon="layers"></span>About ScopeFlux</a>
-        <a href="#sources" data-page="sources"><span data-icon="database"></span>Sources & help</a>
+        <a href="#imports" data-page="imports"><span class="nav-mark"></span>Import data</a>
+        <a href="#sources" data-page="sources"><span class="nav-mark"></span>Sources &amp; help</a>
       </nav>
-      <div class="sidebar-bottom">
-        <div class="credit-box">
-          <span class="credit-title">Free beta access</span>
-          <p>RSS discovery, Wikipedia views and CSV analytics. No subscription or credits.</p>
-          <a href="#plans" class="upgrade">How access works ↗</a>
-        </div>
-        <a href="#sources" class="profile"
-          ><span class="workspace-icon">SF</span
-          ><span>Local workspace<small>Saved in this browser</small></span
-          ><span>⋯</span></a
-        >
+      <div class="sidebar-foot">
+        <a href="#radar" data-page="radar">Google Trends RSS list</a>
+        <a href="#history" data-page="history">Recent analyses</a>
+        <a href="#plans" data-page="plans">About &amp; privacy</a>
       </div>
     </aside>
     <button
@@ -107,19 +89,30 @@
         <button
           id="menu-toggle"
           class="icon-btn mobile-menu"
-          aria-label="Toggle navigation"
+          type="button"
+          aria-label="Open navigation"
           aria-expanded="false"
           aria-controls="sidebar"
         >
-          <span data-icon="menu"></span>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14" /></svg>
         </button>
-        <div class="breadcrumb">
-          Workspace <span>/</span> <strong id="breadcrumb">Trend explorer</strong>
-        </div>
-        <div class="topbar-right">
-          <span class="demo-badge"><i></i>Trend analytics · beta</span
-          ><a href="#plans" class="top-upgrade">Free access <span>↗</span></a>
-        </div>
+        <a class="brand topbar-brand" href="#discover" aria-label="ScopeFlux home"
+          ><span class="brand-mark" aria-hidden="true"></span
+          ><span class="brand-name">ScopeFlux</span></a
+        >
+        <form id="topic-search" class="topbar-search" role="search">
+          <label for="q" class="sr-only">Search a topic</label>
+          <input
+            id="q"
+            type="search"
+            placeholder="Search any topic"
+            maxlength="100"
+            autocomplete="off"
+          />
+          <button type="submit" class="scan-btn">Scan</button>
+        </form>
+        <span class="sr-only" id="breadcrumb"></span>
+        <span id="topbar-status" class="topbar-status" role="status"></span>
       </header>
       <main id="main" tabindex="-1">
         <p
@@ -136,17 +129,120 @@
           aria-live="polite"
           hidden
         ></p>
-        <section class="page" id="page-explorer" hidden>
-          <div class="page-heading analytics-heading">
+        <section class="page" id="page-discover">
+          <div class="page-head">
             <div>
-              <div class="eyebrow"><span></span>YOUR DATA, EXPLAINED</div>
-              <h1>See what your<br />data is doing.</h1>
-              <p>
+              <h1>Discover trends</h1>
+              <p id="discover-intro" class="lead"></p>
+            </div>
+            <div class="head-actions">
+              <button id="discover-refresh" class="btn" type="button">Refresh</button>
+              <button id="discover-export" class="btn" type="button" disabled>Export CSV</button>
+            </div>
+          </div>
+          <div class="tabs" role="tablist" aria-label="Discover views">
+            <button
+              type="button"
+              role="tab"
+              id="tab-rising"
+              data-tab="rising"
+              aria-selected="true"
+              aria-controls="discover-results"
+            >
+              Rising now <span class="tab-count" id="count-rising"></span>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              id="tab-early"
+              data-tab="early"
+              aria-selected="false"
+              aria-controls="discover-results"
+            >
+              Early signals <span class="tab-count" id="count-early"></span>
+            </button>
+          </div>
+          <div class="filter-bar">
+            <label for="discover-market">Market</label>
+            <select id="discover-market" class="select-chip"></select>
+            <span id="discover-match" class="filter-note"></span>
+          </div>
+          <div class="source-status-row">
+            <div id="discover-sources" class="source-status" aria-label="Source status"></div>
+            <a href="#sources" class="source-status-link">What each source counts</a>
+          </div>
+          <div id="discover-notice"></div>
+          <div id="discover-results" aria-live="polite" aria-busy="false"></div>
+          <div id="discover-more" class="more-row" hidden>
+            <button id="discover-show-more" class="btn btn-raised" type="button"></button>
+            <span id="discover-shown" class="filter-note"></span>
+          </div>
+          <p class="footnote">
+            A topic counts as rising on a source when its last 7 days are clearly above the 7 before
+            (thresholds on <a href="#sources">Sources &amp; help</a>). Change is measured on the
+            source it moved first on — sources count different things, so the figure never stands
+            for all of them combined.
+          </p>
+        </section>
+        <section class="page" id="page-topic" hidden>
+          <div class="page-head">
+            <div>
+              <p class="crumb"><a href="#discover">Discover trends</a> / Topic</p>
+              <h1 id="topic-title">Topic</h1>
+              <p id="topic-summary" class="lead"></p>
+            </div>
+            <div class="head-actions">
+              <button id="topic-save" class="btn" type="button" disabled>Save topic</button>
+              <button id="topic-export" class="btn" type="button" disabled>Export CSV</button>
+            </div>
+          </div>
+          <div id="topic-notices"></div>
+          <article class="panel chart-card" aria-labelledby="topic-chart-heading">
+            <h2 id="topic-chart-heading" class="sr-only">Daily movement per source</h2>
+            <div class="chart-toolbar">
+              <div id="topic-legend" class="legend"></div>
+              <div class="segmented" role="group" aria-label="Time window">
+                <button type="button" data-days="30" aria-pressed="false">30 days</button>
+                <button type="button" data-days="90" aria-pressed="true">90 days</button>
+              </div>
+            </div>
+            <p class="chart-note">
+              Each line is indexed to its own peak in this window (100 = that source’s busiest day),
+              so the shapes compare even though the units cannot. Hover or tap for raw values.
+            </p>
+            <div id="topic-chart" class="topic-chart"></div>
+            <div id="topic-axis" class="chart-axis"></div>
+            <p id="topic-rss-note" class="chart-note"></p>
+          </article>
+          <h2 class="section-heading">Per source</h2>
+          <div class="table-scroll">
+            <table class="data-table" id="topic-table">
+              <thead>
+                <tr>
+                  <th scope="col">Source</th>
+                  <th scope="col">What it counts</th>
+                  <th scope="col" class="num">Last 7 days</th>
+                  <th scope="col" class="num">7 days before</th>
+                  <th scope="col" class="num">Change</th>
+                  <th scope="col" class="num">Busiest day</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p id="topic-footnote" class="footnote"></p>
+        </section>
+        <section class="page" id="page-explorer" hidden>
+          <div class="page-head">
+            <div>
+              <h1>CSV analytics</h1>
+              <p class="lead">
                 Look up daily Wikipedia article views for any topic, or import a CSV to see how your
                 own values change, compare series and check seasonal patterns.
               </p>
             </div>
-            <div class="heading-actions">
+            <div class="head-actions">
               <a href="#imports" class="outline-btn"
                 ><span data-icon="upload"></span>Import your data</a
               ><a href="#history" class="text-btn">Recent analyses ↗</a>
@@ -375,13 +471,13 @@
             </div>
           </div>
         </section>
-        <section class="page" id="page-radar">
+        <section class="page" id="page-radar" hidden>
           <div class="page-heading">
-            <div class="eyebrow">FREE · NO ACCOUNT REQUIRED</div>
-            <h1>Discover topics.<br />Track what changes.</h1>
+            <h1>Google Trends RSS list</h1>
             <p>
-              Browse current topics from a public RSS feed, open the reporting behind them and save
-              what matters. Refresh later to see what changed.
+              Today’s list from Google’s public trending feed, per country. Save topics, refresh
+              later and compare which ones appeared or disappeared. Discover trends uses this list
+              as one of its four sources.
             </p>
           </div>
           <div class="quick-start" aria-label="How to use discovery">
@@ -470,7 +566,7 @@
               <option value="not-listed">Missing from feed</option>
               <option value="bucket-changed">Traffic label changed</option>
               <option value="saved">My saved topics</option></select
-            ><a href="#saved" class="outline-btn">Saved Radar topics ↗</a>
+            ><a href="#saved" class="outline-btn">Saved RSS topics ↗</a>
           </div>
           <p id="radar-view-help" class="radar-comparison-help"></p>
           <p id="radar-status" class="radar-status" role="status" aria-live="polite"></p>
@@ -516,8 +612,7 @@
         </section>
         <section class="page" id="page-saved" hidden>
           <div class="page-heading">
-            <div class="eyebrow">YOUR SIGNALS, IN ONE PLACE</div>
-            <h1>Keep a finger<br />on the pulse.</h1>
+            <h1>Saved topics</h1>
             <p>
               Follow RSS topics or save a CSV analysis. Saved items remain in this browser; there is
               no automatic background monitoring.
@@ -534,12 +629,17 @@
           </div>
           <div id="watch-summary" class="watch-summary"></div>
           <div class="section-title">
-            <h2>Saved Radar topics</h2>
+            <h2>Saved trends</h2>
+            <span id="trend-topic-count"></span>
+          </div>
+          <div id="trend-topic-list" class="saved-list"></div>
+          <div class="section-title">
+            <h2>Saved Google RSS topics</h2>
             <span id="live-topic-count"></span>
           </div>
           <p class="form-help">
-            Real Google RSS topics · Observations update only when you load their market in Radar.
-            Retained checks and saved topics stay in this browser.
+            Real Google RSS topics · Observations update only when you load their market in the RSS
+            list. Retained checks and saved topics stay in this browser.
           </p>
           <div id="live-activity-summary" class="live-activity-summary"></div>
           <div class="live-topic-filters">
@@ -569,8 +669,7 @@
         </section>
         <section class="page" id="page-history" hidden>
           <div class="page-heading">
-            <div class="eyebrow">PICK UP WHERE YOU LEFT OFF</div>
-            <h1>A trail of possibilities.</h1>
+            <h1>Recent analyses</h1>
             <p>Revisit the analyses you’ve explored in this browser.</p>
           </div>
           <button class="outline-btn" id="clear-history">Clear history</button>
@@ -579,8 +678,7 @@
 
         <section class="page" id="page-compare" hidden>
           <div class="page-heading">
-            <div class="eyebrow">PUT THE SIGNALS SIDE BY SIDE</div>
-            <h1>See the bigger<br />picture together.</h1>
+            <h1>Compare topics</h1>
             <p>
               Compare the relative evolution of topics on aligned dates. Compare between two and
               five series.
@@ -657,8 +755,7 @@
         </section>
         <section class="page" id="page-markets" hidden>
           <div class="page-heading">
-            <div class="eyebrow">FOLLOW A TOPIC ACROSS BORDERS</div>
-            <h1>One topic.<br />A world of signals.</h1>
+            <h1>Compare markets</h1>
             <p>
               Compare how one topic’s Wikipedia article views changed in different language
               editions. A language edition is only a rough stand-in for a country.
@@ -712,8 +809,7 @@
         </section>
         <section class="page" id="page-seasonality" hidden>
           <div class="page-heading">
-            <div class="eyebrow">SEE THE PATTERNS THAT RETURN</div>
-            <h1>When does your<br />topic peak?</h1>
+            <h1>Seasonality</h1>
             <p>
               Find the strongest months for a topic’s Wikipedia article views, or in your own
               historical data.
@@ -787,8 +883,7 @@
         </section>
         <section class="page" id="page-imports" hidden>
           <div class="page-heading">
-            <div class="eyebrow">BRING YOUR OWN SIGNALS</div>
-            <h1>Your data.<br />A clearer perspective.</h1>
+            <h1>Import data</h1>
             <p>
               Analyze exported trend data or any non-negative time series. Your file stays in this
               browser.
@@ -901,8 +996,7 @@
         </section>
         <section class="page" id="page-plans" hidden>
           <div class="page-heading">
-            <div class="eyebrow">FREE TO USE</div>
-            <h1>Useful tools.<br />No subscription.</h1>
+            <h1>About ScopeFlux</h1>
             <p>Discover current RSS topics and make sense of your own dated data.</p>
           </div>
           <article class="panel access-panel">
@@ -933,86 +1027,140 @@
           </article>
         </section>
         <section class="page" id="page-sources" hidden>
-          <div class="page-heading">
-            <div class="eyebrow">KNOW WHAT’S BEHIND THE NUMBERS</div>
-            <h1>Clear sources.<br />Better decisions.</h1>
-            <p>Every signal should tell you where it came from and what it actually measures.</p>
-          </div>
-          <div class="source-grid">
-            <article class="panel source-card">
-              <span data-icon="upload"></span>
-              <h2>Your CSV data</h2>
-              <span class="status-pill">Local import · original values</span>
-              <p>
-                Import a date column and numeric values from your reports or spreadsheets. Files
-                stay in this browser. Calculations preserve the supplied values and units.
+          <div class="page-head">
+            <div>
+              <h1>Sources &amp; help</h1>
+              <p class="lead">
+                Four free public sources, each counting something different. Nothing is blended into
+                one number, because no honest formula exists to do it. This page says exactly what
+                every figure on ScopeFlux is.
               </p>
-              <a href="#imports">Import CSV data ↗</a>
-            </article>
-            <article class="panel source-card">
-              <span data-icon="globe"></span>
-              <h2>Wikipedia article views</h2>
-              <span class="status-pill">Wikimedia pageviews API · daily</span>
+            </div>
+          </div>
+          <p id="sources-checked" class="filter-note"></p>
+          <div class="table-scroll">
+            <div class="source-table" role="list" id="sources-table"></div>
+          </div>
+          <div id="source-detail" class="panel source-detail"></div>
+          <div>
+            <h2 class="section-heading">When a topic counts as rising</h2>
+            <p class="section-lead">
+              The exact thresholds Discover uses today. They are starting values and will be tuned
+              as real data comes in.
+            </p>
+            <div class="table-scroll">
+              <table class="data-table" id="threshold-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Source</th>
+                    <th scope="col">Rising when</th>
+                    <th scope="col">Minimum volume</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h2 class="section-heading">How the numbers are made</h2>
+            <dl id="method-list" class="method-list"></dl>
+          </div>
+          <div>
+            <h2 class="section-heading">Known limits</h2>
+            <ul class="limit-list">
+              <li>
+                Topics are matched by name. “Apple” the company and the fruit can be mixed up; the
+                Wikipedia article chosen is shown on every topic page.
+              </li>
+              <li>
+                A Wikipedia language edition is only a rough stand-in for a country. United States,
+                United Kingdom and Worldwide all use English Wikipedia.
+              </li>
+              <li>Hacker News is global in every market and leans heavily towards technology.</li>
+              <li>
+                Google’s RSS list has no history of its own. ScopeFlux only knows what it has
+                recorded since it started storing the list.
+              </li>
+              <li>
+                Discover is rebuilt about once a day per market, in small steps. The time of the
+                last update is shown at the top.
+              </li>
+            </ul>
+          </div>
+          <div class="note-columns">
+            <div>
+              <h3>Why there is no Google search data</h3>
               <p>
-                Daily views of the Wikipedia article that best matches a topic, in one language
-                edition. Views are article reads, not searches. A language edition is only a rough
-                stand-in for a country, and name matching is imperfect (“Apple” the company vs the
-                fruit).
+                Google does not publish search volume. The official Trends API is limited to
+                approved partners, and scraping the public pages breaks Google’s terms. ScopeFlux
+                uses the public daily trending feed where it can, and measures interest where the
+                data is genuinely open.
               </p>
-              <a href="#explorer">Look up a topic ↗</a>
-            </article>
+            </div>
+            <div>
+              <h3>What ScopeFlux keeps</h3>
+              <p>
+                A daily snapshot of what every source reported for each market. Your saved topics,
+                imports and recent analyses stay in this browser only.
+              </p>
+            </div>
           </div>
-          <div class="plan-note">
-            <h3>Data provenance</h3>
-            <p>
-              ScopeFlux analyzes Wikipedia article views and imported CSV series. Radar retrieves
-              Google’s public RSS feed. No historical keyword API is connected, and no generated or
-              sample values are shown anywhere. The source of imported files is supplied by the user
-              and has not been independently verified.
-            </p>
-            <h3>Recent growth & acceleration</h3>
-            <p>
-              Recent change compares the means of two adjacent windows, each containing up to 30
-              observations. A third window supplies the previous growth rate. Acceleration is their
-              difference in percentage points. A zero baseline returns “Not available”, never
-              infinite growth. A point means one supplied observation, not necessarily one day.
-            </p>
-            <h3>Volatility & anomaly flags</h3>
-            <p>
-              Volatility is standard deviation divided by the full-series mean. Exploratory spike
-              and dip flags use the median of up to 30 previous observations and a threshold of four
-              scaled median absolute deviations, with a 25% baseline floor and one-unit minimum.
-              These flags are descriptive, not statistically calibrated alerts or forecasts.
-            </p>
-            <h3>Seasonality</h3>
-            <p>
-              Monthly averages are calculated for calendar years with observations in all 12 months.
-              At least two such years are required. Each year is normalized to an average of 100
-              before the corresponding months are averaged. Pattern consistency is the ratio of
-              variation in the monthly profile to total normalized variation; it is not a confidence
-              score or prediction accuracy.
-            </p>
-            <h3>Comparison & missing values</h3>
-            <p>
-              Comparison uses only dates shared by all selected series and rebases each to 100 from
-              its first seven common observations. It compares relative evolution, not absolute
-              popularity. Missing dates are not interpolated. CSV imports reject invalid dates,
-              duplicate dates, missing values, negative values, and censored values such as &lt;1.
-            </p>
-            <h3>About ScopeFlux</h3>
-            <p>All current beta tools are free. No ads or paid tiers are active.</p>
-            <h3>Watchlists & production status</h3>
-            <p>
-              Watchlists store series snapshots in this browser. Rules evaluate stored observations
-              only when you click Evaluate. Accounts, cloud storage, background monitoring,
-              notifications and billing are not implemented.
-            </p>
-          </div>
+          <details class="panel method-details">
+            <summary>How CSV analytics, Compare and Seasonality calculate</summary>
+            <div class="plan-note">
+              <h3>Data provenance</h3>
+              <p>
+                ScopeFlux analyzes Wikipedia article views and imported CSV series. The RSS list
+                retrieves Google’s public RSS feed. No historical keyword API is connected, and no
+                generated or sample values are shown anywhere. The source of imported files is
+                supplied by the user and has not been independently verified.
+              </p>
+              <h3>Recent growth & acceleration</h3>
+              <p>
+                Recent change compares the means of two adjacent windows, each containing up to 30
+                observations. A third window supplies the previous growth rate. Acceleration is
+                their difference in percentage points. A zero baseline returns “Not available”,
+                never infinite growth. A point means one supplied observation, not necessarily one
+                day.
+              </p>
+              <h3>Volatility & anomaly flags</h3>
+              <p>
+                Volatility is standard deviation divided by the full-series mean. Exploratory spike
+                and dip flags use the median of up to 30 previous observations and a threshold of
+                four scaled median absolute deviations, with a 25% baseline floor and one-unit
+                minimum. These flags are descriptive, not statistically calibrated alerts or
+                forecasts.
+              </p>
+              <h3>Seasonality</h3>
+              <p>
+                Monthly averages are calculated for calendar years with observations in all 12
+                months. At least two such years are required. Each year is normalized to an average
+                of 100 before the corresponding months are averaged. Pattern consistency is the
+                ratio of variation in the monthly profile to total normalized variation; it is not a
+                confidence score or prediction accuracy.
+              </p>
+              <h3>Comparison & missing values</h3>
+              <p>
+                Comparison uses only dates shared by all selected series and rebases each to 100
+                from its first seven common observations. It compares relative evolution, not
+                absolute popularity. Missing dates are not interpolated. CSV imports reject invalid
+                dates, duplicate dates, missing values, negative values, and censored values such as
+                &lt;1.
+              </p>
+              <h3>About ScopeFlux</h3>
+              <p>All current beta tools are free. No ads or paid tiers are active.</p>
+              <h3>Watchlists & production status</h3>
+              <p>
+                Watchlists store series snapshots in this browser. Rules evaluate stored
+                observations only when you click Evaluate. Accounts, cloud storage, background
+                monitoring, notifications and billing are not implemented.
+              </p>
+            </div>
+          </details>
         </section>
-        <footer>
-          <a href="#explorer" class="footer-brand">scopeflux.</a
-          ><span>Understand the signal. Follow the change.</span
-          ><a href="#sources">Sources & help ↗</a><a href="#plans">Privacy & local data ↗</a>
+        <footer class="site-footer">
+          <span>ScopeFlux · every number names its source.</span
+          ><a href="#sources">Sources &amp; help</a><a href="#plans">About &amp; privacy</a>
         </footer>
       </main>
     </div>

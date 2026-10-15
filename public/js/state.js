@@ -42,7 +42,45 @@ export const workspace = {
     0,
     Math.max(0, MAX_SAVED - restored.saved.length),
   ),
+  trendTopics: restoreTrendTopics(raw.trendTopics), // topics saved from Discover
 };
+
+// Saved Discover topics: { key: 'en:Godot', title, market, savedAt }.
+function restoreTrendTopics(list) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .filter(
+      t =>
+        t &&
+        typeof t.key === 'string' &&
+        /^([a-z]{2,3}|rss):.{1,300}$/.test(t.key) &&
+        typeof t.title === 'string' &&
+        t.title.length <= 300 &&
+        typeof t.market === 'string' &&
+        /^[A-Z]{2}$/.test(t.market),
+    )
+    .slice(0, MAX_SAVED);
+}
+
+export const isTrendSaved = key => workspace.trendTopics.some(t => t.key === key);
+
+// Save or unsave a Discover topic. Returns the new saved state, or null when full.
+export function toggleTrendTopic({ key, title, market }) {
+  if (isTrendSaved(key)) {
+    workspace.trendTopics = workspace.trendTopics.filter(t => t.key !== key);
+    persist();
+    updateSavedCount();
+    return false;
+  }
+  if (workspace.trendTopics.length >= MAX_SAVED) return null;
+  workspace.trendTopics = [
+    { key, title, market, savedAt: new Date().toISOString() },
+    ...workspace.trendTopics,
+  ];
+  persist();
+  updateSavedCount();
+  return true;
+}
 
 // Message for the banner at the top of the page, or '' when everything loaded.
 export function restoreProblem() {
@@ -131,7 +169,8 @@ export function storedSeries(current = null) {
 }
 
 export function updateSavedCount() {
-  $('#saved-count').textContent = workspace.saved.length + workspace.liveTopics.length;
+  $('#saved-count').textContent =
+    workspace.saved.length + workspace.liveTopics.length + workspace.trendTopics.length;
 }
 
 // Pages that list stored series (Explorer, Compare, Seasonality) register here
