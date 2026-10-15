@@ -40,6 +40,16 @@ test('Google News articles are counted per UTC day in the market edition', async
   assert.equal(url.searchParams.get('q'), 'Godot when:15d');
 });
 
+test('Google News is asked with a feed-reader User-Agent that still names ScopeFlux', async () => {
+  let agent = '';
+  const fetcher = async (url, init) => {
+    agent = init.headers['User-Agent'];
+    return new Response('<rss><channel></channel></rss>');
+  };
+  await googleNews.getDailySeries(topic, 'US', 14, { fetcher, now: NOW });
+  assert.match(agent, /^Mozilla\/5\.0 \(compatible; ScopeFlux\/1\.0; \+https:\/\/scopeflux\.io\)$/);
+});
+
 test('Google News: multi-word names are quoted; a non-RSS answer is an error, not data', async () => {
   assert.equal(
     new URL(googleNews.searchUrl('Hollow Knight', 'US', 15)).searchParams.get('q'),
