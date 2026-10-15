@@ -45,23 +45,27 @@ Every request: timeout, response size limit, `User-Agent: ScopeFlux/1.0
 - **Limit to state in the UI:** small, tech-leaning audience; one front-page post
   moves the line a lot.
 
-## 3. Google News RSS search (replaced GDELT in Oct 2026)
+## 3. The Guardian Open Platform (news coverage, since Oct 2026)
 
-- **Counts:** news articles that mention the topic, per UTC day of publication, in one
-  Google News country edition. Free, no key.
+- **Counts:** Guardian articles that mention the topic (exact name, in quotes), per UTC day
+  of publication. One newspaper, the same in every market.
+- **History:** the full archive, back to 1999.
 - **Endpoint:**
-  `https://news.google.com/rss/search?q={query} when:{N}d&hl={hl}&gl={gl}&ceid={gl}:{lang}`
-  Editions per market live in `lib/config.mjs` (`MARKETS[...].news`). Worldwide uses the
-  US English edition. Multi-word names are quoted; names under 2 characters are not searched.
-- **Limit:** Google returns at most **100 articles per search**. When an answer has 100 items,
-  the days up to the oldest returned article are set to unknown (`null`), never 0, and the
-  topic page says so. Recent days of a very busy topic can still be undercounted.
-- **Why it replaced GDELT:** GDELT DOC 2.0 answered "Please limit requests to one every
-  5 seconds" for Cloudflare's shared IPs, and often took 10–20 s. Google News answers fast.
-- **Licence note:** the feed is public, but Google's terms do not clearly allow commercial
-  reuse. Only counts are shown (no headlines or text). Review this before relying on ads income.
-- **Limit to state in the UI:** counts published articles, not readers; syndicated copies
-  inflate counts; at most 100 articles per search.
+  `https://content.guardianapis.com/search?q="{name}"&from-date={YYYY-MM-DD}&to-date={YYYY-MM-DD}&use-date=published&order-by=newest&page-size=200&api-key={key}`
+- **Key:** free developer key from https://open-platform.theguardian.com/access/ , stored as the
+  Worker secret `GUARDIAN_API_KEY` (never in the repo). Without it the news line says
+  "not connected yet" and no request is made.
+- **Limits of the free key:** about 1 request per second and 500 per day. The pipeline waits
+  1.1 s between requests, and a count is fetched once per topic and day and reused by every
+  market (`NEWS_CACHE_HOURS`). One request returns at most 200 articles; when there are more,
+  the days up to the oldest returned article are unknown (`null`), never zero.
+- **Licence:** the free developer key is for non-commercial use. ScopeFlux is free and has no
+  ads today. Before adding AdSense, ask The Guardian about a commercial key or switch sources.
+- **Limit to state in the UI:** one UK-based newspaper, not all news media; counts published
+  articles, not readers.
+- **Earlier providers:** GDELT DOC 2.0 rate-limited Cloudflare's shared IPs ("one request every
+  5 seconds"); Google News RSS answered HTTP 503 to Cloudflare. Both were dropped. Snapshots
+  carry `newsProvider`, so results from an earlier provider are never shown or mixed in.
 
 ## 4. Google Trends RSS (daily trending searches)
 
@@ -91,7 +95,7 @@ Every request: timeout, response size limit, `User-Agent: ScopeFlux/1.0
 |---|---|---|
 | Wikipedia | avg last 7 days ≥ 1.25 × avg previous 7 | ≥ 200 views/day (English), ≥ 30 on smaller editions |
 | Hacker News | stories last 7 days ≥ 1.5 × previous 7 | ≥ 3 stories in last 7 days |
-| Google News | articles last 7 days ≥ 1.25 × previous 7 | ≥ 10 articles in last 7 days |
+| The Guardian | articles last 7 days ≥ 1.25 × previous 7 | ≥ 3 articles in last 7 days |
 | Trends RSS | listed on at least 1 day of the last 7 | — |
 
 - **Agreement** = number of sources where the topic is rising. A count, not a score.

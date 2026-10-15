@@ -58,8 +58,8 @@ async function load() {
   $('#topic-table tbody').innerHTML = '';
   $('#topic-save').disabled = true;
   $('#topic-export').disabled = true;
-  // News searches are the slowest; ask separately so the other lines appear
-  // first and the news line is drawn when it arrives.
+  // The news source is asked separately so the other lines appear first and
+  // the news line is drawn when it arrives.
   try {
     const fast = await fetchTopic(['wikipedia', 'hackernews']);
     if (version !== loadVersion) return;
@@ -84,7 +84,7 @@ async function load() {
   try {
     news = (await fetchTopic(['news'])).sources.news;
   } catch {
-    news = { status: 'unavailable', message: 'Google News could not be reached.' };
+    news = { status: 'unavailable', message: 'The Guardian could not be reached.' };
   }
   if (version !== loadVersion) return;
   data.sources.news = news;
@@ -152,7 +152,7 @@ function summaryText() {
     parts.push(
       'Wikipedia article “' + data.article.replaceAll('_', ' ') + '” (' + data.lang + ' edition)',
     );
-  parts.push('Hacker News stories and Google News articles that mention “' + data.searchText + '”');
+  parts.push('Hacker News stories and Guardian articles that mention “' + data.searchText + '”');
   return (
     parts.join(', ') +
     '. Market: ' +
@@ -501,7 +501,7 @@ function footnote() {
   return (
     'Tracking ' +
     wiki +
-    'Hacker News stories and Google News articles that mention “' +
+    'Hacker News stories and Guardian articles that mention “' +
     esc(data.searchText) +
     '”. Name matching is imperfect. None of this is Google search volume. <a href="#sources">How each source is counted</a>'
   );

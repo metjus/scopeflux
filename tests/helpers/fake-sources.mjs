@@ -21,7 +21,7 @@ export function fakeFetcher({ fail = [] } = {}) {
             ? 'wikipedia-search'
             : url.includes('hn.algolia.com')
               ? 'hackernews'
-              : url.includes('news.google.com')
+              : url.includes('content.guardianapis.com')
                 ? 'news'
                 : 'unknown';
     if (fail.includes(service) || service === 'unknown') return new Response('down', { status: 503 });
@@ -40,7 +40,7 @@ export function fakeFetcher({ fail = [] } = {}) {
       case 'hackernews':
         return jsonResponse(sample('hn-search.json'));
       case 'news':
-        return new Response(sample('google-news.xml'), { headers: { 'Content-Type': 'application/xml' } });
+        return jsonResponse(sample('guardian-search.json'));
     }
   };
   return { fetcher, calls };

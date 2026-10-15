@@ -38,6 +38,17 @@ everything else on the site works.
 4. Commit and push. After the deploy, the first market fills in within an hour or two; all eight
    markets within about half a day. Logs: Cloudflare dashboard → Workers → scopeflux → Logs.
 
+### News source key (The Guardian)
+
+1. Register a free developer key at https://open-platform.theguardian.com/access/ (it arrives
+   by email).
+2. Cloudflare dashboard → Workers & Pages → scopeflux → Settings → Variables and Secrets →
+   Add → type **Secret**, name `GUARDIAN_API_KEY`, value = the key → Deploy.
+   (Or from a terminal: `npx wrangler secret put GUARDIAN_API_KEY`.)
+3. Locally, put `GUARDIAN_API_KEY=...` in `.dev.vars` (ignored by git).
+
+Without the key everything else works; the news line says "not connected yet".
+
 Testing the pipeline locally: put `ALLOW_MANUAL_PIPELINE=true` in a `.dev.vars` file (never in
 production), run `npx wrangler d1 migrations apply scopeflux --local`, start `npm run dev` and
 open http://localhost:8787/api/dev/pipeline-step repeatedly; each call runs one step.
@@ -59,7 +70,7 @@ lib/
   sources/                  One adapter per source, same output shape
     wikipedia.mjs           Article lookup, daily views, top-viewed lists; also /api/history
     hackernews.mjs          Stories per day (Algolia)
-    google-news.mjs         News articles per day (Google News RSS search, max 100 per search)
+    guardian.mjs            Guardian articles per day (The Guardian Open Platform, free key)
     trends-rss.mjs          Google Trends daily RSS; also /api/trending
 public/                     The website (served as-is)
   index.html                All pages; each <section class="page"> is one page
@@ -85,7 +96,7 @@ docs/                       Spec, data sources, design, mockups
 
 ## Where the numbers come from
 
-- **Discover and topic pages:** Wikipedia article views, Hacker News stories, Google News articles
+- **Discover and topic pages:** Wikipedia article views, Hacker News stories, Guardian articles
   and Google Trends RSS listings. Each source is evaluated on its own; nothing is averaged.
 - **CSV analytics, Compare, Markets, Seasonality:** Wikipedia article views, or your CSV.
 - **Your CSV** (Import data): values you supply; never uploaded.
