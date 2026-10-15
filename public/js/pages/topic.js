@@ -6,7 +6,7 @@ import { csvCell } from '../data/countries.js';
 import { $, $$, esc, toast, download } from '../ui/dom.js';
 import { isTrendSaved, toggleTrendTopic } from '../state.js';
 
-const LINES = ['wikipedia', 'hackernews', 'gdelt']; // RSS is a list, never a line
+const LINES = ['wikipedia', 'hackernews', 'news']; // RSS is a list, never a line
 const W = 1000,
   H = 320,
   TOP = 12,
@@ -58,12 +58,12 @@ async function load() {
   $('#topic-table tbody').innerHTML = '';
   $('#topic-save').disabled = true;
   $('#topic-export').disabled = true;
-  // Wikipedia and Hacker News answer in about a second; GDELT can take 30.
-  // Ask separately so the fast lines appear first and GDELT is drawn when ready.
+  // News searches are the slowest; ask separately so the other lines appear
+  // first and the news line is drawn when it arrives.
   try {
     const fast = await fetchTopic(['wikipedia', 'hackernews']);
     if (version !== loadVersion) return;
-    data = { ...fast, sources: { ...fast.sources, gdelt: { status: 'loading' } } };
+    data = { ...fast, sources: { ...fast.sources, news: { status: 'loading' } } };
     // A search (?q=) becomes a stable link to the matched topic.
     if (!params.key && fast.key) {
       params.key = fast.key;
@@ -82,12 +82,12 @@ async function load() {
   }
   let news;
   try {
-    news = (await fetchTopic(['gdelt'])).sources.gdelt;
+    news = (await fetchTopic(['news'])).sources.news;
   } catch {
-    news = { status: 'unavailable', message: 'GDELT could not be reached.' };
+    news = { status: 'unavailable', message: 'Google News could not be reached.' };
   }
   if (version !== loadVersion) return;
-  data.sources.gdelt = news;
+  data.sources.news = news;
   render();
 }
 
@@ -152,7 +152,7 @@ function summaryText() {
     parts.push(
       'Wikipedia article “' + data.article.replaceAll('_', ' ') + '” (' + data.lang + ' edition)',
     );
-  parts.push('Hacker News stories and news articles that mention “' + data.searchText + '”');
+  parts.push('Hacker News stories and Google News articles that mention “' + data.searchText + '”');
   return (
     parts.join(', ') +
     '. Market: ' +
@@ -501,7 +501,7 @@ function footnote() {
   return (
     'Tracking ' +
     wiki +
-    'Hacker News stories and GDELT news coverage that mention “' +
+    'Hacker News stories and Google News articles that mention “' +
     esc(data.searchText) +
     '”. Name matching is imperfect. None of this is Google search volume. <a href="#sources">How each source is counted</a>'
   );

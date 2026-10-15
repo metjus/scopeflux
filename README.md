@@ -59,7 +59,7 @@ lib/
   sources/                  One adapter per source, same output shape
     wikipedia.mjs           Article lookup, daily views, top-viewed lists; also /api/history
     hackernews.mjs          Stories per day (Algolia)
-    gdelt.mjs               News articles per day (GDELT DOC 2.0)
+    google-news.mjs         News articles per day (Google News RSS search, max 100 per search)
     trends-rss.mjs          Google Trends daily RSS; also /api/trending
 public/                     The website (served as-is)
   index.html                All pages; each <section class="page"> is one page
@@ -85,7 +85,7 @@ docs/                       Spec, data sources, design, mockups
 
 ## Where the numbers come from
 
-- **Discover and topic pages:** Wikipedia article views, Hacker News stories, GDELT news articles
+- **Discover and topic pages:** Wikipedia article views, Hacker News stories, Google News articles
   and Google Trends RSS listings. Each source is evaluated on its own; nothing is averaged.
 - **CSV analytics, Compare, Markets, Seasonality:** Wikipedia article views, or your CSV.
 - **Your CSV** (Import data): values you supply; never uploaded.
