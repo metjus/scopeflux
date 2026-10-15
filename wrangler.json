@@ -14,7 +14,7 @@
     {
       "binding": "DB",
       "database_name": "scopeflux",
-      "database_id": "abcd9faa-8b51-47fd-b6d7-1f3530dc9843",
+      "database_id": "bb3cc75f-1041-4833-bee5-23146945300b",
       "migrations_dir": "migrations"
     }
   ],
