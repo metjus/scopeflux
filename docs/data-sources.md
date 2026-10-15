@@ -45,30 +45,23 @@ Every request: timeout, response size limit, `User-Agent: ScopeFlux/1.0
 - **Limit to state in the UI:** small, tech-leaning audience; one front-page post
   moves the line a lot.
 
-## 3. GDELT DOC 2.0
+## 3. Google News RSS search (replaced GDELT in Oct 2026)
 
-- **Counts:** matching news articles per day (raw volume), worldwide or per source
-  country.
-- **History:** the DOC API covers roughly the last 3 months — enough for 90-day
-  charts; check the current limit.
+- **Counts:** news articles that mention the topic, per UTC day of publication, in one
+  Google News country edition. Free, no key.
 - **Endpoint:**
-  `https://api.gdeltproject.org/api/v2/doc/doc?query={query}&mode=timelinevolraw&timespan=14d&format=json`
-  For a market add `sourcecountry:{code}` inside the query (check GDELT's country
-  code list — it is not always ISO).
-- **As built (Oct 2026):** `startdatetime`/`enddatetime` instead of `timespan`, so days line up
-  with the other sources. Short ranges come back in 15-minute steps; they are added up per day.
-  The market filter uses country *names* (`sourcecountry:slovakia`), because GDELT's two-letter
-  codes are FIPS, not ISO (Slovakia is `LO`, Germany `GM`). Names live in `lib/config.mjs`.
-  Characters GDELT treats as operators (`:` `(` …) are removed; multi-word names are quoted;
-  names under 3 characters are not searched. Plain-text answers mean "no data". The pipeline
-  waits 5.5 s between GDELT calls (third-party docs say 1 request per 5 s). GDELT often needs
-  10–20 s to answer, so its timeout is 30 s (`GDELT_TIMEOUT_MS`); a "please limit requests" text
-  answer counts as rate limiting. The topic page loads GDELT separately so it never delays the others.
-- **Notes:** GDELT asks clients to keep request rates low — find the current
-  guidance and throttle to it. Multi-word topics need quotes. Very short or very
-  common words may be rejected; treat that as "no data", not a crash.
-- **Limit to state in the UI:** counts published articles, not readers; syndicated
-  copies inflate counts.
+  `https://news.google.com/rss/search?q={query} when:{N}d&hl={hl}&gl={gl}&ceid={gl}:{lang}`
+  Editions per market live in `lib/config.mjs` (`MARKETS[...].news`). Worldwide uses the
+  US English edition. Multi-word names are quoted; names under 2 characters are not searched.
+- **Limit:** Google returns at most **100 articles per search**. When an answer has 100 items,
+  the days up to the oldest returned article are set to unknown (`null`), never 0, and the
+  topic page says so. Recent days of a very busy topic can still be undercounted.
+- **Why it replaced GDELT:** GDELT DOC 2.0 answered "Please limit requests to one every
+  5 seconds" for Cloudflare's shared IPs, and often took 10–20 s. Google News answers fast.
+- **Licence note:** the feed is public, but Google's terms do not clearly allow commercial
+  reuse. Only counts are shown (no headlines or text). Review this before relying on ads income.
+- **Limit to state in the UI:** counts published articles, not readers; syndicated copies
+  inflate counts; at most 100 articles per search.
 
 ## 4. Google Trends RSS (daily trending searches)
 
@@ -98,7 +91,7 @@ Every request: timeout, response size limit, `User-Agent: ScopeFlux/1.0
 |---|---|---|
 | Wikipedia | avg last 7 days ≥ 1.25 × avg previous 7 | ≥ 200 views/day (English), ≥ 30 on smaller editions |
 | Hacker News | stories last 7 days ≥ 1.5 × previous 7 | ≥ 3 stories in last 7 days |
-| GDELT | articles last 7 days ≥ 1.25 × previous 7 | ≥ 10 articles in last 7 days |
+| Google News | articles last 7 days ≥ 1.25 × previous 7 | ≥ 10 articles in last 7 days |
 | Trends RSS | listed on at least 1 day of the last 7 | — |
 
 - **Agreement** = number of sources where the topic is rising. A count, not a score.

@@ -18,7 +18,7 @@ stop and note which step it was.
 - [ ] Discover shows either results, or "The first results for Worldwide are still being
       collected". It must never show topics that were not measured.
 - [ ] Type a topic in the top search box (e.g. `matcha`) → **Scan** opens its topic page with up
-      to three lines (Wikipedia, Hacker News, GDELT). Hovering the chart shows raw numbers with
+      to three lines (Wikipedia, Hacker News, Google News). Hovering the chart shows raw numbers with
       units. 30 / 90 days switches the window.
 - [ ] A topic with no Wikipedia article (e.g. `best running shoes`) says so and still shows the
       other sources.

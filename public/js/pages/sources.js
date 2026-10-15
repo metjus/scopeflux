@@ -170,15 +170,9 @@ function renderThresholds() {
       '≥ ' + s.hackernews.minLast7 + ' stories in the last ' + w + ' days',
     ],
     [
-      'gdelt',
-      'Articles in the last ' +
-        w +
-        ' days ≥ ' +
-        times(s.gdelt.ratio) +
-        ' the ' +
-        w +
-        ' days before',
-      '≥ ' + s.gdelt.minLast7 + ' articles in the last ' + w + ' days',
+      'news',
+      'Articles in the last ' + w + ' days ≥ ' + times(s.news.ratio) + ' the ' + w + ' days before',
+      '≥ ' + s.news.minLast7 + ' articles in the last ' + w + ' days',
     ],
     [
       'rss',

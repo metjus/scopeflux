@@ -21,8 +21,8 @@ export function fakeFetcher({ fail = [] } = {}) {
             ? 'wikipedia-search'
             : url.includes('hn.algolia.com')
               ? 'hackernews'
-              : url.includes('api.gdeltproject.org')
-                ? 'gdelt'
+              : url.includes('news.google.com')
+                ? 'news'
                 : 'unknown';
     if (fail.includes(service) || service === 'unknown') return new Response('down', { status: 503 });
     switch (service) {
@@ -39,8 +39,8 @@ export function fakeFetcher({ fail = [] } = {}) {
         return jsonResponse('{"pages":[{"key":"Matcha","title":"Matcha"}]}');
       case 'hackernews':
         return jsonResponse(sample('hn-search.json'));
-      case 'gdelt':
-        return jsonResponse(sample('gdelt-timeline.json'));
+      case 'news':
+        return new Response(sample('google-news.xml'), { headers: { 'Content-Type': 'application/xml' } });
     }
   };
   return { fetcher, calls };

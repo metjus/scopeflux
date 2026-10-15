@@ -40,7 +40,7 @@ logic (restyle only).
 |---|---|---|
 | Wikipedia pageviews | interest over time | last-7-day avg views > previous 7 × threshold |
 | Hacker News (Algolia) | developer / tech signal | stories last 7 days > previous 7 × threshold |
-| GDELT DOC 2.0 | news coverage | articles last 7 days > previous 7 × threshold |
+| Google News RSS (replaced GDELT DOC 2.0, Oct 2026) | news coverage | articles last 7 days > previous 7 × threshold |
 | Google Trends RSS | today's search trends | listed in the market's daily feed within 7 days |
 
 Exact endpoints, limits and thresholds: `docs/data-sources.md`.
@@ -54,7 +54,7 @@ Czechia (CZ), France (FR), Japan (JP).
 
 - Wikipedia: language edition from `WIKI_LANGUAGES` in `lib/wikipedia.mjs`;
   Worldwide = English edition
-- GDELT: filter by source country; Worldwide = no filter
+- Google News: country edition per market; Worldwide = US English edition (was GDELT)
 - Hacker News: global everywhere (say so in the UI)
 - Trends RSS: the market's `geo`; Worldwide = listed in any of the 7 national feeds
 
@@ -64,7 +64,7 @@ The Wikipedia article is the topic's identity (e.g. `en:Godot_(game_engine)`).
 - Candidates from Trends RSS (free text) are resolved to an article with
   `resolveArticle()` in `lib/wikipedia.mjs`. No match → keep the topic with
   Wikipedia marked "no article" (it can still rise on other sources).
-- The article title is the search query for Hacker News and GDELT.
+- The article title is the search query for Hacker News and Google News.
 - Known limit, shown on the Sources page: name matching is imperfect
   ("Apple" the company vs the fruit).
 
@@ -110,7 +110,7 @@ built. Tell Matúš if the paid plan ($5/month) would make it materially simpler
    Zero behaviour change; existing tests pass; add a short `README.md` map of files.
 2. **New look.** Apply `docs/design.md` to the existing pages. Behaviour unchanged.
 3. **Source adapters.** `lib/sources/wikipedia.mjs` (move the existing file),
-   `hackernews.mjs`, `gdelt.mjs`, `trends-rss.mjs` (wrap existing `lib/trending.mjs`).
+   `hackernews.mjs`, `google-news.mjs` (was `gdelt.mjs`), `trends-rss.mjs` (wrap existing `lib/trending.mjs`).
    Same shape for each: `getDailySeries(query, market, days)` →
    `{ source, unit, series: [{date, value}], fetchedAt }` or a typed error.
    Unit tests with saved sample responses, no live network in tests.
@@ -127,7 +127,7 @@ built. Tell Matúš if the paid plan ($5/month) would make it materially simpler
 ## Done means
 
 - Every number on screen has a named source and unit
-- Turning off any one source (e.g. GDELT down) leaves the site working, with that
+- Turning off any one source (e.g. Google News down) leaves the site working, with that
   source shown as unavailable
 - No sample or synthetic data anywhere in production code
 - `npm test` passes; code is readable without the docs

@@ -1,6 +1,6 @@
 // What each Discover source is, in plain words. Used by Discover, the topic
 // page and Sources & help. Thresholds come live from /api/config instead.
-export const SOURCE_ORDER = ['wikipedia', 'hackernews', 'gdelt', 'rss'];
+export const SOURCE_ORDER = ['wikipedia', 'hackernews', 'news', 'rss'];
 
 export const SOURCE_INFO = {
   wikipedia: {
@@ -29,18 +29,18 @@ export const SOURCE_INFO = {
     limit:
       'A small, tech-leaning audience. Silence here says nothing about topics outside software, and one front-page post moves the line sharply. The same in every market.',
   },
-  gdelt: {
-    name: 'GDELT',
+  news: {
+    name: 'Google News',
     color: '#A78BFA',
     role: 'News coverage',
-    unit: 'Matching news articles per day',
-    history: 'About 3 months',
+    unit: 'News articles per day that mention the topic',
+    history: 'Recent weeks',
     refresh: 'Daily',
-    regions: 'By source country',
-    docs: 'GDELT DOC 2.0 API',
-    what: 'How many news articles mention the topic, worldwide or from outlets in one country.',
+    regions: 'By country edition',
+    docs: 'Google News RSS search',
+    what: 'How many news articles in the market’s Google News edition mention the topic, by day of publication.',
     limit:
-      'Counts published articles, not readers. Heavy coverage is not the same as public interest, and syndicated copies inflate the count. Very short names cannot be searched.',
+      'Counts published articles, not readers. Google returns at most 100 articles per search, so for very busy topics the older days are shown as unknown and recent days can be undercounted. Worldwide uses the US English edition.',
   },
   rss: {
     name: 'Trends RSS',

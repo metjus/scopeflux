@@ -41,7 +41,7 @@ test('rising needs both the ratio and the minimum volume', () => {
 test('missing days are reported as missing, never guessed', () => {
   const values = Array(14).fill(5);
   values[3] = null;
-  assert.deepEqual(evaluateCounts('gdelt', series(values)), { missing: true });
+  assert.deepEqual(evaluateCounts('news', series(values)), { missing: true });
 });
 
 test('"moved first on" only names a source that clearly moved first', () => {
@@ -50,14 +50,14 @@ test('"moved first on" only names a source that clearly moved first', () => {
   const tie = { ...b, firstCrossDate: '2026-10-09' };
   assert.deepEqual(
     [
-      summarizeTopic({ wikipedia: a, gdelt: b }).leader,
-      summarizeTopic({ wikipedia: a, gdelt: b }).leaderIsFirst,
+      summarizeTopic({ wikipedia: a, news: b }).leader,
+      summarizeTopic({ wikipedia: a, news: b }).leaderIsFirst,
     ],
     ['wikipedia', true],
   );
-  const unclear = summarizeTopic({ wikipedia: a, gdelt: tie });
+  const unclear = summarizeTopic({ wikipedia: a, news: tie });
   assert.equal(unclear.leaderIsFirst, false);
-  assert.equal(unclear.leader, 'gdelt'); // strongest, without claiming it moved first
+  assert.equal(unclear.leader, 'news'); // strongest, without claiming it moved first
 });
 
 test('the pipeline builds a snapshot in small steps', async () => {
@@ -81,22 +81,22 @@ test('the pipeline builds a snapshot in small steps', async () => {
   const matcha = [...snapshot.rising, ...snapshot.early].find(t => t.key === 'en:Matcha');
   assert.ok(matcha);
   assert.equal(matcha.perSource.rss.rising, true);
-  assert.equal(snapshot.sources.gdelt.status, 'ok');
+  assert.equal(snapshot.sources.news.status, 'ok');
   // Never more than 50 outgoing requests in one step: check the biggest step.
   assert.ok(calls.length / steps.length < 50);
 });
 
 test('a source that is down is shown as unavailable; the rest still work', async () => {
   const env = { DB: createFakeD1() };
-  const { fetcher } = fakeFetcher({ fail: ['gdelt'] });
+  const { fetcher } = fakeFetcher({ fail: ['news'] });
   await buildFirstSnapshot(env, fetcher);
   const { snapshot } = await (
     await discoverResponse(new Request('https://x/api/discover?market=WW'), env)
   ).json();
-  assert.equal(snapshot.sources.gdelt.status, 'unavailable');
+  assert.equal(snapshot.sources.news.status, 'unavailable');
   assert.equal(snapshot.sources.wikipedia.status, 'ok');
   const godot = [...snapshot.rising, ...snapshot.early].find(t => t.key === 'en:Godot_(game_engine)');
-  assert.equal(godot.perSource.gdelt.status, 'unavailable');
+  assert.equal(godot.perSource.news.status, 'unavailable');
 });
 
 test('discover without a database says so instead of inventing data', async () => {
@@ -115,7 +115,7 @@ test('topic page: series per source with units, cached, RSS from own records', a
   const body = await (await topicResponse(new Request(url), env, { fetcher, now: NOW })).json();
   assert.equal(body.title, 'Godot (game engine)');
   assert.equal(body.searchText, 'Godot');
-  for (const key of ['wikipedia', 'hackernews', 'gdelt']) {
+  for (const key of ['wikipedia', 'hackernews', 'news']) {
     assert.equal(body.sources[key].status, 'ok');
     assert.equal(body.sources[key].series.length, 30);
     assert.ok(body.sources[key].unit);
@@ -188,10 +188,10 @@ test('the automatic tables are exactly the ones in the migration file', async ()
   assert.equal(describe(auto), describe(createFakeD1()));
 });
 
-test('topic page can ask for some sources only (fast ones first, GDELT later)', async () => {
+test('topic page can ask for some sources only (news is loaded separately)', async () => {
   const { fetcher, calls } = fakeFetcher();
   const url = 'https://x/api/topic?key=en:Matcha&market=WW&days=30&sources=wikipedia,hackernews';
   const body = await (await topicResponse(new Request(url), {}, { fetcher, now: NOW })).json();
   assert.deepEqual(Object.keys(body.sources), ['wikipedia', 'hackernews']);
-  assert.ok(!calls.some(u => u.includes('gdeltproject')));
+  assert.ok(!calls.some(u => u.includes('news.google.com')));
 });

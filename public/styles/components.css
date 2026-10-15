@@ -296,8 +296,8 @@ select.select-chip {
 .dot-hackernews {
   background: var(--src-hn);
 }
-.dot-gdelt {
-  background: var(--src-gdelt);
+.dot-news {
+  background: var(--src-news);
 }
 .dot-rss {
   background: var(--src-rss);
