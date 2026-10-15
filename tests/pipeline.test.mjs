@@ -94,6 +94,7 @@ test('a source that is down is shown as unavailable; the rest still work', async
     await discoverResponse(new Request('https://x/api/discover?market=WW'), env)
   ).json();
   assert.equal(snapshot.sources.news.status, 'unavailable');
+  assert.match(snapshot.sources.news.lastError, /HTTP 503/);
   assert.equal(snapshot.sources.wikipedia.status, 'ok');
   const godot = [...snapshot.rising, ...snapshot.early].find(t => t.key === 'en:Godot_(game_engine)');
   assert.equal(godot.perSource.news.status, 'unavailable');
@@ -133,6 +134,7 @@ test('topic page: a failing source is reported, not filled in', async () => {
   const body = await (await topicResponse(new Request(url), {}, { fetcher, now: NOW })).json();
   assert.equal(body.sources.hackernews.status, 'unavailable');
   assert.match(body.sources.hackernews.message, /Hacker News/);
+  assert.match(body.sources.hackernews.detail, /HTTP 503/); // technical reason, for diagnosis
   assert.equal(body.sources.wikipedia.status, 'ok');
 });
 
