@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ScopeFlux — palette and type</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap');
+body { margin: 0; }
+a { color: #FF7A91; }
+a:hover { color: #FF2E63; }
+</style>
+</helmet>
+
+<div style="background: #15121A; color: #F2EDF7; font-family: Figtree, system-ui, sans-serif; padding: 44px 44px 52px 44px">
+  <div style="display: flex; flex-direction: column; gap: 38px">
+
+    <div>
+      <h1 style="margin: 0 0 9px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 800; font-size: 38px; letter-spacing: -.03em">Palette and type</h1>
+      <p style="margin: 0; font-size: 16px; line-height: 1.55; color: #A79FB4; max-width: 660px">Charcoal with a faint plum cast as the ground. Red is a heat range rather than a flat accent: the stronger the signal, the hotter and denser it gets.</p>
+    </div>
+
+    <!-- base -->
+    <div>
+      <h2 style="margin: 0 0 16px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -.02em">Ground</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px">
+        <sc-for list="{{base}}" as="c" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div style="{{c.swatch}}"></div>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 15px; font-weight: 600">{{c.name}}</span>
+              <span style="font-size: 14px; color: #8C85A0">{{c.hex}}</span>
+              <span style="font-size: 13px; color: #6F6880; line-height: 1.45">{{c.use}}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- heat -->
+    <div>
+      <h2 style="margin: 0 0 5px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -.02em">Heat range</h2>
+      <p style="margin: 0 0 16px 0; font-size: 15px; color: #8C85A0">Hue and lightness move together, so the steps read even without colour.</p>
+      <div style="height: 54px; border-radius: 13px; background: linear-gradient(90deg, #332C40 0%, #8E2246 28%, #FF2E63 68%, #FF9A4D 100%); margin-bottom: 16px"></div>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px">
+        <sc-for list="{{heatSteps}}" as="h" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 3px">
+            <span style="font-size: 15px; font-weight: 600; color: {{h.tone}}">{{h.label}}</span>
+            <span style="font-size: 14px; color: #8C85A0">{{h.hex}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- source line colours -->
+    <div>
+      <h2 style="margin: 0 0 5px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -.02em">Source lines</h2>
+      <p style="margin: 0 0 16px 0; font-size: 15px; color: #8C85A0">Each source keeps one colour everywhere it appears. Every pair differs in lightness as well as hue.</p>
+      <div style="display: flex; flex-direction: column">
+        <sc-for list="{{sourceColors}}" as="s" hint-placeholder-count="5">
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 12px 0; border-top: 1px solid #221D2B">
+            <span aria-hidden="true" style="{{s.dot}}"></span>
+            <span style="flex: 0 0 130px; font-size: 15px; font-weight: 600; color: #E7E1EE">{{s.name}}</span>
+            <span style="flex: 0 0 90px; font-size: 14px; color: #8C85A0">{{s.hex}}</span>
+            <svg viewBox="0 0 220 24" preserveAspectRatio="none" aria-hidden="true" style="flex: 999 1 160px; min-width: 0; height: 24px; display: block">
+              <path d="M0 18 L44 14 L88 16 L132 9 L176 11 L220 4" fill="none" stroke="{{s.hex}}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- type -->
+    <div>
+      <h2 style="margin: 0 0 16px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -.02em">Type</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 44px">
+        <div style="flex: 999 1 420px; min-width: 0; max-width: 620px">
+          <p style="margin: 0 0 12px 0; font-size: 14px; color: #8C85A0">Bricolage Grotesque — headlines, figures, wordmark</p>
+          <p style="margin: 0 0 7px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 800; font-size: 44px; line-height: 1.05; letter-spacing: -.035em">Rising right now</p>
+          <p style="margin: 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -.02em; color: #BDB5C9">+64% over seven days</p>
+        </div>
+        <div style="flex: 1 1 300px; min-width: 0; max-width: 440px">
+          <p style="margin: 0 0 12px 0; font-size: 14px; color: #8C85A0">Figtree — body, labels, buttons</p>
+          <p style="margin: 0 0 10px 0; font-size: 16px; line-height: 1.65; color: #E7E1EE">Wikipedia article views are not Google searches. Every source measures something different.</p>
+          <p style="margin: 0; font-size: 14px; color: #A79FB4">Secondary text sits in this grey</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- alternates -->
+    <div>
+      <h2 style="margin: 0 0 5px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -.02em">If red stops working</h2>
+      <p style="margin: 0 0 16px 0; font-size: 15px; color: #8C85A0">Three fallbacks on the same charcoal ground. Say a number and I will swap it.</p>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px">
+        <sc-for list="{{alts}}" as="a" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 11px">
+            <div style="{{a.swatch}}"></div>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <span style="font-size: 16px; font-weight: 700">{{a.name}}</span>
+              <span style="font-size: 14px; line-height: 1.5; color: #8C85A0">{{a.note}}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const chip = (css) => 'height: 70px; border-radius: 12px; ' + css;
+
+    const base = [
+      { name: 'Pitch',  hex: '#15121A', use: 'page ground',        swatch: chip('background: #15121A; border: 1px solid #332C40') },
+      { name: 'Carbon', hex: '#1C1824', use: 'inputs and panels',  swatch: chip('background: #1C1824; border: 1px solid #332C40') },
+      { name: 'Seam',   hex: '#2E2838', use: 'rules and borders',  swatch: chip('background: #2E2838') },
+      { name: 'Chalk',  hex: '#F2EDF7', use: 'primary text',       swatch: chip('background: #F2EDF7') }
+    ];
+
+    const heatSteps = [
+      { label: 'Quiet',   hex: '#332C40', tone: '#8C85A0' },
+      { label: 'Faint',   hex: '#8E2246', tone: '#C98A9E' },
+      { label: 'Rising',  hex: '#FF2E63', tone: '#FF8FA6' },
+      { label: 'Strong',  hex: '#FF9A4D', tone: '#FFC08A' }
+    ];
+
+    const sourceColors = [
+      { name: 'Reddit',      hex: '#FF2E63' },
+      { name: 'Wikipedia',   hex: '#FF9A4D' },
+      { name: 'Hacker News', hex: '#FFD166' },
+      { name: 'GDELT',       hex: '#A78BFA' },
+      { name: 'Trends RSS',  hex: '#7E7691' }
+    ].map((s) => ({
+      name: s.name,
+      hex: s.hex,
+      dot: 'flex: 0 0 12px; width: 12px; height: 12px; border-radius: 50%; background: ' + s.hex + '; display: block'
+    }));
+
+    const alts = [
+      { name: '1 · Amber',  note: 'Warmer and calmer. Less alarming, easier on long reads.',        swatch: chip('background: linear-gradient(90deg, #332C40 0%, #B45309 55%, #FBBF24 100%)') },
+      { name: '2 · Plasma', note: 'Red bleeding into violet. More candy, less warning light.',      swatch: chip('background: linear-gradient(90deg, #332C40 0%, #9333EA 50%, #FF2E63 100%)') },
+      { name: '3 · Cyan',   note: 'Cool signal on warm charcoal. Furthest from what you asked for.', swatch: chip('background: linear-gradient(90deg, #332C40 0%, #0E7490 50%, #22D3EE 100%)') }
+    ];
+
+    return { base, heatSteps, sourceColors, alts };
+  }
+}
+</script>
+</body>
+</html>

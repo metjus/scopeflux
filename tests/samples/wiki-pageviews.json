@@ -1,0 +1,130 @@
+{
+ "items": [
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026093000",
+   "access": "all-access",
+   "agent": "user",
+   "views": 400
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026100100",
+   "access": "all-access",
+   "agent": "user",
+   "views": 400
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026100200",
+   "access": "all-access",
+   "agent": "user",
+   "views": 400
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026100300",
+   "access": "all-access",
+   "agent": "user",
+   "views": 400
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026100400",
+   "access": "all-access",
+   "agent": "user",
+   "views": 400
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026100500",
+   "access": "all-access",
+   "agent": "user",
+   "views": 400
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026100600",
+   "access": "all-access",
+   "agent": "user",
+   "views": 400
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026100700",
+   "access": "all-access",
+   "agent": "user",
+   "views": 550
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026100800",
+   "access": "all-access",
+   "agent": "user",
+   "views": 700
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026100900",
+   "access": "all-access",
+   "agent": "user",
+   "views": 850
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026101000",
+   "access": "all-access",
+   "agent": "user",
+   "views": 1000
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026101100",
+   "access": "all-access",
+   "agent": "user",
+   "views": 1150
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026101200",
+   "access": "all-access",
+   "agent": "user",
+   "views": 1300
+  },
+  {
+   "project": "en.wikipedia",
+   "article": "Godot_(game_engine)",
+   "granularity": "daily",
+   "timestamp": "2026101300",
+   "access": "all-access",
+   "agent": "user",
+   "views": 1450
+  }
+ ]
+}

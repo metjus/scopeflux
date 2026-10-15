@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ScopeFlux — sources and help</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap');
+body { margin: 0; }
+a { color: #FF7A91; }
+a:hover { color: #FF2E63; }
+</style>
+</helmet>
+
+<div style="background: #15121A; color: #F2EDF7; font-family: Figtree, system-ui, sans-serif; display: flex; flex-wrap: wrap; align-items: stretch; min-height: 100vh">
+
+  <!-- ===== sidebar ===== -->
+  <div style="flex: 0 0 248px; min-width: 0; background: #19151F; border-right: 1px solid #241F2D; padding: 18px 14px; display: flex; flex-direction: column; gap: 22px">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F2EDF7; padding: 4px 8px">
+      <span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 8px; background: radial-gradient(70% 70% at 30% 25%, #FF9A4D 0%, #FF2E63 62%, #C41744 100%); box-shadow: 0 0 16px rgba(255,46,99,.5); display: block"></span>
+      <span style="font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -.02em">ScopeFlux</span>
+    </a>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <sc-for list="{{navMain}}" as="n" hint-placeholder-count="4">
+        <a href="{{n.href}}" style="{{n.style}}"><span style="{{n.mark}}"></span><span style="flex: 999 1 auto; min-width: 0">{{n.label}}</span><span style="{{n.badgeStyle}}">{{n.badge}}</span></a>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px; border-top: 1px solid #241F2D; padding-top: 18px">
+      <sc-for list="{{navWork}}" as="n" hint-placeholder-count="4">
+        <a href="{{n.href}}" style="{{n.style}}"><span style="{{n.mark}}"></span><span style="flex: 999 1 auto; min-width: 0">{{n.label}}</span><span style="{{n.badgeStyle}}">{{n.badge}}</span></a>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ===== workspace ===== -->
+  <div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column">
+
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 13px 28px; border-bottom: 1px solid #241F2D">
+      <span style="font-size: 13px; color: #8C85A0">Method v1.0 · last changed 14 Oct 2026</span>
+      <span style="font-size: 13px; color: #6F6880; margin-left: auto">Status checked 09:12</span>
+    </div>
+
+    <div style="padding: 22px 28px 40px 28px; display: flex; flex-direction: column; gap: 24px">
+
+      <div>
+        <h1 style="margin: 0 0 7px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 800; font-size: 32px; letter-spacing: -.03em">Sources &amp; help</h1>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #A79FB4; max-width: 680px">Five public sources, each counting something different. Nothing is blended into one number, because no honest formula exists to do it. This page says exactly what every figure on ScopeFlux is.</p>
+      </div>
+
+      <!-- status table -->
+      <div style="overflow-x: auto">
+        <div style="min-width: 720px; display: flex; flex-direction: column">
+          <div style="display: flex; align-items: center; gap: 16px; padding-bottom: 10px; border-bottom: 1px solid #2E2838; font-size: 12px; color: #6F6880">
+            <span style="flex: 0 0 150px">Source</span>
+            <span style="flex: 0 0 140px">Status</span>
+            <span style="flex: 999 1 180px; min-width: 0">Counts</span>
+            <span style="flex: 0 0 110px">History</span>
+            <span style="flex: 0 0 110px">Refreshed</span>
+          </div>
+          <sc-for list="{{sources}}" as="s" hint-placeholder-count="5">
+            <button type="button" onClick="{{s.pick}}" style="{{s.rowStyle}}">
+              <span style="flex: 0 0 150px; display: flex; align-items: center; gap: 9px">
+                <span aria-hidden="true" style="{{s.dot}}"></span>
+                <span style="font-size: 15px; font-weight: 600; color: #F2EDF7">{{s.name}}</span>
+              </span>
+              <span style="flex: 0 0 140px; display: flex; align-items: center; gap: 7px">
+                <span aria-hidden="true" style="{{s.statusDot}}"></span>
+                <span style="font-size: 13px; color: {{s.statusTone}}">{{s.status}}</span>
+              </span>
+              <span style="flex: 999 1 180px; min-width: 0; font-size: 14px; color: #BDB5C9">{{s.unit}}</span>
+              <span style="flex: 0 0 110px; font-size: 13px; color: #A79FB4">{{s.history}}</span>
+              <span style="flex: 0 0 110px; font-size: 13px; color: #A79FB4">{{s.refresh}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- selected source detail -->
+      <div style="background: #19151F; border: 1px solid #241F2D; border-radius: 14px; padding: 22px 24px; display: flex; flex-wrap: wrap; gap: 28px">
+        <div style="flex: 999 1 380px; min-width: 0">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px">
+            <span aria-hidden="true" style="{{sel.dot}}"></span>
+            <h2 style="margin: 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -.02em">{{sel.name}}</h2>
+            <span style="font-size: 13px; color: #8C85A0">{{sel.role}}</span>
+          </div>
+          <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.65; color: #D6CFE0; max-width: 620px">{{sel.what}}</p>
+          <div style="border-left: 2px solid #3A3348; padding-left: 14px; max-width: 620px">
+            <p style="margin: 0 0 4px 0; font-size: 12px; color: #6F6880">Where it falls short</p>
+            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #A79FB4">{{sel.limit}}</p>
+          </div>
+        </div>
+        <div style="flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+          <sc-for list="{{sel.facts}}" as="f" hint-placeholder-count="4">
+            <div>
+              <p style="margin: 0 0 2px 0; font-size: 12px; color: #6F6880">{{f.label}}</p>
+              <p style="margin: 0; font-size: 14px; font-weight: 600; color: #E7E1EE">{{f.value}}</p>
+            </div>
+          </sc-for>
+          <sc-if value="{{sel.hasIssue}}" hint-placeholder-val="{{false}}">
+            <div style="background: rgba(255,154,77,.08); border: 1px solid rgba(255,154,77,.35); border-radius: 10px; padding: 11px 13px">
+              <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #FFD0A8">{{sel.issue}}</p>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <!-- how the numbers are made -->
+      <div>
+        <h2 style="margin: 0 0 12px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -.02em">How the numbers are made</h2>
+        <div style="display: flex; flex-direction: column">
+          <sc-for list="{{methods}}" as="m" hint-placeholder-count="5">
+            <div style="display: flex; flex-wrap: wrap; gap: 6px 24px; padding: 13px 0; border-top: 1px solid #221D2B">
+              <span style="flex: 0 0 200px; font-size: 14px; font-weight: 600; color: #F2EDF7">{{m.term}}</span>
+              <span style="flex: 999 1 320px; min-width: 0; font-size: 14px; line-height: 1.6; color: #A79FB4">{{m.def}}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 28px; border-top: 1px solid #2E2838; padding-top: 22px">
+        <div style="flex: 999 1 380px; min-width: 0; max-width: 580px">
+          <h3 style="margin: 0 0 8px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: -.02em">Why there is no Google search data</h3>
+          <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #A79FB4">Google does not publish search volume. The official Trends API is limited to approved partners, and scraping the public pages breaks Google's terms and stops working without warning. ScopeFlux uses the public daily trending feed where it can, and measures interest where the data is genuinely open.</p>
+        </div>
+        <div style="flex: 1 1 280px; min-width: 0; max-width: 420px">
+          <h3 style="margin: 0 0 8px 0; font-family: 'Bricolage Grotesque', Figtree, sans-serif; font-size: 17px; font-weight: 700; letter-spacing: -.02em">What ScopeFlux keeps</h3>
+          <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #A79FB4">A daily snapshot of what every source reported, since 2 Sep 2026. It is how topic pages can say when something first appeared and how long it lasted.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1360,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { selected: 'Wikipedia' };
+  }
+
+  nav(active) {
+    const link = (item) => {
+      const on = item.key === active;
+      return {
+        href: item.href, label: item.label, badge: item.badge || '',
+        style: 'display: flex; align-items: center; gap: 10px; text-decoration: none; border-radius: 10px; padding: 0 10px; min-height: 44px; font-size: 14px; font-weight: ' +
+               (on ? '600' : '500') + '; color: ' + (on ? '#F2EDF7' : '#A79FB4') + '; background: ' + (on ? '#241E2E' : 'transparent'),
+        mark: 'width: 3px; height: 16px; border-radius: 2px; flex: 0 0 auto; background: ' + (on ? 'linear-gradient(180deg, #FF9A4D 0%, #FF2E63 100%)' : 'transparent'),
+        badgeStyle: item.badge ? 'font-size: 12px; font-weight: 600; color: #8C85A0; background: #241F2D; border-radius: 999px; padding: 2px 8px; flex: 0 0 auto' : 'display: none'
+      };
+    };
+    return {
+      navMain: [
+        { key: 'discover',    label: 'Discover trends', href: 'Main.dc.html' },
+        { key: 'csv',         label: 'CSV analytics',   href: 'Import.dc.html' },
+        { key: 'compare',     label: 'Compare topics',  href: 'Compare.dc.html' },
+        { key: 'seasonality', label: 'Seasonality',     href: 'Seasonality.dc.html' }
+      ].map(link),
+      navWork: [
+        { key: 'saved',   label: 'Saved topics',    href: 'Saved.dc.html', badge: '5' },
+        { key: 'import',  label: 'Import data',     href: 'Import.dc.html' },
+        { key: 'sources', label: 'Sources & help',  href: 'Sources.dc.html' },
+        { key: 'states',  label: 'Status & errors', href: 'States.dc.html' }
+      ].map(link)
+    };
+  }
+
+  static get SOURCES() {
+    return [
+      { name: 'Wikipedia', color: '#FF9A4D', role: 'History and depth', status: 'ok',
+        unit: 'Article views per day', history: 'Since Jul 2015', refresh: 'Daily', regions: 'By language edition', docs: 'Wikimedia Pageviews API',
+        what: 'Daily view counts for the article that matches your topic. The closest thing to a public interest curve, and the only source here that reaches back years — which is what makes Seasonality possible.',
+        limit: 'Measures readers of an encyclopedia article, not searchers. Topics without their own article return nothing, and a language edition is only a rough stand-in for a country.' },
+      { name: 'Reddit', color: '#FF2E63', role: 'Earliest movement', status: 'slow',
+        unit: 'Rising posts and their score', history: 'Rolling 90 days', refresh: 'Hourly', regions: 'Global, English-leaning', docs: 'Reddit Data API',
+        what: 'Posts gaining traction across subreddits, matched to your topic. Usually the first source to move when something starts spreading.',
+        limit: 'Skews to Reddit\u2019s interests, so tech, games and hardware move more readily here. One large subreddit can carry a whole spike.',
+        issue: 'Responding slowly. The last complete hour is 10:00; newer figures will fill in once requests go through.' },
+      { name: 'Hacker News', color: '#FFD166', role: 'Developer signal', status: 'ok',
+        unit: 'Posts, points and comments', history: 'Since 2007', refresh: 'Hourly', regions: 'Global', docs: 'HN Algolia Search API',
+        what: 'New submissions and the points and comments they attract. Narrow but very clean for software, startups and hardware.',
+        limit: 'A small, specific audience. Silence here says nothing about topics outside software, and one front-page post moves the line sharply.' },
+      { name: 'GDELT', color: '#A78BFA', role: 'News context', status: 'ok',
+        unit: 'Matching news articles', history: 'Since 2015', refresh: 'Every 15 minutes', regions: 'Per country', docs: 'GDELT DOC 2.0 API',
+        what: 'How often a topic appears in world news, across languages and countries. Also the source of the headlines shown next to spikes.',
+        limit: 'Counts published articles, not readers. Heavy coverage is not the same as public interest, and syndicated copies inflate the count.' },
+      { name: 'Trends RSS', color: '#7E7691', role: 'Daily discovery', status: 'limited',
+        unit: 'Topics listed in today\u2019s feed', history: 'Today only', refresh: 'Several times a day', regions: '11 countries', docs: 'Google Trends public RSS',
+        what: 'Google\u2019s public daily trending feed, per country. Good for spotting what surfaced today; it carries no history.',
+        limit: 'A list, not a measurement. Labels like \u201c200+\u201d are buckets, not counts, and a topic missing from the feed has not necessarily gone quiet.' }
+    ];
+  }
+
+  renderVals() {
+    const STATUS = {
+      ok:      { label: 'Responding',  dot: '#6FD39A', tone: '#BDB5C9' },
+      slow:    { label: 'Slow',        dot: '#FF9A4D', tone: '#FFC08A' },
+      limited: { label: 'Daily list only', dot: '#5F586F', tone: '#8C85A0' }
+    };
+    const all = Component.SOURCES;
+    const rowsBase = 'display: flex; align-items: center; gap: 16px; width: 100%; text-align: left; border: 0; border-bottom: 1px solid #221D2B; padding: 14px 10px; font-family: inherit; min-height: 52px; cursor: pointer; border-radius: 0';
+
+    const sources = all.map((src) => {
+      const st = STATUS[src.status];
+      const on = src.name === this.state.selected;
+      return {
+        name: src.name, unit: src.unit, history: src.history, refresh: src.refresh,
+        status: st.label, statusTone: st.tone,
+        statusDot: 'width: 8px; height: 8px; border-radius: 50%; display: block; flex: 0 0 auto; background: ' + st.dot,
+        dot: 'width: 11px; height: 11px; border-radius: 50%; display: block; flex: 0 0 auto; background: ' + src.color,
+        rowStyle: rowsBase + '; background: ' + (on ? '#1F1A28' : 'transparent'),
+        pick: () => this.setState({ selected: src.name })
+      };
+    });
+
+    const s = all.find((x) => x.name === this.state.selected);
+    const sel = {
+      name: s.name, role: s.role, what: s.what, limit: s.limit,
+      dot: 'width: 12px; height: 12px; border-radius: 50%; display: block; flex: 0 0 auto; background: ' + s.color,
+      facts: [
+        { label: 'Counts', value: s.unit }, { label: 'History', value: s.history },
+        { label: 'Regions', value: s.regions }, { label: 'Read from', value: s.docs }
+      ],
+      hasIssue: Boolean(s.issue), issue: s.issue || ''
+    };
+
+    const methods = [
+      { term: 'Change',            def: 'The selected window against the window just before it, on one source. Never averaged across sources.' },
+      { term: 'Agreement',         def: 'How many sources are above their own 7-day average on the same day. A count of sources, not a score.' },
+      { term: 'Indexed lines',     def: 'On topic pages each source is scaled so its busiest day in the window is 100. Shapes compare; units do not.' },
+      { term: 'Spike',             def: 'A day more than four median absolute deviations above the source\u2019s 30-day median.' },
+      { term: 'Lead and lag',      def: 'Each source is shifted day by day until it best matches the fastest one. Shown only when the fit is clear.' },
+      { term: 'Seasonality index', def: 'Each month against its own year\u2019s average, 100 = an ordinary month. Needs two complete calendar years.' }
+    ];
+
+    return { ...this.nav('sources'), sources, sel, methods };
+  }
+}
+</script>
+</body>
+</html>

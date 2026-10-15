@@ -15,7 +15,17 @@
       "/api/*"
     ]
   },
-  "vars": {
-    "TREND_API_ENABLED": "false"
-  }
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "scopeflux",
+      "database_id": "abcd9faa-8b51-47fd-b6d7-1f3530dc9843",
+      "migrations_dir": "migrations"
+    }
+  ]
 }

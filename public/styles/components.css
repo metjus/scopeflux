@@ -1,0 +1,500 @@
+/* Shared pieces used on several pages: headings, panels, notices, tabs,
+   source dots, tables, metrics, empty/loading/error states, toast. */
+
+/* ----- page heading ----- */
+.page-head,
+.page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+}
+.page-head > div:first-child {
+  flex: 999 1 360px;
+  min-width: 0;
+}
+/* Headings receive focus after navigation (for screen readers), without a ring. */
+h1[tabindex='-1']:focus {
+  outline: none;
+}
+.page-heading {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+}
+.page-heading > p,
+.lead {
+  color: var(--haze);
+  max-width: 680px;
+  margin-top: 7px;
+}
+.page-heading h1 + p {
+  margin-top: 0;
+}
+.head-actions,
+.heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.crumb {
+  font-size: 13px;
+  color: var(--dim);
+  margin-bottom: 8px;
+}
+.crumb a {
+  color: var(--mute);
+  text-decoration: none;
+}
+.section-heading {
+  font-size: 19px;
+}
+.section-lead {
+  color: var(--mute);
+  font-size: 14px;
+  margin: 6px 0 12px;
+  max-width: 700px;
+}
+.footnote {
+  font-size: 13px;
+  color: var(--dim);
+  max-width: 760px;
+}
+.filter-note {
+  font-size: 13px;
+  color: var(--dim);
+}
+.eyebrow {
+  display: none;
+}
+
+/* ----- panels ----- */
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  padding: 18px 20px;
+}
+.panel-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.panel-heading h3 {
+  font-size: 17px;
+}
+.panel-heading p {
+  color: var(--mute);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* ----- notices and messages ----- */
+.notice,
+.data-notice,
+.storage-status,
+.info-strip {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 15px;
+  font-size: 14px;
+  color: var(--haze);
+}
+.warn-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-line);
+  border-radius: 11px;
+  padding: 13px 15px;
+  font-size: 13px;
+  color: var(--haze);
+}
+.warn-strip strong {
+  display: block;
+  color: var(--chalk);
+  font-size: 14px;
+  margin-bottom: 3px;
+}
+.warn-strip::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--warn);
+  flex: 0 0 auto;
+  margin-top: 6px;
+}
+.form-help {
+  font-size: 13px;
+  color: var(--mute);
+}
+.form-error {
+  color: var(--rise-text);
+  font-size: 14px;
+  background: rgba(255, 46, 99, 0.08);
+  border: 1px solid rgba(255, 46, 99, 0.3);
+  border-radius: var(--radius);
+  padding: 10px 13px;
+}
+.status-pill,
+.count-badge,
+.tiny-pill,
+.green-pill,
+.data-tag,
+.season-data-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--soft);
+  background: var(--control);
+  border-radius: 999px;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+/* ----- empty, loading, error states (docs/mockups/States.dc.html) ----- */
+.empty-state,
+.state-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  padding: 22px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.empty-state h3,
+.state-card h3 {
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.empty-state p,
+.state-card p {
+  color: var(--haze);
+  font-size: 14px;
+  max-width: 640px;
+}
+.empty-state > svg {
+  color: var(--mute);
+}
+.loading-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.loading-rows span {
+  height: 18px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--line) 0%, var(--control) 50%, var(--line) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-rows span {
+    animation: none;
+  }
+}
+
+/* ----- tabs, segmented controls, chips ----- */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.tabs button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--haze);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 14px;
+  min-height: var(--touch);
+  margin-bottom: -1px;
+}
+.tabs button[aria-selected='true'] {
+  color: var(--chalk);
+  font-weight: 600;
+  border-bottom-color: var(--ember);
+}
+.tab-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mute);
+  background: var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.tab-count:empty {
+  display: none;
+}
+.segmented {
+  display: flex;
+  gap: 4px;
+  background: var(--pitch);
+  border: 1px solid var(--seam);
+  border-radius: var(--radius);
+  padding: 3px;
+}
+.segmented button {
+  background: transparent;
+  color: var(--haze);
+  border: 0;
+  border-radius: 7px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  min-height: 38px;
+}
+.segmented button[aria-pressed='true'] {
+  background: var(--control);
+  color: var(--chalk);
+  font-weight: 600;
+}
+select.select-chip {
+  background: var(--control);
+  border: 0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 13px;
+}
+
+/* ----- source dots: one colour per source, grey when not rising ----- */
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: 0 0 auto;
+  background: var(--seam);
+}
+.dot-wikipedia {
+  background: var(--src-wikipedia);
+}
+.dot-hackernews {
+  background: var(--src-hn);
+}
+.dot-gdelt {
+  background: var(--src-gdelt);
+}
+.dot-rss {
+  background: var(--src-rss);
+}
+.dot-off {
+  background: var(--seam);
+}
+.dot-down {
+  background: #4a4357;
+}
+
+/* ----- data tables ----- */
+.table-scroll {
+  overflow-x: auto;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.data-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dim);
+  padding: 0 12px 10px 0;
+  border-bottom: 1px solid var(--seam);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 11px 12px 11px 0;
+  border-bottom: 1px solid var(--row);
+  vertical-align: middle;
+}
+.data-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.change-up {
+  color: var(--rise-text);
+  font-weight: 700;
+}
+.change-down {
+  color: var(--fall-text);
+  font-weight: 700;
+}
+
+/* ----- metric cards (CSV analytics, Seasonality) ----- */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+.metric {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-panel);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.metric-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--mute);
+}
+.metric-value {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.metric-value strong {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.metric-value span {
+  color: var(--mute);
+  font-size: 13px;
+}
+.metric small {
+  color: var(--dim);
+  font-size: 12px;
+}
+
+/* ----- lists of saved / imported items ----- */
+.saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.saved-item,
+.import-item {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+.saved-item > div,
+.import-item > div {
+  flex: 999 1 220px;
+  min-width: 0;
+}
+.saved-item h3,
+.import-item h3 {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.saved-item p,
+.import-item p {
+  color: var(--mute);
+  font-size: 13px;
+}
+.section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+.section-title span {
+  color: var(--dim);
+  font-size: 13px;
+}
+
+/* ----- charts (shared) ----- */
+.sparkline {
+  width: 90px;
+  height: 28px;
+  flex: 0 0 auto;
+}
+.sparkline path {
+  fill: none;
+  stroke: var(--ember);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chart-empty {
+  fill: var(--mute);
+  font-size: 14px;
+}
+
+/* ----- toast ----- */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 20px);
+  z-index: 90;
+  max-width: min(90%, 560px);
+  background: var(--raised);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 18px;
+  box-shadow: var(--shadow-pop);
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+.toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ----- dialog ----- */
+dialog {
+  background: var(--input);
+  color: var(--chalk);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  padding: 18px 20px;
+  width: min(560px, 92vw);
+}
+dialog::backdrop {
+  background: rgba(10, 8, 14, 0.72);
+}
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
