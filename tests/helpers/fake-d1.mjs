@@ -3,9 +3,10 @@
 import { readFileSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 
-export function createFakeD1() {
+// empty: true starts without any tables (as if nobody ran the migration).
+export function createFakeD1({ empty = false } = {}) {
   const sqlite = new DatabaseSync(':memory:');
-  sqlite.exec(readFileSync(new URL('../../migrations/0001_init.sql', import.meta.url), 'utf8'));
+  if (!empty) sqlite.exec(readFileSync(new URL('../../migrations/0001_init.sql', import.meta.url), 'utf8'));
   const statement = (sql, params = []) => ({
     bind: (...values) => statement(sql, values),
     first: async () => sqlite.prepare(sql).get(...params) ?? null,

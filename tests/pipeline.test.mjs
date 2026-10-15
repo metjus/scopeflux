@@ -161,3 +161,29 @@ test('the cron handler does nothing (and does not crash) without a database', as
   const worker = (await import('../worker.mjs')).default;
   await worker.scheduled({}, {}, {});
 });
+
+test('missing tables are created automatically on the first run', async () => {
+  const env = { DB: createFakeD1({ empty: true }) };
+  const { fetcher } = fakeFetcher();
+  const response = await discoverResponse(new Request('https://x/api/discover?market=WW'), env);
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).snapshot, null);
+  const step = await runPipelineStep(env, { now: NOW, fetcher, sleep: noSleep });
+  assert.equal(step.action, 'collected');
+});
+
+test('the automatic tables are exactly the ones in the migration file', async () => {
+  const { SCHEMA_STATEMENTS } = await import('../lib/schema.mjs');
+  const describe = db =>
+    JSON.stringify(
+      db.sqlite
+        .prepare(
+          'SELECT m.name AS t, p.name AS c, p.type, p.pk, p."notnull" AS n FROM sqlite_master m JOIN pragma_table_info(m.name) p WHERE m.type = \'table\' ORDER BY t, c',
+        )
+        .all()
+        .concat(db.sqlite.prepare("SELECT name FROM sqlite_master WHERE type = 'index' ORDER BY name").all()),
+    );
+  const auto = createFakeD1({ empty: true });
+  SCHEMA_STATEMENTS.forEach(sql => auto.sqlite.exec(sql));
+  assert.equal(describe(auto), describe(createFakeD1()));
+});
