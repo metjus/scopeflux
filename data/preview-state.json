@@ -1,0 +1,51 @@
+{
+  "feeds": [
+    {
+      "tld": "ai",
+      "checkedAt": "2026-10-15T11:12:28.983Z",
+      "count": 100
+    },
+    {
+      "tld": "eu",
+      "checkedAt": "2026-10-15T11:12:29.445Z",
+      "count": 100
+    }
+  ],
+  "historyFeeds": [
+    {
+      "tld": "com",
+      "checkedAt": "2026-10-15T15:14:23.636Z",
+      "count": 10
+    },
+    {
+      "tld": "net",
+      "checkedAt": "2026-10-15T15:14:24.085Z",
+      "count": 10
+    },
+    {
+      "tld": "org",
+      "checkedAt": "2026-10-15T15:14:25.167Z",
+      "count": 10
+    },
+    {
+      "tld": "ai",
+      "checkedAt": "2026-10-15T15:14:25.440Z",
+      "count": 10
+    },
+    {
+      "tld": "eu",
+      "checkedAt": "2026-10-15T15:14:26.345Z",
+      "count": 10
+    },
+    {
+      "tld": "io",
+      "checkedAt": "2026-10-15T15:14:27.173Z",
+      "count": 10
+    },
+    {
+      "tld": "app",
+      "checkedAt": "2026-10-15T15:14:27.450Z",
+      "count": 10
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+const {test} = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const {DatabaseSync} = require('node:sqlite');
+const {env, createDatabase} = require('./helpers/runtime.cjs');
+const {feedParts, readSavedFeed} = require('../lib/catalog-store.ts');
+const {saveCatalogFeed} = require('../lib/catalog-history.ts');
+const routes = require('../app/api/domains/route.ts');
+const catalogue = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/catalogue.json')));
+const history = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/history.json')));
+test('complete exported SQL imports and reimports within D1 row/statement limits', () => {
+  const sqlite = new DatabaseSync(':memory:');
+  for (const name of fs.readdirSync(path.join(__dirname, '../migrations')).sort()) sqlite.exec(fs.readFileSync(path.join(__dirname, '../migrations', name), 'utf8'));
+  const sql = fs.readFileSync(path.join(__dirname, '../data/catalog-seed.sql'), 'utf8');
+  assert.ok(sql.split('\n').every(line => Buffer.byteLength(line) < 100000));
+  sqlite.exec(sql); sqlite.exec(sql);
+  const feeds = sqlite.prepare('SELECT tld,records FROM catalog_feeds UNION ALL SELECT tld,records FROM catalog_feed_parts').all();
+  assert.equal(feeds.filter(row => !row.tld.startsWith('history:')).flatMap(row => JSON.parse(row.records)).length, catalogue.records.length);
+  assert.ok(feeds.every(row => Buffer.byteLength(row.records) < 500000));
+  assert.equal(sqlite.prepare('SELECT COUNT(*) AS count FROM watchlist').get().count, 0);
+  assert.ok(sqlite.prepare('SELECT COUNT(*) AS count FROM catalog_history').get().count >= history.records.length);
+  sqlite.close();
+});
+test('large feeds survive chunked updates, reads, source failures and shrinking snapshots', async () => {
+  env.DB = createDatabase();
+  const records = catalogue.records.filter(row => row.tld === 'sk');
+  assert.ok(feedParts(records).length > 1);
+  await saveCatalogFeed(env.DB, 'sk', records, catalogue.feeds.find(row => row.tld === 'sk').checkedAt);
+  const saved = await readSavedFeed(env.DB, 'sk');
+  assert.deepEqual(JSON.parse(saved.records), records);
+  const api = await (await routes.GET(new Request('https://example.test/api/domains?cached=1&tlds=sk'))).json();
+  assert.deepEqual(api.records, records);
+  await saveCatalogFeed(env.DB, 'sk', records.slice(0, 5), new Date(Date.now() + 1000).toISOString());
+  assert.equal(JSON.parse((await readSavedFeed(env.DB, 'sk')).records).length, 5);
+  assert.equal((await env.DB.prepare('SELECT COUNT(*) AS count FROM catalog_feed_parts').first()).count, 0);
+  env.DB.close();
+});

@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1792011153192,
+      "tag": "0000_aromatic_iron_patriot",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792013552609,
+      "tag": "0001_black_wong",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792023039646,
+      "tag": "0002_sparkling_selene",
+      "breakpoints": true
+    }
+  ]
+}
