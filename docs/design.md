@@ -34,7 +34,7 @@ Visual reference: `docs/mockups/`.
   /* sources — each keeps one colour everywhere */
   --src-wikipedia: #FF9A4D;
   --src-hn:        #FFD166;
-  --src-news:      #A78BFA;  /* Google News (was GDELT) */
+  --src-news:      #A78BFA;  /* news source: The Guardian */
   --src-rss:       #7E7691;
 }
 ```

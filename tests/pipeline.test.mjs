@@ -61,7 +61,7 @@ test('"moved first on" only names a source that clearly moved first', () => {
 });
 
 test('the pipeline builds a snapshot in small steps', async () => {
-  const env = { DB: createFakeD1() };
+  const env = { DB: createFakeD1(), GUARDIAN_API_KEY: 'k' };
   const { fetcher, calls } = fakeFetcher();
   const steps = await buildFirstSnapshot(env, fetcher);
   assert.equal(steps[0].action, 'collected');
@@ -87,7 +87,7 @@ test('the pipeline builds a snapshot in small steps', async () => {
 });
 
 test('a source that is down is shown as unavailable; the rest still work', async () => {
-  const env = { DB: createFakeD1() };
+  const env = { DB: createFakeD1(), GUARDIAN_API_KEY: 'k' };
   const { fetcher } = fakeFetcher({ fail: ['news'] });
   await buildFirstSnapshot(env, fetcher);
   const { snapshot } = await (
@@ -107,7 +107,7 @@ test('discover without a database says so instead of inventing data', async () =
 });
 
 test('topic page: series per source with units, cached, RSS from own records', async () => {
-  const env = { DB: createFakeD1() };
+  const env = { DB: createFakeD1(), GUARDIAN_API_KEY: 'k' };
   const { fetcher, calls } = fakeFetcher();
   await buildFirstSnapshot(env, fetcher);
   const url =
@@ -131,7 +131,7 @@ test('topic page: series per source with units, cached, RSS from own records', a
 test('topic page: a failing source is reported, not filled in', async () => {
   const { fetcher } = fakeFetcher({ fail: ['hackernews'] });
   const url = 'https://x/api/topic?key=en:Matcha&market=WW&days=90';
-  const body = await (await topicResponse(new Request(url), {}, { fetcher, now: NOW })).json();
+  const body = await (await topicResponse(new Request(url), { GUARDIAN_API_KEY: 'k' }, { fetcher, now: NOW })).json();
   assert.equal(body.sources.hackernews.status, 'unavailable');
   assert.match(body.sources.hackernews.message, /Hacker News/);
   assert.match(body.sources.hackernews.detail, /HTTP 503/); // technical reason, for diagnosis
@@ -146,7 +146,7 @@ test('topic page rejects bad input', async () => {
 });
 
 test('a build that never finishes is closed after maxBuildHours with what it has', async () => {
-  const env = { DB: createFakeD1() };
+  const env = { DB: createFakeD1(), GUARDIAN_API_KEY: 'k' };
   const { fetcher } = fakeFetcher();
   // Start a build, then let 7 hours pass with every candidate still pending.
   await runPipelineStep(env, { now: NOW, fetcher, sleep: noSleep });
@@ -165,7 +165,7 @@ test('the cron handler does nothing (and does not crash) without a database', as
 });
 
 test('missing tables are created automatically on the first run', async () => {
-  const env = { DB: createFakeD1({ empty: true }) };
+  const env = { DB: createFakeD1({ empty: true }), GUARDIAN_API_KEY: 'k' };
   const { fetcher } = fakeFetcher();
   const response = await discoverResponse(new Request('https://x/api/discover?market=WW'), env);
   assert.equal(response.status, 200);
@@ -193,13 +193,13 @@ test('the automatic tables are exactly the ones in the migration file', async ()
 test('topic page can ask for some sources only (news is loaded separately)', async () => {
   const { fetcher, calls } = fakeFetcher();
   const url = 'https://x/api/topic?key=en:Matcha&market=WW&days=30&sources=wikipedia,hackernews';
-  const body = await (await topicResponse(new Request(url), {}, { fetcher, now: NOW })).json();
+  const body = await (await topicResponse(new Request(url), { GUARDIAN_API_KEY: 'k' }, { fetcher, now: NOW })).json();
   assert.deepEqual(Object.keys(body.sources), ['wikipedia', 'hackernews']);
   assert.ok(!calls.some(u => u.includes('news.google.com')));
 });
 
-test('GDELT-era results are not shown: their builds are closed and their markets rebuilt', async () => {
-  const env = { DB: createFakeD1() };
+test('results from an earlier news provider are not shown: builds closed, markets rebuilt', async () => {
+  const env = { DB: createFakeD1(), GUARDIAN_API_KEY: 'k' };
   const { fetcher } = fakeFetcher();
   await runPipelineStep(env, { now: NOW, fetcher, sleep: noSleep }); // creates the tables
   const old = new Date(NOW - 3_600_000).toISOString();
@@ -244,4 +244,27 @@ test('GDELT-era results are not shown: their builds are closed and their markets
   });
   assert.equal(next.action, 'collected');
   assert.equal(next.market, 'US');
+});
+
+test('a Guardian count is fetched once per topic and day, then shared by the other markets', async () => {
+  const env = { DB: createFakeD1(), GUARDIAN_API_KEY: 'k' };
+  const { fetcher, calls } = fakeFetcher();
+  const guardianCalls = () => calls.filter(url => url.includes('guardianapis')).length;
+  await buildFirstSnapshot(env, fetcher); // Worldwide
+  const first = guardianCalls();
+  assert.ok(first > 0);
+  const steps = await buildFirstSnapshot(env, fetcher); // next market, same topics
+  assert.notEqual(steps[0].market, 'WW');
+  assert.equal(guardianCalls(), first);
+});
+
+test('without a Guardian key, Discover says news is unavailable and asks nothing', async () => {
+  const env = { DB: createFakeD1() };
+  const { fetcher, calls } = fakeFetcher();
+  await buildFirstSnapshot(env, fetcher);
+  const { snapshot } = await (await discoverResponse(new Request('https://x/api/discover?market=WW'), env)).json();
+  assert.equal(snapshot.sources.news.status, 'unavailable');
+  assert.match(snapshot.sources.news.lastError, /not connected/);
+  assert.equal(calls.filter(url => url.includes('guardianapis')).length, 0);
+  assert.equal(snapshot.sources.wikipedia.status, 'ok');
 });

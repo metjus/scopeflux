@@ -3,15 +3,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as wikipedia from '../lib/sources/wikipedia.mjs';
 import * as hackernews from '../lib/sources/hackernews.mjs';
-import * as googleNews from '../lib/sources/google-news.mjs';
+import * as guardian from '../lib/sources/guardian.mjs';
 import { fakeFetcher, NOW } from './helpers/fake-sources.mjs';
 
 const topic = { article: 'Godot_(game_engine)', lang: 'en', searchText: 'Godot' };
 
 test('every adapter returns the same shape: source, unit, 14 dated points, fetchedAt', async () => {
   const { fetcher } = fakeFetcher();
-  for (const adapter of [wikipedia, hackernews, googleNews]) {
-    const result = await adapter.getDailySeries(topic, 'US', 14, { fetcher, now: NOW });
+  for (const adapter of [wikipedia, hackernews, guardian]) {
+    const result = await adapter.getDailySeries(topic, 'US', 14, { fetcher, now: NOW, apiKey: 'k' });
     assert.ok(result.source);
     assert.ok(result.unit.length > 5);
     assert.equal(result.series.length, 14);
@@ -29,48 +29,40 @@ test('Hacker News stories are counted per UTC day', async () => {
   assert.match(calls[0], /restrictSearchableAttributes=title/);
 });
 
-test('Google News articles are counted per UTC day in the market edition', async () => {
+test('Guardian articles are counted per UTC day; the key and dates go in the request', async () => {
   const { fetcher, calls } = fakeFetcher();
-  const { series, note } = await googleNews.getDailySeries(topic, 'DE', 14, { fetcher, now: NOW });
+  const { series, note } = await guardian.getDailySeries(topic, 'DE', 14, { fetcher, now: NOW, apiKey: 'k' });
   assert.equal(series.find(p => p.date === '2026-10-10').value, 6);
   assert.equal(series.find(p => p.date === '2026-10-01').value, 2);
   assert.equal(note, undefined);
   const url = new URL(calls[0]);
-  assert.equal(url.searchParams.get('gl'), 'DE');
-  assert.equal(url.searchParams.get('q'), 'Godot when:15d');
+  assert.equal(url.searchParams.get('q'), '"Godot"');
+  assert.equal(url.searchParams.get('from-date'), '2026-09-30');
+  assert.equal(url.searchParams.get('to-date'), '2026-10-13');
+  assert.equal(url.searchParams.get('api-key'), 'k');
 });
 
-test('Google News is asked with a feed-reader User-Agent that still names ScopeFlux', async () => {
-  let agent = '';
-  const fetcher = async (url, init) => {
-    agent = init.headers['User-Agent'];
-    return new Response('<rss><channel></channel></rss>');
-  };
-  await googleNews.getDailySeries(topic, 'US', 14, { fetcher, now: NOW });
-  assert.match(agent, /^Mozilla\/5\.0 \(compatible; ScopeFlux\/1\.0; \+https:\/\/scopeflux\.io\)$/);
+test('The Guardian without an API key says so, and makes no request', async () => {
+  const { fetcher, calls } = fakeFetcher();
+  await assert.rejects(guardian.getDailySeries(topic, 'US', 14, { fetcher, now: NOW }), {
+    code: 'NOT_CONFIGURED',
+  });
+  assert.equal(calls.length, 0);
 });
 
-test('Google News: multi-word names are quoted; a non-RSS answer is an error, not data', async () => {
-  assert.equal(
-    new URL(googleNews.searchUrl('Hollow Knight', 'US', 15)).searchParams.get('q'),
-    '"Hollow Knight" when:15d',
-  );
-  const fetcher = async () => new Response('<html>blocked</html>', { status: 200 });
-  await assert.rejects(googleNews.getDailySeries(topic, 'US', 14, { fetcher, now: NOW }), {
+test('The Guardian: an unexpected answer is an error, not data', async () => {
+  const fetcher = async () => Response.json({ response: { status: 'error', message: 'Invalid key' } });
+  await assert.rejects(guardian.getDailySeries(topic, 'US', 14, { fetcher, now: NOW, apiKey: 'k' }), {
     code: 'BAD_RESPONSE',
   });
 });
 
-test('Google News at its 100-article cap: older days become unknown (null), not zero', async () => {
-  const items = Array.from(
-    { length: 100 },
-    (_, i) =>
-      '<item><pubDate>' +
-      new Date(Date.parse('2026-10-13T20:00:00Z') - i * 3_600_000).toUTCString() +
-      '</pubDate></item>',
-  ).join('');
-  const fetcher = async () => new Response('<rss><channel>' + items + '</channel></rss>');
-  const result = await googleNews.getDailySeries(topic, 'US', 14, { fetcher, now: NOW });
+test('The Guardian with more articles than one page: older days become unknown (null), not zero', async () => {
+  const results = Array.from({ length: 200 }, (_, i) => ({
+    webPublicationDate: new Date(Date.parse('2026-10-13T20:00:00Z') - i * 3_600_000).toISOString(),
+  }));
+  const fetcher = async () => Response.json({ response: { status: 'ok', total: 450, results } });
+  const result = await guardian.getDailySeries(topic, 'US', 14, { fetcher, now: NOW, apiKey: 'k' });
   assert.equal(result.series.find(p => p.date === '2026-10-01').value, null);
   assert.ok(result.series.at(-1).value > 0);
   assert.ok(result.note);
