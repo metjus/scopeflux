@@ -1,105 +1,124 @@
-# ScopeFlux
+# DomainRadar — Cloudflare export
 
-Free trend discovery at https://scopeflux.io: which topics are rising across several free
-public sources at once, and how each source is moving. A Cloudflare Worker serves a small API
-and a static site. Plain JavaScript modules, no framework, no build step.
+Samostatná anglická stránka na sledovanie domén pred očakávaným uvoľnením, historických pozorovaní a ľubovoľnej konkrétnej domény. Tento balík je pripravený pre **Cloudflare Workers + D1**. Cloudflare Workers sa nasadzuje cez Wrangler alebo Git; súbory sa nenahrávajú cez FTP ani iba cez Pages „Upload assets“.
 
-Rules for working on the code: `CLAUDE.md`. What to build next: `docs/v1-spec.md`.
-Before and after going live: `docs/launch-checklist.md`.
+## Čo balík obsahuje
 
-## Commands
+- Zdrojový kód a zostavený Worker v `dist/server`, statické súbory v `dist/client`.
+- TLD filtre `.sk`, `.com`, `.net`, `.org`, `.io`, `.app`, `.ai`, `.eu`, 7/30 dní, vyhľadávanie, name-quality filtre a CSV.
+- Kontrolu ľubovoľnej platnej domény cez dostupné registre; bez časového limitu na budúcu expiráciu.
+- Uložené verejné zdrojové náhľady: **8 512 upcoming** a **1 352 historických pozorovaní** pri exporte 15. 10. 2026. Presné časy získania sú v `data/manifest.json`, nie sú prepísané časom exportu.
+- Prázdnu osobnú watchlist databázu. Údaje účtov ani prihlasovacie údaje z pôvodnej stránky sa neexportujú.
+- Voliteľné Cloudflare Access prihlásenie, vlastný chránený updater a dva vypnuté bloky Google AdSense.
 
-| Command | What it does |
-|---|---|
-| `npm install` | Installs Wrangler (Cloudflare's tool). Needed once. |
-| `npm test` | Runs all tests in `tests/`. No internet needed. |
-| `npm run dev` | Runs the site locally at http://localhost:8787 |
-| `npm run deploy` | Publishes to Cloudflare (normally done by Cloudflare from GitHub). |
+Katalóg nie je úplný zoznam všetkých domén na internete. Niektoré zdroje poskytujú iba verejný náhľad. Expirácia, plánované uvoľnenie a potvrdená registrácia sú odlišné údaje. Dátum uvoľnenia nie je zárukou dostupnosti. Presná hodina sa nezobrazuje, ak ju zdroj nepublikuje.
 
-`npm run dev` passes an older compatibility date because the pinned Wrangler version cannot run
-the date in `wrangler.json` locally. Deploys are not affected.
+## Nasadenie na scopeflux.io (aktuálne nastavenie)
 
-## Switching on Discover (one-time setup)
+Repozitár `metjus/scopeflux` je napojený na Cloudflare Worker **scopeflux** (Workers Builds). Každá zmena v `main` sa nasadí sama.
 
-Discover reads results that a scheduled job (every 5 minutes, one small step at a time) stores
-in a Cloudflare D1 database. Until the database exists, Discover says "not switched on yet" and
-everything else on the site works.
+- Cloudflare → Workers & Pages → scopeflux → Settings → Build:
+  - **Build command:** `npx -y pnpm@11.25.0 install --frozen-lockfile && npx -y pnpm@11.25.0 run build`
+  - **Deploy command:** `npx wrangler deploy` (build zanechá `.wrangler/deploy/config.json`, takže Wrangler nasadí zostavený `dist/server`)
+- Databáza: existujúca D1 `scopeflux` (binding `DB`). Tabuľky sa vytvoria samy pri prvej požiadavke (`lib/schema.ts`), migrácie netreba spúšťať ručne.
+- Počiatočné dáta (`data/catalog-seed.sql`) sa nenahrávajú automaticky. Katalóg sa plní zo zdrojov pri návštevách a cronom (`10 * * * *`); .ai/.eu a história potrebujú updater z kapitoly 5.
+- `dist/` je výstup buildu a nie je v gite.
 
-1. Create the database: `npx wrangler d1 create scopeflux`
-2. Copy the `database_id` it prints and add this block to `wrangler.json`:
-   ```json
-   "d1_databases": [
-     { "binding": "DB", "database_name": "scopeflux", "database_id": "PASTE-ID-HERE", "migrations_dir": "migrations" }
-   ]
-   ```
-3. Create the tables: `npx wrangler d1 migrations apply scopeflux --remote`
-   (or paste the SQL into the D1 **Console** in the Cloudflare dashboard — remove the `--`
-   comments first, because the console joins everything into one line).
-4. Commit and push. After the deploy, the first market fills in within an hour or two; all eight
-   markets within about half a day. Logs: Cloudflare dashboard → Workers → scopeflux → Logs.
+Nasledujúce kapitoly popisujú pôvodný ručný postup (vlastný Worker, vlastná D1).
 
-### News source key (The Guardian)
+## 1. Príprava
 
-1. Register a free developer key at https://open-platform.theguardian.com/access/ (it arrives
-   by email).
-2. Cloudflare dashboard → Workers & Pages → scopeflux → Settings → Variables and Secrets →
-   Add → type **Secret**, name `GUARDIAN_API_KEY`, value = the key → Deploy.
-   (Or from a terminal: `npx wrangler secret put GUARDIAN_API_KEY`.)
-3. Locally, put `GUARDIAN_API_KEY=...` in `.dev.vars` (ignored by git).
+Nainštaluj Node.js **24 LTS** a rozbaľ celý priečinok. V termináli v tomto priečinku spusti:
 
-Without the key everything else works; the news line says "not connected yet".
-
-Testing the pipeline locally: put `ALLOW_MANUAL_PIPELINE=true` in a `.dev.vars` file (never in
-production), run `npx wrangler d1 migrations apply scopeflux --local`, start `npm run dev` and
-open http://localhost:8787/api/dev/pipeline-step repeatedly; each call runs one step.
-
-## Where things are
-
-```
-worker.mjs                  Router for /api/*; scheduled() runs one pipeline step per cron
-wrangler.json               Cloudflare settings (cron every 5 minutes)
-migrations/0001_init.sql    D1 tables: builds, candidates, rss_listings, snapshots, topic_cache
-lib/
-  config.mjs                EVERY threshold, market and limit (shown on Sources & help)
-  api.mjs                   GET /api/discover, /api/topic, /api/config
-  pipeline.mjs              Scheduled job: collect candidates → evaluate → store snapshot
-  rising.mjs                "Rising", "moved first on", agreement count (pure functions)
-  topics.mjs                Topic identity: 'en:Godot_(game_engine)' or 'rss:<title>'
-  http.mjs                  One safe way to call a service: timeout, size limit, User-Agent, typed errors
-  dates.mjs                 UTC days; every series ends at the last complete day
-  sources/                  One adapter per source, same output shape
-    wikipedia.mjs           Article lookup, daily views, top-viewed lists; also /api/history
-    hackernews.mjs          Stories per day (Algolia)
-    guardian.mjs            Guardian articles per day (The Guardian Open Platform, free key)
-    trends-rss.mjs          Google Trends daily RSS; also /api/trending
-public/                     The website (served as-is)
-  index.html                All pages; each <section class="page"> is one page
-  styles/
-    tokens.css              All colours, fonts, radii (docs/design.md)
-    base.css, layout.css, components.css   Reset and controls; sidebar/topbar/drawer; shared pieces
-    discover.css, topic.css, sources.css, pages.css   Per page
-  js/
-    main.js                 Start-up and page switching (#discover, #topic?key=…, #sources, …)
-    state.js                Everything stored in this browser (localStorage) + helpers
-    ui/                     dom.js (helpers), chart.js (SVG charts), navigation.js (drawer)
-    pages/
-      discover.js           Discover trends (GET /api/discover)
-      topic.js              Topic page: one chart, one line per source (GET /api/topic)
-      sources.js            Sources & help with live thresholds (GET /api/config)
-      explorer.js           CSV analytics: one series (Wikipedia topic or imported CSV)
-      compare.js, markets.js, seasonality.js, saved.js, history.js, imports.js
-      radar.js              Google Trends RSS list (the old Discover page) + saved RSS topics
-    data/                   Pure logic used by pages and tests (statistics, CSV, exports, …)
-tests/                      node:test; samples/ = saved API answers; helpers/ = fake D1 and fetch
-docs/                       Spec, data sources, design, mockups
+```sh
+npx pnpm@11.25.0 install --frozen-lockfile
+npx pnpm@11.25.0 exec wrangler login
+npx pnpm@11.25.0 run db:create
 ```
 
-## Where the numbers come from
+Z výstupu vytvorenia databázy skopíruj skutočné `database_id` do `wrangler.json` namiesto `00000000-0000-4000-8000-000000000000`. Zachovaj binding **DB**. Názov Workeru môžeš zmeniť cez `name`.
 
-- **Discover and topic pages:** Wikipedia article views, Hacker News stories, Guardian articles
-  and Google Trends RSS listings. Each source is evaluated on its own; nothing is averaged.
-- **CSV analytics, Compare, Markets, Seasonality:** Wikipedia article views, or your CSV.
-- **Your CSV** (Import data): values you supply; never uploaded.
+Pre pravidelné načítavanie všetkých zdrojov odporúčame Workers Paid; SSR, väčší katalóg a cron môžu prekročiť CPU alebo počet databázových dotazov bezplatného plánu. Aktuálne limity: [Workers](https://developers.cloudflare.com/workers/platform/limits/), [D1](https://developers.cloudflare.com/d1/platform/limits/). Balík používa malé časti JSON, aby veľký `.sk` feed neprekročil limit D1 na riadok, a SQL príkazy pod 100 KB.
 
-Nothing on the site is generated, sampled or estimated. When a source does not answer, the
-page says so and leaves the gap empty.
+## 2. Databáza a prvé dáta
+
+```sh
+npx pnpm@11.25.0 run db:migrate
+npx pnpm@11.25.0 run db:seed
+```
+
+Migrácie vytvoria tabuľky. Seed importuje verejné pozorovania, zachová zdrojové dátumy a nevkladá watchlisty. Pred opätovným importom do používanej databázy urob zálohu; seed je určený na počiatočné naplnenie.
+
+## 3. Nasadenie
+
+Najjednoduchšie je znovu zostaviť so svojou konfiguráciou:
+
+```sh
+npx pnpm@11.25.0 run check
+npx pnpm@11.25.0 run test
+npx pnpm@11.25.0 run build
+npx pnpm@11.25.0 run deploy:ready
+```
+
+`deploy:ready` prevezme tvoje D1 ID a premenné z koreňového `wrangler.json`, doplní ich do zostavenej konfigurácie a spustí Wrangler. Môže použiť aj priložený overený `dist` bez buildu, pokiaľ nemeníš zdrojový kód alebo AdSense konfiguráciu. Pri zmene kódu je nový build povinný.
+
+Overenie bez nasadenia:
+
+```sh
+npx pnpm@11.25.0 run deploy:ready -- --dry-run
+```
+
+Wrangler zobrazí URL tvojho Workeru. V Cloudflare Workers → Settings → Domains & Routes môžeš pridať vlastnú doménu. Tento export nebol nasadený do tvojho Cloudflare účtu.
+
+**Viditeľnosť:** samostatný Worker je po nasadení štandardne verejný. Ak má zostať iba pre teba, pred jeho sprístupnením chráň celý hostname cez Cloudflare Access a vypni alebo rovnako chráň alternatívny `workers.dev` endpoint. Pôvodná ChatGPT stránka týmto exportom nemení svoju viditeľnosť.
+
+## 4. Prihlásenie a watchlist
+
+Katalóg a kontrola domény fungujú bez účtu. Watchlist potrebuje Cloudflare Access; samostatný balík nepoužíva ChatGPT prihlásenie.
+
+1. V Cloudflare Zero Trust vytvor **Access → Applications → Self-hosted** aplikáciu pre `tvoj-hostname/account/*` a nastav pravidlo, kto sa smie prihlásiť. Pre súkromnú celú stránku chráň celý hostname namiesto samotnej cesty.
+2. Skopíruj Application Audience (AUD). Do `wrangler.json` → `vars` vlož `ACCESS_TEAM_DOMAIN` v tvare `https://tvoj-team.cloudflareaccess.com` a `ACCESS_AUD`.
+3. Znovu zostav/nasaď. Odkaz **Sign in** prejde cez `/account/login` a po overení sa vráti do katalógu. Odhlásenie je `/account/logout`.
+4. Skontroluj, že aplikácia Access zahŕňa nasadený hostname aj každú alternatívnu adresu, ktorú používaš.
+
+Worker kontroluje podpis RS256, issuer, audience a platnosť Access JWT. Identitu nepreberá z používateľom poslaného ID ani e-mailového headera. Watchlist je oddelený podľa overeného `sub`. Bez Access konfigurácie sa používateľ neprihlási; ostatné časti stránky fungujú.
+
+Dokumentácia: [Access JWT](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/).
+
+## 5. Automatické aktualizácie
+
+Prečítaj **CATALOG_UPDATES.md**. Sú potrebné dve cesty:
+
+- Cloudflare cron v `wrangler.json` načítava verejný Backorder.sk a Dynadot a archivuje pozorovania.
+- Priložený GitHub Actions workflow aktualizuje verejné `.ai`/`.eu` náhľady a historické príklady ExpiredDomains.net z prostredia mimo Workeru. Poskytovatelia môžu Worker požiadavky blokovať.
+
+Nový hostname nepreberá updater pôvodnej ChatGPT stránky. Bez nastavenia updatera budú exportované údaje postupne starnúť. `.ai` a `.eu` snapshoty v tomto exporte pochádzajú z **15. 10. 2026, 11:12 UTC**; pri exporte poskytovateľ ich ďalšie načítanie odmietal. Predchádzajúce dáta sú zachované a stránka ukazuje vek zdroja.
+
+Pri verejnom nasadení nastav podľa očakávanej návštevnosti Cloudflare rate limiting pre `/api/domains?domain=...` a watchlist refresh, aby požiadavky návštevníkov zbytočne nezaťažovali registre.
+
+## 6. Google AdSense
+
+Dva responzívne bloky sú pripravené nad výsledkami a pod nimi, označené **Advertisement**. Sú vypnuté, preto nevytvárajú prázdne miesto ani neposielajú požiadavky Google. Pri blokovaní reklamy sa katalóg používa ďalej.
+
+1. Pridaj vlastný nasadený hostname do svojho AdSense účtu a dokonči overenie/schválenie podľa AdSense.
+2. Vytvor dve responzívne display jednotky. V `lib/ads-config.ts` vyplň vlastné `publisherId` (`ca-pub-` + 16 číslic) a `slots.top`, `slots.bottom`. Nastav `enabled: true`. `preview: true` slúži iba na lokálny náhľad rozloženia bez reklám; pred ostrým nasadením ho vypni.
+3. Priprav publikované zásady ochrany súkromia a nastavenie súhlasu s reklamami. Pre personalizované reklamy v EHP, Spojenom kráľovstve a Švajčiarsku Google vyžaduje certifikovanú CMP integrovanú s TCF. Samotný JavaScript flag nižšie CMP nenahrádza.
+4. Integrácia zvolenej CMP po platnom súhlase nastaví `window.domainradarAdConsent = true` a odošle `window.dispatchEvent(new Event('domainradar:ad-consent'))`. Až potom sa načíta AdSense skript. Pri odvolaní nastaví flag `false`, odošle tú istú udalosť a obnoví stránku, aby zastavila už načítaný reklamný skript. Udalosť sa nemá spúšťať automaticky pri návšteve.
+5. Skopíruj presný `ads.txt` z tvojho AdSense účtu do `public/ads.txt`. Balík nevkladá cudzie ani vymyslené publisher ID. Po nasadení over `https://tvoja-domena/ads.txt`.
+6. Spusti nový build a `deploy:ready`. Over displej na mobile a v nastavení AdSense; reklamy sa môžu zobraziť až po schválení a naplnení jednotky.
+
+V súčasnom balíku **nie je aktívna reklamná jednotka ani konkrétna CMP**. Chýbajú tvoje AdSense ID a výber CMP. Nepredpokladá sa schválenie webu Google.
+
+Oficiálne návody: [AdSense kód](https://support.google.com/adsense/answer/9274019), [display jednotky](https://support.google.com/adsense/answer/9274025), [ads.txt](https://support.google.com/adsense/answer/12171612), [CMP požiadavky](https://support.google.com/adsense/answer/13554116).
+
+## Vývoj a overenie
+
+```sh
+npx pnpm@11.25.0 run dev
+```
+
+Lokálne migrácie môžeš aplikovať pomocou `npx pnpm@11.25.0 exec wrangler d1 migrations apply DB --local --config wrangler.json`. `db:migrate` a `db:seed` v skriptoch cielia na **remote** databázu.
+
+Testy pokrývajú filtre všetkých TLD, 30 dní, históriu, parsery, databázu, watchlist izoláciu, Access JWT, ochranu updatera a import veľkého feedu. Skutočné reklamné požiadavky sa v testoch neposielajú. Overenie v reálnom prehliadači a v tvojom Cloudflare/AdSense účte je potrebné po nasadení.
+
+Zdrojová štruktúra: `app/` UI a API, `lib/` registre/katalóg/filtre/autentifikácia, `worker.ts` vstup Workeru a cron, `migrations/` D1 schéma, `data/` počiatočné verejné snapshoty, `scripts/` updater a nasadenie.

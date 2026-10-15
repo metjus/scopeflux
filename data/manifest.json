@@ -1,0 +1,93 @@
+{
+  "exportedAt": "2026-10-15T15:49:05.005Z",
+  "upcomingRecords": 8512,
+  "historicalRecords": 1352,
+  "tlds": [
+    "ai",
+    "app",
+    "com",
+    "eu",
+    "io",
+    "net",
+    "org",
+    "sk"
+  ],
+  "sources": [
+    {
+      "tld": "ai",
+      "checkedAt": "2026-10-15T11:12:28.983Z",
+      "count": 100
+    },
+    {
+      "tld": "app",
+      "checkedAt": "2026-10-15T15:34:19.685Z",
+      "count": 100
+    },
+    {
+      "tld": "com",
+      "checkedAt": "2026-10-15T15:34:19.685Z",
+      "count": 100
+    },
+    {
+      "tld": "eu",
+      "checkedAt": "2026-10-15T11:12:29.445Z",
+      "count": 100
+    },
+    {
+      "tld": "io",
+      "checkedAt": "2026-10-15T15:34:19.685Z",
+      "count": 100
+    },
+    {
+      "tld": "net",
+      "checkedAt": "2026-10-15T15:34:19.685Z",
+      "count": 100
+    },
+    {
+      "tld": "org",
+      "checkedAt": "2026-10-15T15:34:19.685Z",
+      "count": 100
+    },
+    {
+      "tld": "sk",
+      "checkedAt": "2026-10-15T15:34:19.816Z",
+      "count": 7812
+    },
+    {
+      "tld": "history:com",
+      "checkedAt": "2026-10-15T15:14:23.636Z",
+      "count": 10
+    },
+    {
+      "tld": "history:net",
+      "checkedAt": "2026-10-15T15:14:24.085Z",
+      "count": 10
+    },
+    {
+      "tld": "history:org",
+      "checkedAt": "2026-10-15T15:14:25.167Z",
+      "count": 10
+    },
+    {
+      "tld": "history:ai",
+      "checkedAt": "2026-10-15T15:14:25.440Z",
+      "count": 10
+    },
+    {
+      "tld": "history:eu",
+      "checkedAt": "2026-10-15T15:14:26.345Z",
+      "count": 10
+    },
+    {
+      "tld": "history:io",
+      "checkedAt": "2026-10-15T15:14:27.173Z",
+      "count": 10
+    },
+    {
+      "tld": "history:app",
+      "checkedAt": "2026-10-15T15:14:27.450Z",
+      "count": 10
+    }
+  ],
+  "personalWatchlistsIncluded": false
+}

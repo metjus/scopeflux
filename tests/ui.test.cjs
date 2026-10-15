@@ -1,0 +1,81 @@
+require('./helpers/runtime.cjs');
+const {test} = require('node:test');
+const assert = require('node:assert/strict');
+const React = require('react');
+const {renderToStaticMarkup} = require('react-dom/server');
+const Pagination = require('../app/result-pagination.tsx').default;
+const Coverage = require('../app/catalogue-coverage.tsx').default;
+const Navigation = require('../app/site-navigation.tsx').default;
+const DomainLookup = require('../app/domain-lookup.tsx').default;
+const {PAGES} = require('../lib/navigation.ts');
+
+test('pagination renders all pages, correct range and available next/previous actions', () => {
+  const props = {page: 2, totalPages: 3, start: 101, end: 200, total: 219, onPage() {}};
+  const html = renderToStaticMarkup(React.createElement(Pagination, props));
+  assert.match(html, /Showing 101–200 of 219/);
+  assert.match(html, /value="3"/);
+  assert.match(html, /aria-label="Result page"/);
+  assert.ok(!html.includes('disabled'));
+  const last = renderToStaticMarkup(React.createElement(Pagination, {...props, page: 3, start: 201, end: 219}));
+  assert.match(last, /disabled=""[^>]*>Next/);
+});
+
+test('history coverage explains missing TLD observations rather than implying availability', () => {
+  const html = renderToStaticMarkup(React.createElement(Coverage, {records: [], feeds: [], tlds: ['ai', 'eu'], recent: true, period: '30'}));
+  assert.match(html, /No saved past release observations/);
+  assert.match(html, /\.ai, .eu/);
+  assert.match(html, /does not mean those domains are available/);
+});
+
+test('saved preview source failures and the 30-day filter coverage are visible', () => {
+  const row = {domain: 'cloud.ai', tld: 'ai', drop: '2026-10-15'};
+  const feed = {tld: 'ai', refreshError: 'Source unavailable (403).', checkedAt: '2026-10-15T10:00:00Z'};
+  const html = renderToStaticMarkup(React.createElement(Coverage, {records: [row], feeds: [feed], tlds: ['ai'], recent: false, period: '30'}));
+  assert.match(html, /following 30 calendar days/);
+  assert.match(html, /last successful snapshot/);
+  assert.match(html, /403/);
+});
+
+test('timestamp coverage dates follow local time, including releases after midnight', () => {
+  const value = '2026-10-15T23:45:00Z';
+  const date = new Date(value).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
+  const html = renderToStaticMarkup(React.createElement(Coverage, {records: [{domain: 'cloud.app', tld: 'app', drop: value}], feeds: [], tlds: ['app'], recent: false, period: '30'}));
+  assert.ok(html.includes(date));
+});
+
+test('every menu destination has an accessible active link and the mobile disclosure has controls', () => {
+  for (const page of PAGES) {
+    const html = renderToStaticMarkup(React.createElement(Navigation, {currentPage: page.id, watchCount: 2, onNavigate() {}}));
+    for (const destination of PAGES) assert.ok(html.includes('href="#' + destination.id + '"'));
+    assert.equal((html.match(/aria-current="page"/g) || []).length, 1);
+    assert.match(html, /aria-controls="site-navigation-panel"/);
+    assert.match(html, /aria-expanded="false"/);
+  }
+  const lookup = renderToStaticMarkup(React.createElement(DomainLookup, {onCheck: async () => {}}));
+  assert.match(lookup, /no expiration-date limit/);
+  assert.match(lookup, /for="any-domain"/);
+  assert.match(lookup, /type="submit"/);
+});
+
+test('historical deletion detail is separate from a future release estimate and preserves the public source link', () => {
+  const Details = require('../app/domain-details.tsx').default;
+  const record = {domain: 'sample.com', tld: 'com', status: 'Source-reported deletion', expiration: null, drop: null, source: 'ExpiredDomains.net', sourceUrl: 'https://www.expireddomains.net/tld/com/', checkedAt: '2026-10-15T12:00:05.000Z', reportedDrop: {at: '2026-10-14T17:24:00.000Z', label: 'Yesterday 17:24', sourceDate: 'Thu, 15 Oct 2026 12:00:00 GMT', source: 'ExpiredDomains.net', url: 'https://www.expireddomains.net/tld/com/', checkedAt: '2026-10-15T12:00:05.000Z'}};
+  const html = renderToStaticMarkup(React.createElement(Details, {record, premium: {candidate: false, reason: 'Fixture'}, saved: false, busy: false, checking: false, archived: true, releaseCountdown: '', onClose() {}, onSave() {}}));
+  assert.match(html, /Historical deletion report/);
+  assert.match(html, /Source-reported deletion:/);
+  assert.match(html, /Yesterday 17:24 \(UTC\)/);
+  assert.match(html, /Expected availability<\/span><strong>Not confirmed/);
+  assert.ok(!html.includes('Release estimate:'));
+  assert.ok(html.includes('https://www.expireddomains.net/tld/com/'));
+});
+
+test('failed registration details show a known release with original retrieval and a separate failed attempt', () => {
+  const Details = require('../app/domain-details.tsx').default;
+  const record = {domain:'sample.ai',tld:'ai',status:'Unverified',expiration:null,drop:'2026-11-15',source:'Backorder.com',sourceUrl:'https://backorder.com/en/pending-delete/ai',checkedAt:'2026-10-15T12:00:00Z',availabilityCheckedAt:'2026-10-15T12:00:00Z',checkError:'Registry unavailable (503).',checkAttemptedAt:'2026-10-15T15:00:00Z'};
+  const html = renderToStaticMarkup(React.createElement(Details, {record,premium:{candidate:false,reason:'Fixture'},saved:false,busy:false,checking:false,archived:false,releaseCountdown:'~31 days',onClose(){},onSave(){}}));
+  assert.match(html,/Current registration check unavailable/);
+  assert.match(html,/Registry unavailable \(503\)/);
+  assert.match(html,/Last registration attempt/);
+  assert.match(html,/Release estimate retrieved/);
+  assert.match(html,/15 Nov 2026/);
+});

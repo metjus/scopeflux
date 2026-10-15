@@ -1,0 +1,11 @@
+import {readFile, writeFile} from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
+const source = JSON.parse(await readFile(new URL('../wrangler.json', import.meta.url), 'utf8'));
+if (!source.d1_databases?.[0]?.database_id || source.d1_databases[0].database_id.startsWith('00000000-')) throw new Error('Create D1 and enter its database_id in wrangler.json first.');
+const target = new URL('../dist/server/wrangler.json', import.meta.url);
+const built = JSON.parse(await readFile(target, 'utf8'));
+for (const key of ['name', 'compatibility_date', 'compatibility_flags', 'vars', 'triggers', 'observability']) built[key] = source[key];
+built.d1_databases = source.d1_databases.map(db => ({...db, migrations_dir: '../../migrations'}));
+await writeFile(target, JSON.stringify(built, null, 2) + '\n');
+const result = spawnSync(process.execPath, ['node_modules/wrangler/bin/wrangler.js', 'deploy', '--config', 'dist/server/wrangler.json', ...process.argv.slice(2)], {stdio: 'inherit', cwd: new URL('..', import.meta.url)});
+process.exit(result.status ?? 1);

@@ -1,3 +1,8 @@
 node_modules/
 .wrangler/
+.next/
+*.tsbuildinfo
 .dev.vars
+.env*
+!.env.example
+dist/
