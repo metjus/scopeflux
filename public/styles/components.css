@@ -148,7 +148,7 @@ h1[tabindex='-1']:focus {
 .count-badge,
 .tiny-pill,
 .green-pill,
-.sample-tag,
+.data-tag,
 .season-data-tag {
   display: inline-flex;
   align-items: center;

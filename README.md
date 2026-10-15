@@ -5,6 +5,7 @@ public sources at once, and how each source is moving. A Cloudflare Worker serve
 and a static site. Plain JavaScript modules, no framework, no build step.
 
 Rules for working on the code: `CLAUDE.md`. What to build next: `docs/v1-spec.md`.
+Before and after going live: `docs/launch-checklist.md`.
 
 ## Commands
 

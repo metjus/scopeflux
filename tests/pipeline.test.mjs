@@ -142,3 +142,22 @@ test('topic page rejects bad input', async () => {
     assert.equal(response.status, 400);
   }
 });
+
+test('a build that never finishes is closed after maxBuildHours with what it has', async () => {
+  const env = { DB: createFakeD1() };
+  const { fetcher } = fakeFetcher();
+  // Start a build, then let 7 hours pass with every candidate still pending.
+  await runPipelineStep(env, { now: NOW, fetcher, sleep: noSleep });
+  const later = NOW + 7 * 3_600_000;
+  const step = await runPipelineStep(env, { now: later, fetcher, sleep: noSleep });
+  assert.equal(step.action, 'finished');
+  const { snapshot } = await (
+    await discoverResponse(new Request('https://x/api/discover?market=WW'), env)
+  ).json();
+  assert.equal(snapshot.rising.length + snapshot.early.length, 0); // nothing evaluated, nothing invented
+});
+
+test('the cron handler does nothing (and does not crash) without a database', async () => {
+  const worker = (await import('../worker.mjs')).default;
+  await worker.scheduled({}, {}, {});
+});
