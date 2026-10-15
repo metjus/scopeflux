@@ -33,6 +33,8 @@ everything else on the site works.
    ]
    ```
 3. Create the tables: `npx wrangler d1 migrations apply scopeflux --remote`
+   (or paste the SQL into the D1 **Console** in the Cloudflare dashboard — remove the `--`
+   comments first, because the console joins everything into one line).
 4. Commit and push. After the deploy, the first market fills in within an hour or two; all eight
    markets within about half a day. Logs: Cloudflare dashboard → Workers → scopeflux → Logs.
 
