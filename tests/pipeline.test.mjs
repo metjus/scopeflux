@@ -187,3 +187,11 @@ test('the automatic tables are exactly the ones in the migration file', async ()
   SCHEMA_STATEMENTS.forEach(sql => auto.sqlite.exec(sql));
   assert.equal(describe(auto), describe(createFakeD1()));
 });
+
+test('topic page can ask for some sources only (fast ones first, GDELT later)', async () => {
+  const { fetcher, calls } = fakeFetcher();
+  const url = 'https://x/api/topic?key=en:Matcha&market=WW&days=30&sources=wikipedia,hackernews';
+  const body = await (await topicResponse(new Request(url), {}, { fetcher, now: NOW })).json();
+  assert.deepEqual(Object.keys(body.sources), ['wikipedia', 'hackernews']);
+  assert.ok(!calls.some(u => u.includes('gdeltproject')));
+});

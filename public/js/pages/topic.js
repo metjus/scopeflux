@@ -58,20 +58,16 @@ async function load() {
   $('#topic-table tbody').innerHTML = '';
   $('#topic-save').disabled = true;
   $('#topic-export').disabled = true;
-  const query = new URLSearchParams({ market: params.market, days: String(days) });
-  if (params.key) query.set('key', params.key);
-  else query.set('q', params.q);
-  if (params.title) query.set('title', params.title);
+  // Wikipedia and Hacker News answer in about a second; GDELT can take 30.
+  // Ask separately so the fast lines appear first and GDELT is drawn when ready.
   try {
-    const response = await fetch('/api/topic?' + query);
-    const body = await response.json().catch(() => ({}));
+    const fast = await fetchTopic(['wikipedia', 'hackernews']);
     if (version !== loadVersion) return;
-    if (!response.ok) throw new Error(body.error || 'This topic could not be loaded.');
-    data = body;
+    data = { ...fast, sources: { ...fast.sources, gdelt: { status: 'loading' } } };
     // A search (?q=) becomes a stable link to the matched topic.
-    if (!params.key && body.key) {
-      params.key = body.key;
-      history.replaceState(null, '', topicLink(body.key, params.market, body.title));
+    if (!params.key && fast.key) {
+      params.key = fast.key;
+      history.replaceState(null, '', topicLink(fast.key, params.market, fast.title));
     }
     render();
   } catch (error) {
@@ -82,7 +78,33 @@ async function load() {
       esc(error.message) +
       '</p><button type="button" class="btn" id="topic-retry">Try again</button></div>';
     $('#topic-retry').addEventListener('click', load);
+    return;
   }
+  let news;
+  try {
+    news = (await fetchTopic(['gdelt'])).sources.gdelt;
+  } catch {
+    news = { status: 'unavailable', message: 'GDELT could not be reached.' };
+  }
+  if (version !== loadVersion) return;
+  data.sources.gdelt = news;
+  render();
+}
+
+// GET /api/topic for some of the sources. Throws a readable Error on failure.
+async function fetchTopic(sources) {
+  const query = new URLSearchParams({
+    market: params.market,
+    days: String(days),
+    sources: sources.join(','),
+  });
+  if (params.key) query.set('key', params.key);
+  else query.set('q', params.q);
+  if (params.title) query.set('title', params.title);
+  const response = await fetch('/api/topic?' + query);
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error || 'This topic could not be loaded.');
+  return body;
 }
 
 const titleFromKey = key =>
@@ -182,7 +204,13 @@ function renderLegend() {
   $('#topic-legend').innerHTML = LINES.map(key => {
     const status = data.sources[key]?.status;
     const ok = status === 'ok';
-    const label = ok ? '' : status === 'unavailable' ? ' · not responding' : ' · no data';
+    const label = ok
+      ? ''
+      : status === 'loading'
+        ? ' · loading…'
+        : status === 'unavailable'
+          ? ' · not responding'
+          : ' · no data';
     return (
       '<button type="button" data-source="' +
       key +
@@ -405,7 +433,11 @@ function renderTable() {
       : source.status === 'unavailable'
         ? '<span class="status-down">Not responding</span>'
         : '<span class="status-missing">' +
-          (source.status === 'no-article' ? 'No article' : 'No data') +
+          (source.status === 'no-article'
+            ? 'No article'
+            : source.status === 'loading'
+              ? 'Loading…'
+              : 'No data') +
           '</span>';
   $('#topic-table tbody').innerHTML = LINES.map(key => {
     const source = data.sources[key];

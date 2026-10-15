@@ -61,7 +61,9 @@ Every request: timeout, response size limit, `User-Agent: ScopeFlux/1.0
   codes are FIPS, not ISO (Slovakia is `LO`, Germany `GM`). Names live in `lib/config.mjs`.
   Characters GDELT treats as operators (`:` `(` …) are removed; multi-word names are quoted;
   names under 3 characters are not searched. Plain-text answers mean "no data". The pipeline
-  waits 5.5 s between GDELT calls (third-party docs say 1 request per 5 s).
+  waits 5.5 s between GDELT calls (third-party docs say 1 request per 5 s). GDELT often needs
+  10–20 s to answer, so its timeout is 30 s (`GDELT_TIMEOUT_MS`); a "please limit requests" text
+  answer counts as rate limiting. The topic page loads GDELT separately so it never delays the others.
 - **Notes:** GDELT asks clients to keep request rates low — find the current
   guidance and throttle to it. Multi-word topics need quotes. Very short or very
   common words may be rejected; treat that as "no data", not a crash.

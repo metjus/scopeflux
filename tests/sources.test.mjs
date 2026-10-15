@@ -84,3 +84,13 @@ test('Wikipedia top lists skip non-articles; climbers need a real jump', async (
     ['Godot_(game_engine)'],
   );
 });
+
+test('GDELT "please limit requests" text counts as rate limiting, not "no data"', async () => {
+  const fetcher = async () =>
+    new Response('Please limit requests to one every 5 seconds or contact kalev.leetaru5@gmail.com.', {
+      status: 200,
+    });
+  await assert.rejects(gdelt.getDailySeries(topic, 'US', 14, { fetcher, now: NOW }), {
+    code: 'RATE_LIMITED',
+  });
+});
