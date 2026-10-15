@@ -195,3 +195,51 @@ test('topic page can ask for some sources only (news is loaded separately)', asy
   assert.deepEqual(Object.keys(body.sources), ['wikipedia', 'hackernews']);
   assert.ok(!calls.some(u => u.includes('news.google.com')));
 });
+
+test('GDELT-era results are not shown: their builds are closed and their markets rebuilt', async () => {
+  const env = { DB: createFakeD1() };
+  const { fetcher } = fakeFetcher();
+  await runPipelineStep(env, { now: NOW, fetcher, sleep: noSleep }); // creates the tables
+  const old = new Date(NOW - 3_600_000).toISOString();
+  await env.DB.batch([
+    env.DB.prepare('INSERT INTO snapshots (market, built_at, json) VALUES (?, ?, ?)').bind(
+      'US',
+      old,
+      JSON.stringify({
+        market: 'US',
+        sources: { gdelt: { status: 'ok' } },
+        rising: [],
+        early: [],
+      }),
+    ),
+    env.DB.prepare(
+      "INSERT INTO builds (build_id, market, started_at, status) VALUES (?, 'US', ?, 'done')",
+    ).bind('US|' + old, old),
+  ]);
+  // Hidden on Discover.
+  const discover = await (
+    await discoverResponse(new Request('https://x/api/discover?market=US'), env)
+  ).json();
+  assert.equal(discover.snapshot, null);
+
+  // A running build that already measured with GDELT is closed without a snapshot.
+  const running = await env.DB.prepare("SELECT build_id FROM builds WHERE status = 'evaluating'").first();
+  await env.DB.prepare("UPDATE candidates SET status = 'done', result = ? WHERE build_id = ?")
+    .bind(JSON.stringify({ perSource: { gdelt: {} } }), running.build_id)
+    .run();
+  const closed = await runPipelineStep(env, {
+    now: NOW,
+    fetcher,
+    sleep: noSleep,
+  });
+  assert.equal(closed.action, 'closed-outdated');
+
+  // US was built an hour ago, but with GDELT, so it is due again right away.
+  const next = await runPipelineStep(env, {
+    now: NOW,
+    fetcher,
+    sleep: noSleep,
+  });
+  assert.equal(next.action, 'collected');
+  assert.equal(next.market, 'US');
+});
