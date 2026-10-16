@@ -9,6 +9,7 @@ import {
 import { PAGES } from '../lib/navigation';
 import type { PageId } from '../lib/navigation';
 import styles from './site-navigation.module.css';
+import { BrandMark } from './brand-mark';
 
 const PAGE_ICONS = {
   discover: Globe2,
@@ -92,9 +93,9 @@ export default function SiteNavigation({
       }}
     >
       <div className={styles.header}>
-        <a className={styles.brand} href="#discover" aria-label="DomainRadar home" onClick={event => followLink(event, 'discover')}>
-          <span className={styles.brandIcon}><Radar size={24} aria-hidden="true" /></span>
-          <span>Domain<span className={styles.brandAccent}>Radar</span></span>
+        <a className={styles.brand} href="#discover" aria-label="ScopeFlux home" onClick={event => followLink(event, 'discover')}>
+          <span className={styles.brandIcon}><BrandMark size={24} /></span>
+          <span>Scope<span className={styles.brandAccent}>Flux</span></span>
         </a>
         <button
           ref={toggle}

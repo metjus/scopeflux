@@ -7,6 +7,7 @@ const {env, createDatabase} = require('./helpers/runtime.cjs');
 const {feedParts, readSavedFeed} = require('../lib/catalog-store.ts');
 const {saveCatalogFeed} = require('../lib/catalog-history.ts');
 const routes = require('../app/api/domains/route.ts');
+const {isUpcomingDate} = require('../lib/release-time.ts');
 const catalogue = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/catalogue.json')));
 const history = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/history.json')));
 test('complete exported SQL imports and reimports within D1 row/statement limits', () => {
@@ -30,7 +31,9 @@ test('large feeds survive chunked updates, reads, source failures and shrinking 
   const saved = await readSavedFeed(env.DB, 'sk');
   assert.deepEqual(JSON.parse(saved.records), records);
   const api = await (await routes.GET(new Request('https://example.test/api/domains?cached=1&tlds=sk'))).json();
-  assert.deepEqual(api.records, records);
+  // The saved-catalogue API leaves out releases whose date has passed, so only
+  // compare the records that are still upcoming today (the seed ages daily).
+  assert.deepEqual(api.records, records.filter(row => isUpcomingDate(row.drop)));
   await saveCatalogFeed(env.DB, 'sk', records.slice(0, 5), new Date(Date.now() + 1000).toISOString());
   assert.equal(JSON.parse((await readSavedFeed(env.DB, 'sk')).records).length, 5);
   assert.equal((await env.DB.prepare('SELECT COUNT(*) AS count FROM catalog_feed_parts').first()).count, 0);

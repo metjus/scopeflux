@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="18" fill="#121b17"/><circle cx="32" cy="32" r="20" fill="none" stroke="#b8f67d" stroke-width="3"/><circle cx="32" cy="32" r="10" fill="none" stroke="#b8f67d" stroke-width="2"/><path d="M32 32L46 18" stroke="#b8f67d" stroke-width="4"/><circle cx="32" cy="32" r="3" fill="#b8f67d"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- ScopeFlux mark (same drawing as app/brand-mark.tsx), on a dark tile -->
+  <defs>
+    <linearGradient id="g" x1="2" y1="4" x2="22" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c2b0ff"/>
+      <stop offset="1" stop-color="#7ee1ce"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#1b1830"/>
+  <g transform="translate(8 8) scale(2)" fill="none">
+    <circle cx="12" cy="12" r="8.5" stroke="url(#g)" stroke-width="1.8" opacity=".55"/>
+    <path d="M1.8 13.2c2.6 0 3.4-5.4 6.1-5.4s3.3 8.6 6.1 8.6 3.4-4.4 6.2-4.4h1.9" stroke="url(#g)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="14" cy="16.4" r="1.6" fill="#7ee1ce"/>
+  </g>
+</svg>

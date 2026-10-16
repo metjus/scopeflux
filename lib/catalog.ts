@@ -1,3 +1,4 @@
+import {USER_AGENT,limitedText} from './http.ts';
 import {readSavedFeed,readSavedFeeds,feedParts} from './catalog-store.ts';
 import type {DomainRecord} from './domains';
 import {saveCatalogFeed,archiveStatement,recentCatalog} from './catalog-history.ts';
@@ -50,10 +51,10 @@ async function feed(tld:string,page=1){
  const url=tld==='sk'?'https://www.backorder.sk/zadrzane':DYNA[tld]?`https://www.dynadot.com/market/backorder?${DYNA[tld]}=${tld}&page_size=100&order_by=3&page_index=${page}`:`https://backorder.com/en/pending-delete/${tld}`;
  const checkedAt=new Date().toISOString();
  if(page>1&&!DYNA[tld])return {records:[],feed:{tld,source,url,loaded:0,more:false,limited:tld!=='sk',checkedAt}};
- const response=await fetch(url,{headers:{Accept:'text/html'},signal:AbortSignal.timeout(16000)});
+ const response=await fetch(url,{headers:{Accept:'text/html','User-Agent':USER_AGENT},signal:AbortSignal.timeout(16000)});
  if(!response.ok){const delay=Number(response.headers.get('Retry-After'))||60;throw new FeedSourceError(response.status===429?'The source is rate-limiting requests. Please wait before loading another page.':'Source unavailable ('+response.status+').',response.status===429?Math.max(1,Math.min(3600,delay)):undefined);}
  if(response.url.includes('/login'))throw new FeedSourceError('The source requires an account for this page.');
- const html=await response.text();
+ const html=await limitedText(response,10_000_000);
  const all=tld==='sk'?parseSkDrops(html,checkedAt):DYNA[tld]?parseDynadot(html,tld,checkedAt):parseCountryDrops(html,tld,checkedAt);
  if(!all.length)throw new FeedSourceError('The source returned no readable listings.');
  const records=all.filter(r=>isUpcomingDate(r.drop));

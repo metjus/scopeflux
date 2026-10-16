@@ -34,3 +34,10 @@ test('visitors see a plain sentence, not a raw fetch error', () => {
     console.error = quiet;
   }
 });
+
+test('source answers are read only up to a size limit, and requests name ScopeFlux', async () => {
+  const {limitedText, USER_AGENT} = await import('../lib/http.ts');
+  assert.match(USER_AGENT, /https:\/\/scopeflux\.io/);
+  assert.equal(await limitedText(new Response('small answer'), 100), 'small answer');
+  await assert.rejects(limitedText(new Response('x'.repeat(200)), 100), /too large/);
+});

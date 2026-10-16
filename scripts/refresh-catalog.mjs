@@ -1,4 +1,5 @@
 import {parseCountryDrops} from '../lib/catalog.ts';
+import {USER_AGENT, limitedText} from '../lib/http.ts';
 import {parsePublicHistory, PUBLIC_HISTORY_TLDS, publicHistoryUrl} from '../lib/public-history.ts';
 
 async function refresh({origin, token}) {
@@ -8,9 +9,9 @@ async function refresh({origin, token}) {
   const feeds = [], historyFeeds = [];
   async function preview(tld, url, history = false) {
     try {
-      const response = await fetch(url, {signal: AbortSignal.timeout(20000)});
+      const response = await fetch(url, {headers: {'User-Agent': USER_AGENT}, signal: AbortSignal.timeout(20000)});
       if (!response.ok || response.url.includes('/login')) throw new Error('Public preview unavailable (' + response.status + ').');
-      const html = await response.text(), checkedAt = new Date().toISOString();
+      const html = await limitedText(response, 5_000_000), checkedAt = new Date().toISOString();
       const records = history ? parsePublicHistory(html, tld, response.headers.get('Date'), checkedAt) : parseCountryDrops(html, tld, checkedAt);
       if (!records.length) throw new Error('No readable public records with reliable source dates.');
       (history ? historyFeeds : feeds).push({tld, records, checkedAt});
