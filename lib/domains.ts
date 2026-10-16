@@ -1,3 +1,4 @@
+import {USER_AGENT,limitedText} from './http.ts';
 import {parseBackorderDetail} from './backorder-detail.ts';
 export const TLDS=['sk','cz','com','net','org','eu','ai','io','dev','app'];
 export type ReportedDrop={at:string;label:string;sourceDate:string;source:string;url:string;checkedAt:string};
@@ -18,7 +19,7 @@ class RegistrySourceError extends Error {
  constructor(status:number,message:string){super(message);this.status=status;}
 }
 async function get(url:string,accept='application/json'){
- const res=await fetch(url,{headers:{Accept:accept},signal:AbortSignal.timeout(14000)});
+ const res=await fetch(url,{headers:{Accept:accept,'User-Agent':USER_AGENT},signal:AbortSignal.timeout(14000)});
  if(!res.ok)throw new RegistrySourceError(res.status,res.status===404?'The registry did not find a record. Confirm availability with a registrar.':res.status===429?'The registry has limited requests. Please try again later.':'The source is currently unavailable ('+res.status+').');
  return res;
 }
@@ -34,19 +35,19 @@ export async function lookup(input:string):Promise<DomainRecord>{
  const domain=normalizeDomain(input),tld=domain.split('.').pop()!,checkedAt=new Date().toISOString();
  if(tld==='sk'){
  const sourceUrl='https://www.backorder.sk/domena/'+domain;
- const html=await(await get(sourceUrl,'text/html')).text();
+ const html=await limitedText(await get(sourceUrl,'text/html'),5_000_000);
  return parseBackorderDetail(html,domain,checkedAt);
  }
  let base:string|undefined;
  if(tld==='ai')base='https://rdap.identitydigital.services/rdap/';
  else{
-  if(!bootstrap||Date.now()-bootstrap.at>86400000){const data=await(await get('https://data.iana.org/rdap/dns.json')).json() as {services:BootstrapService[]};bootstrap={at:Date.now(),services:data.services};}
+  if(!bootstrap||Date.now()-bootstrap.at>86400000){const data=JSON.parse(await limitedText(await get('https://data.iana.org/rdap/dns.json'),2_000_000)) as {services:BootstrapService[]};bootstrap={at:Date.now(),services:data.services};}
   base=rdapServiceBase(bootstrap.services,domain);
  }
  if(!base)return {domain,tld,status:'Unverified',expiration:null,drop:null,source:'IANA · Registry directory',sourceUrl:'https://www.iana.org/domains/root/db/'+tld+'.html',checkedAt,note:'No public RDAP service is listed for this ending. Use the registry reference to find its lookup service. This does not confirm whether the domain is registered or available.'};
  const sourceUrl=base.replace(/\/?$/,'/')+'domain/'+encodeURIComponent(domain);
  let data:RdapDomain;
- try{data=await(await get(sourceUrl)).json() as RdapDomain;}
+ try{data=JSON.parse(await limitedText(await get(sourceUrl),2_000_000)) as RdapDomain;}
  catch(error){if(error instanceof RegistrySourceError&&error.status===404)return {domain,tld,status:'Unverified',expiration:null,drop:null,source:'Registry · RDAP',sourceUrl,checkedAt,note:'The registry returned no record for this name. It may be unavailable, reserved, a subdomain, or not registered. A missing record does not confirm availability; check with a registrar.'};throw error;}
  const returnedName=data.ldhName||data.unicodeName;
  if(data.objectClassName!=='domain'||!returnedName||normalizeDomain(returnedName)!==domain)throw new Error('The registry did not return a matching domain record. Please confirm with its lookup service.');

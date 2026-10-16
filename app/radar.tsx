@@ -195,7 +195,7 @@ export default function Radar({signedIn}:{signedIn:boolean}){
  async function remove(name:string){setBusy(name);try{await api('/api/watchlist',json({domain:name},'DELETE'));setSaved(old=>old.filter(x=>x.domain!==name));notify('The domain was removed from your watchlist.')}catch(e){notify((e as Error).message)}finally{setBusy('')}}
  function exportCsv(){
    const url=URL.createObjectURL(new Blob([catalogueCsv(shown)],{type:'text/csv;charset=utf-8'}));
-   const link=document.createElement('a');link.href=url;link.download='domainradar.csv';link.click();
+   const link=document.createElement('a');link.href=url;link.download='scopeflux-domains.csv';link.click();
    setTimeout(()=>URL.revokeObjectURL(url),1000);
  }
 
@@ -223,7 +223,7 @@ export default function Radar({signedIn}:{signedIn:boolean}){
  {!watch&&!recent&&feeds.some(f=>f.stored)&&<p className="preview-note">Last successful source update: {new Date(Math.min(...feeds.filter(f=>f.stored).map(f=>new Date(f.checkedAt).getTime()))).toLocaleString('en-GB')}. Saved listings remain available if a source cannot be reached.</p>}
  <div className="coverage"><span className="green-dot"/><span>{watch?'Checks on opening the page and on request.':recent?'Deletion reports and past estimates · current availability is not confirmed.':'Release estimates from source lists · not guaranteed availability.'}</span><button onClick={()=>navigate('sources')}>Data coverage <ArrowRight size={14}/></button></div></section></div></>}
  {!informational&&!watch&&<AdSlot placement="bottom"/>}
- <footer><span>DomainRadar <span className="foot-dot">/</span> Good names are worth watching.</span><button onClick={()=>navigate('sources')}>How to read the data <ArrowUpRight size={14}/></button></footer></main></div>
+ <footer><span>ScopeFlux <span className="foot-dot">/</span> Good names are worth watching.</span><button onClick={()=>navigate('sources')}>How to read the data <ArrowUpRight size={14}/></button></footer></main></div>
  <dialog ref={dialog} aria-labelledby="domain-detail-title" onCancel={closeDetail} onClick={e=>{if(e.target===dialog.current)closeDetail()}}>{detail&&detailPremium&&<DomainDetails record={detail} premium={detailPremium} saved={saved.some(x=>x.domain===detail.domain)} busy={!!busy||checkingDomain} checking={checkingDomain} archived={recent} releaseCountdown={timeLeft(detail)} onClose={closeDetail} onSave={()=>save(detail.domain)}/>}</dialog>
  {toast&&<div className="toast" role="status"><Info size={18}/><span>{toast}</span><button aria-label="Dismiss notification" onClick={()=>setToast('')}><X size={17}/></button></div>}</div>
 }

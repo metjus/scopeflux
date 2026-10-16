@@ -4,7 +4,7 @@ export const PAGES = [
   { id: 'watch', label: 'Watchlist', description: 'Follow your saved domain names' },
   { id: 'lookup', label: 'Check domain', description: 'Look up a specific domain name' },
   { id: 'sources', label: 'Sources', description: 'Providers, updates and coverage' },
-  { id: 'about', label: 'About', description: 'Get to know DomainRadar' },
+  { id: 'about', label: 'About', description: 'Get to know ScopeFlux' },
 ] as const;
 
 export type PageId = (typeof PAGES)[number]['id'];
