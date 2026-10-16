@@ -109,3 +109,11 @@ test('every page has its own address, and old #links still open the right page',
   }
   assert.ok(SITE_DESCRIPTION.length <= 300);
 });
+
+test('every share image has alt text', () => {
+  const {pageMetadata, PAGE_SEO} = require('../lib/seo.ts');
+  for (const id of Object.keys(PAGE_SEO)) {
+    const meta = pageMetadata(id);
+    for (const image of [...meta.openGraph.images, ...meta.twitter.images]) assert.ok(image.alt && image.alt.length > 10, id);
+  }
+});
