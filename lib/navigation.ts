@@ -7,12 +7,20 @@ export const PAGES = [
   { id: 'about', label: 'About', description: 'Get to know ScopeFlux' },
 ] as const;
 
-export type PageId = (typeof PAGES)[number]['id'];
+// Shown as small links under the main navigation and in the footer.
+export const LEGAL_PAGES = [
+  { id: 'privacy', label: 'Privacy', description: 'What ScopeFlux stores and why' },
+  { id: 'contact', label: 'Contact', description: 'Get in touch' },
+] as const;
+
+const ALL_PAGES = [...PAGES, ...LEGAL_PAGES];
+
+export type PageId = (typeof ALL_PAGES)[number]['id'];
 
 export function pageFromHash(hash: string): PageId {
-  return PAGES.find(page => `#${page.id}` === hash)?.id ?? 'discover';
+  return ALL_PAGES.find(page => `#${page.id}` === hash)?.id ?? 'discover';
 }
 
 export function pageLabel(id: PageId): string {
-  return PAGES.find(page => page.id === id)!.label;
+  return ALL_PAGES.find(page => page.id === id)!.label;
 }

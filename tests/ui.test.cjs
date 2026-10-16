@@ -79,3 +79,17 @@ test('failed registration details show a known release with original retrieval a
   assert.match(html,/Release estimate retrieved/);
   assert.match(html,/15 Nov 2026/);
 });
+
+test('privacy and contact pages name the contact address and are linked from the navigation', () => {
+  const {PrivacyPage, ContactPage, CONTACT_EMAIL} = require('../app/info-pages.tsx');
+  const {LEGAL_PAGES, pageFromHash} = require('../lib/navigation.ts');
+  assert.equal(CONTACT_EMAIL, 'hello@scopeflux.io');
+  const privacy = renderToStaticMarkup(React.createElement(PrivacyPage));
+  assert.match(privacy, /mailto:hello@scopeflux\.io/);
+  assert.match(privacy, /no analytics, advertising or tracking cookies/);
+  assert.match(renderToStaticMarkup(React.createElement(ContactPage)), /mailto:hello@scopeflux\.io/);
+  const nav = renderToStaticMarkup(React.createElement(Navigation, {currentPage: 'privacy', watchCount: 0, onNavigate() {}}));
+  for (const page of LEGAL_PAGES) assert.ok(nav.includes('href="#' + page.id + '"'));
+  assert.equal((nav.match(/aria-current="page"/g) || []).length, 1);
+  assert.equal(pageFromHash('#contact'), 'contact');
+});
