@@ -28,6 +28,6 @@ export function pageMetadata(page: keyof typeof PAGE_SEO): Metadata {
     alternates: {canonical: path},
     // Next.js replaces (not merges) these objects per page, so each page carries them in full.
     openGraph: {title, description, url: path, type: 'website', siteName: SITE_NAME, locale: 'en_GB', images: [OG_IMAGE]},
-    twitter: {card: 'summary_large_image', title, description, images: [OG_IMAGE.url]},
+    twitter: {card: 'summary_large_image', title, description, images: [{url: OG_IMAGE.url, alt: OG_IMAGE.alt}]},
   };
 }
