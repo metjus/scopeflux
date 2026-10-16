@@ -38,6 +38,8 @@ export async function GET(request: Request) {
     const page = Math.max(1, Math.min(20, Math.floor(Number(params.get('page'))) || 1));
     return Response.json(await upcomingCatalog(tlds, page, env.DB));
   } catch (error) {
-    return Response.json({ error: (error as Error).message }, { status: 502 });
+    // Details go to the Worker log; visitors get a plain sentence.
+    console.error('domains API failed', { message: (error as Error)?.message });
+    return Response.json({ error: 'The domain list is temporarily unavailable. Please try again in a few minutes.' }, { status: 502 });
   }
 }

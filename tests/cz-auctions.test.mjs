@@ -48,3 +48,25 @@ test('the .cz list is fetched as JSON from CZ.NIC and its page is the one shown 
     globalThis.fetch = original;
   }
 });
+
+test('when the database refuses writes (e.g. the D1 daily limit), freshly fetched listings are still shown', async () => {
+  const {upcomingCatalog} = await import('../lib/catalog.ts');
+  const original = globalThis.fetch, quiet = console.error;
+  const future = new Date(Date.now() + 3 * 86400000).toISOString();
+  globalThis.fetch = async () => Response.json([{item_title: 'still-shown.cz', auction_from: future, auction_to: future}]);
+  console.error = () => {};
+  const limited = {
+    prepare: () => ({bind() {return this;}, first: async () => null, all: async () => ({results: []}), run: async () => ({})}),
+    batch: async () => {throw new Error('D1_ERROR: daily write limit exceeded');},
+  };
+  try {
+    const result = await upcomingCatalog(['cz'], 1, limited);
+    // (The fetch may be served from the 15-minute in-memory cache of the previous test.)
+    assert.equal(result.records.length, 1);
+    assert.match(result.records[0].domain, /\.cz$/);
+    assert.equal(result.feeds[0].error, undefined);
+  } finally {
+    globalThis.fetch = original;
+    console.error = quiet;
+  }
+});

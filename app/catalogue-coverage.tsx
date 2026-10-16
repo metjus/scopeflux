@@ -23,7 +23,10 @@ export default function CatalogueCoverage({records, feeds, tlds, recent, period}
         return <span key={tld}>.{tld} · {count.toLocaleString('en-GB')} {recent ? 'archived' : 'loaded'}</span>;
       })}</div>
       {recent && selected.some(tld => !records.some(record => record.tld === tld)) && <p>No saved past release observations for {selected.filter(tld => !records.some(record => record.tld === tld)).map(tld => '.' + tld).join(', ')} yet. This does not mean those domains are available.</p>}
-      {affected.length > 0 && <div className="source-warnings">{affected.map(feed => <p key={feed.tld}>.{feed.tld}: {feed.refreshError ? `Showing the last successful snapshot from ${new Date(feed.checkedAt).toLocaleString('en-GB')}. ` : ''}{feed.refreshError || feed.error}</p>)}</div>}
+      {affected.length > 0 && <details className="source-warnings">
+        <summary>{affected.some(feed => feed.error && !feed.refreshError) ? 'Some lists could not be loaded right now.' : 'Some lists could not be refreshed; saved listings are shown.'} Details</summary>
+        {affected.map(feed => <p key={feed.tld}>.{feed.tld}: {feed.refreshError ? `Showing the last successful snapshot from ${new Date(feed.checkedAt).toLocaleString('en-GB')}. ` : ''}{feed.refreshError || feed.error}</p>)}
+      </details>}
     </div>
   );
 }
