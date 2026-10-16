@@ -1,4 +1,5 @@
 import {USER_AGENT,limitedText} from './http.ts';
+import {recordOk,recordError} from './status-log.ts';
 import {readSavedFeed,readSavedFeeds} from './catalog-store.ts';
 import type {DomainRecord} from './domains';
 import {saveCatalogFeed,archiveDue,recentCatalog} from './catalog-history.ts';
@@ -102,13 +103,15 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):P
    if(age<900000)return storedFeed(tld,saved);
   }}
  const result=await feed(tld,page);
+ if(db)await recordOk(db,'feed:'+tld);
  // Storage problems (e.g. the D1 daily limit) must not hide listings that were just fetched.
  try{
   if(db&&page===1)await saveCatalogFeed(db,tld,result.records,result.feed.checkedAt,result.observed||result.records);
   else if(db&&result.records.length){const due=archiveDue(db,result.observed||result.records);if(due.length)await db.batch(due);}
- }catch(error){logStorageError(error);}
+ }catch(error){logStorageError(error);await recordError(db,'storage',error);}
  return result;
  }catch(e){
+ if(db)await recordError(db,'feed:'+tld,e);
  if(db&&page===1){try{const saved=await readSavedFeed(db,tld);if(saved)return storedFeed(tld,saved,publicFeedError(e));}catch{}}
  return {records:[],feed:{tld,source:feedSource(tld),url:feedPage(tld),loaded:0,more:false,limited:false,checkedAt:new Date().toISOString(),error:publicFeedError(e),retryAfter:e instanceof FeedSourceError?e.retryAfter:undefined}}}}));
  return {records:results.flatMap(r=>r.records),feeds:results.map(r=>r.feed)};
