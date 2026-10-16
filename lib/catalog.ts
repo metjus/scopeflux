@@ -5,7 +5,7 @@ import {saveCatalogFeed,archiveStatement,recentCatalog} from './catalog-history.
 import {isUpcomingDate,releaseTimestamp} from './release-time.ts';
 // .ai and .eu were dropped: their only source (Backorder.com) blocks Worker
 // requests and needed an external scraper. They can still be checked one by one.
-export const CATALOG_TLDS=['sk','com','net','org','io','app'];
+export const CATALOG_TLDS=['sk','cz','com','net','org','io','app'];
 const DYNA:Record<string,string>={com:'tld_0',net:'tld_10',org:'tld_3',io:'tld_8',app:'tld_11'};
 export type FeedInfo={tld:string;source:string;url:string;loaded:number;more:boolean;limited:boolean;checkedAt:string;error?:string;stored?:boolean;refreshError?:string;retryAfter?:number};
 export type CatalogResult={records:DomainRecord[];feeds:FeedInfo[]};
@@ -21,7 +21,20 @@ export function publicFeedError(error:unknown):string{
  console.error('catalogue source failed',{message:(error as Error)?.message});
  return (error as Error)?.name==='TimeoutError'?'The source did not answer in time.':'The source could not be reached right now.';
 }
-function valid(name:string,tld:string){return new RegExp('^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.'+tld+'$','i').test(name);}
+// .cz comes from the registry itself: CZ.NIC publishes the expired domains that
+// enter its public auction (about 15 days ahead) as JSON, linked from its page.
+const CZ_AUCTIONS_JSON='https://auctions-master.nic.cz/share/new_auctions.json';
+const CZ_AUCTIONS_PAGE='https://www.domenovyprohlizec.cz/cs/aukce-domen/';
+// Who publishes each extension's list, and the page a visitor can open.
+function feedSource(tld:string){return tld==='sk'?'Backorder.sk':tld==='cz'?'CZ.NIC':DYNA[tld]?'Dynadot':'Backorder.com';}
+function feedPage(tld:string){return tld==='sk'?'https://www.backorder.sk/zadrzane':tld==='cz'?CZ_AUCTIONS_PAGE:DYNA[tld]?'https://www.dynadot.com/market/backorder':'https://backorder.com/en/pending-delete/'+tld;}
+// One compiled pattern per extension: feeds check thousands of names at a time.
+const NAME_PATTERNS=new Map<string,RegExp>();
+function valid(name:string,tld:string){
+ let pattern=NAME_PATTERNS.get(tld);
+ if(!pattern){pattern=new RegExp('^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.'+tld+'$','i');NAME_PATTERNS.set(tld,pattern);}
+ return pattern.test(name);
+}
 function record(domain:string,drop:string,source:string,sourceUrl:string,checkedAt:string):DomainRecord{return {domain,tld:domain.split('.').pop()!,status:'Expected release',expiration:null,drop,source,sourceUrl,checkedAt,availabilitySource:source,availabilityUrl:sourceUrl,note:'This is the release estimate published by the source, not a guarantee of availability. The holder may restore the domain or a drop-catching service may register it immediately. Date-only estimates do not specify a release hour.'};}
 export function parseSkDrops(html:string,checkedAt=new Date().toISOString()):DomainRecord[]{
  const out:DomainRecord[]=[];
@@ -29,6 +42,24 @@ export function parseSkDrops(html:string,checkedAt=new Date().toISOString()):Dom
  const date=`${m[4]}-${m[3].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
  if(valid(m[1],'sk')&&Number.isFinite(releaseTimestamp(date)))out.push(record(m[1].toLowerCase(),date,'Backorder.sk','https://www.backorder.sk/domena/'+m[1].toLowerCase(),checkedAt));
  }return out;
+}
+// CZ.NIC auction list: [{item_title, auction_from, auction_to}] with UTC times.
+// The record's date is when bidding opens; unsold names are released the day after.
+export function parseCzAuctions(json:string,checkedAt=new Date().toISOString()):DomainRecord[]{
+ let items:unknown;
+ try{items=JSON.parse(json);}catch{throw new FeedSourceError('CZ.NIC returned an unreadable auction list.');}
+ if(!Array.isArray(items))throw new FeedSourceError('CZ.NIC returned an unexpected auction list.');
+ const out:DomainRecord[]=[];
+ for(const item of items as Array<{item_title?:unknown;auction_from?:unknown;auction_to?:unknown}>){
+  const name=typeof item?.item_title==='string'?item.item_title.toLowerCase():'';
+  const from=Date.parse(String(item?.auction_from)),to=Date.parse(String(item?.auction_to));
+  if(!valid(name,'cz')||!Number.isFinite(from))continue;
+  // Kept short: thousands of these are stored; the status text explains the rest.
+  const ends=Number.isFinite(to)?' Bidding ends '+new Date(to).toISOString().slice(0,16).replace('T',' ')+' UTC.':'';
+  out.push({...record(name,new Date(from).toISOString(),'CZ.NIC',CZ_AUCTIONS_PAGE,checkedAt),status:'Registry auction',
+   note:'CZ.NIC auction: bidding opens at the time shown.'+ends+' Unsold names are released the day after.'});
+ }
+ return out;
 }
 export function parseCountryDrops(html:string,tld:string,checkedAt=new Date().toISOString()):DomainRecord[]{
  const out:DomainRecord[]=[];const body=html.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i)?.[1]??'';
@@ -49,18 +80,18 @@ export function parseDynadot(html:string,tld:string,checkedAt=new Date().toISOSt
 }
 async function feed(tld:string,page=1){
  const key=tld+':'+page,old=cache.get(key);if(old&&Date.now()-old.at<900000){const records=old.data.records.filter(r=>isUpcomingDate(r.drop));return {...old.data,records,feed:{...old.data.feed,loaded:records.length}};}
- const source=tld==='sk'?'Backorder.sk':DYNA[tld]?'Dynadot':'Backorder.com';
- const url=tld==='sk'?'https://www.backorder.sk/zadrzane':DYNA[tld]?`https://www.dynadot.com/market/backorder?${DYNA[tld]}=${tld}&page_size=100&order_by=3&page_index=${page}`:`https://backorder.com/en/pending-delete/${tld}`;
+ const source=feedSource(tld);
+ const url=tld==='sk'||tld==='cz'?feedPage(tld):DYNA[tld]?`https://www.dynadot.com/market/backorder?${DYNA[tld]}=${tld}&page_size=100&order_by=3&page_index=${page}`:`https://backorder.com/en/pending-delete/${tld}`;
  const checkedAt=new Date().toISOString();
  if(page>1&&!DYNA[tld])return {records:[],feed:{tld,source,url,loaded:0,more:false,limited:tld!=='sk',checkedAt}};
- const response=await fetch(url,{headers:{Accept:'text/html','User-Agent':USER_AGENT},signal:AbortSignal.timeout(16000)});
+ const response=await fetch(tld==='cz'?CZ_AUCTIONS_JSON:url,{headers:{Accept:tld==='cz'?'application/json':'text/html','User-Agent':USER_AGENT},signal:AbortSignal.timeout(16000)});
  if(!response.ok){const delay=Number(response.headers.get('Retry-After'))||60;throw new FeedSourceError(response.status===429?'The source is rate-limiting requests. Please wait before loading another page.':'Source unavailable ('+response.status+').',response.status===429?Math.max(1,Math.min(3600,delay)):undefined);}
  if(response.url.includes('/login'))throw new FeedSourceError('The source requires an account for this page.');
  const html=await limitedText(response,10_000_000);
- const all=tld==='sk'?parseSkDrops(html,checkedAt):DYNA[tld]?parseDynadot(html,tld,checkedAt):parseCountryDrops(html,tld,checkedAt);
+ const all=tld==='sk'?parseSkDrops(html,checkedAt):tld==='cz'?parseCzAuctions(html,checkedAt):DYNA[tld]?parseDynadot(html,tld,checkedAt):parseCountryDrops(html,tld,checkedAt);
  if(!all.length)throw new FeedSourceError('The source returned no readable listings.');
  const records=all.filter(r=>isUpcomingDate(r.drop));
- const data={records,observed:all,feed:{tld,source,url,loaded:records.length,more:page<20&&!!DYNA[tld]&&all.length>=100,limited:!DYNA[tld]&&tld!=='sk',checkedAt}};
+ const data={records,observed:all,feed:{tld,source,url,loaded:records.length,more:page<20&&!!DYNA[tld]&&all.length>=100,limited:!DYNA[tld]&&tld!=='sk'&&tld!=='cz',checkedAt}};
  cache.set(key,{at:Date.now(),data});if(cache.size>40)cache.delete(cache.keys().next().value!);return data;
 }
 export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):Promise<CatalogResult>{
@@ -75,7 +106,7 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):P
  return result;
  }catch(e){
  if(db&&page===1){try{const saved=await readSavedFeed(db,tld);if(saved)return storedFeed(tld,saved,publicFeedError(e));}catch{}}
- return {records:[],feed:{tld,source:tld==='sk'?'Backorder.sk':DYNA[tld]?'Dynadot':'Backorder.com',url:tld==='sk'?'https://www.backorder.sk/zadrzane':DYNA[tld]?'https://www.dynadot.com/market/backorder':'https://backorder.com/en/pending-delete/'+tld,loaded:0,more:false,limited:tld==='ai'||tld==='eu',checkedAt:new Date().toISOString(),error:publicFeedError(e),retryAfter:e instanceof FeedSourceError?e.retryAfter:undefined}}}}));
+ return {records:[],feed:{tld,source:feedSource(tld),url:feedPage(tld),loaded:0,more:false,limited:false,checkedAt:new Date().toISOString(),error:publicFeedError(e),retryAfter:e instanceof FeedSourceError?e.retryAfter:undefined}}}}));
  return {records:results.flatMap(r=>r.records),feeds:results.map(r=>r.feed)};
 }
 
@@ -107,7 +138,7 @@ export async function savedCatalog(db:D1Database,tlds=CATALOG_TLDS):Promise<Cata
 function storedFeed(tld:string,saved:{records:string;checked_at:string},refreshError?:string){
  const observed=JSON.parse(saved.records) as DomainRecord[];
  const records=observed.filter(r=>isUpcomingDate(r.drop));
- return {records,feed:{tld,source:tld==='sk'?'Backorder.sk':DYNA[tld]?'Dynadot':'Backorder.com',url:tld==='sk'?'https://www.backorder.sk/zadrzane':DYNA[tld]?'https://www.dynadot.com/market/backorder':'https://backorder.com/en/pending-delete/'+tld,loaded:records.length,more:!!DYNA[tld]&&observed.length>=100,limited:!DYNA[tld]&&tld!=='sk',checkedAt:saved.checked_at,stored:true,refreshError}};
+ return {records,feed:{tld,source:feedSource(tld),url:feedPage(tld),loaded:records.length,more:!!DYNA[tld]&&observed.length>=100,limited:!DYNA[tld]&&tld!=='sk'&&tld!=='cz',checkedAt:saved.checked_at,stored:true,refreshError}};
 }
 
 export async function recentReleaseCatalog(db:D1Database,tlds=CATALOG_TLDS){
