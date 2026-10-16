@@ -1,5 +1,5 @@
 import handler from 'vinext/server/fetch-handler';
-import {identify, identityRequest, isRefreshAuthorized, teamOrigin} from './lib/access';
+import {identify, identityRequest, teamOrigin} from './lib/access';
 import {upcomingCatalog, CATALOG_TLDS} from './lib/catalog';
 import {recentCatalog} from './lib/catalog-history';
 import {ensureSchema} from './lib/schema';
@@ -7,9 +7,6 @@ import {ensureSchema} from './lib/schema';
 export default {
   async fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext) {
     const url = new URL(request.url);
-    if (url.pathname === '/api/catalog-cache' && !await isRefreshAuthorized(request, env.CATALOG_REFRESH_TOKEN)) {
-      return Response.json({error: 'A valid catalogue refresh token is required.'}, {status: 401, headers: {'Cache-Control': 'no-store'}});
-    }
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
       const origin = request.headers.get('Origin');
       if (origin && origin !== url.origin) return Response.json({error: 'Cross-origin changes are not allowed.'}, {status: 403});

@@ -15,8 +15,7 @@
     "db:migrate": "wrangler d1 migrations apply DB --remote --config wrangler.json",
     "db:seed": "wrangler d1 execute DB --remote --config wrangler.json --file data/catalog-seed.sql",
     "check": "tsc --noEmit --incremental false",
-    "test": "node --experimental-strip-types --test tests/*.test.mjs tests/*.test.cjs",
-    "refresh": "node --experimental-strip-types scripts/refresh-catalog.mjs"
+    "test": "node --experimental-strip-types --test tests/*.test.mjs tests/*.test.cjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

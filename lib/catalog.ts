@@ -3,7 +3,9 @@ import {readSavedFeed,readSavedFeeds,feedParts} from './catalog-store.ts';
 import type {DomainRecord} from './domains';
 import {saveCatalogFeed,archiveStatement,recentCatalog} from './catalog-history.ts';
 import {isUpcomingDate,releaseTimestamp} from './release-time.ts';
-export const CATALOG_TLDS=['sk','ai','com','net','org','io','app','eu'];
+// .ai and .eu were dropped: their only source (Backorder.com) blocks Worker
+// requests and needed an external scraper. They can still be checked one by one.
+export const CATALOG_TLDS=['sk','com','net','org','io','app'];
 const DYNA:Record<string,string>={com:'tld_0',net:'tld_10',org:'tld_3',io:'tld_8',app:'tld_11'};
 export type FeedInfo={tld:string;source:string;url:string;loaded:number;more:boolean;limited:boolean;checkedAt:string;error?:string;stored?:boolean;refreshError?:string;retryAfter?:number};
 export type CatalogResult={records:DomainRecord[];feeds:FeedInfo[]};
@@ -65,8 +67,6 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):P
  const results=await Promise.all(tlds.filter(t=>CATALOG_TLDS.includes(t)).map(async tld=>{try{
  if(db&&page===1){const saved=await readSavedFeed(db,tld);if(saved){
    const age=Date.now()-new Date(saved.checked_at).getTime();
-   // Country previews are refreshed by the external updater: Worker requests are blocked by the provider.
-   if(tld==='ai'||tld==='eu')return storedFeed(tld,saved,age>2*3600000?'The hourly public preview refresh is overdue. Previous listings are preserved.':undefined);
    if(age<900000)return storedFeed(tld,saved);
   }}
  const result=await feed(tld,page);
