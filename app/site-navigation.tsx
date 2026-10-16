@@ -6,7 +6,7 @@ import {
   Activity, ArrowRight, ArrowUpRight, Bookmark, Globe2,
   History, Info, Menu, Radar, Search, X,
 } from 'lucide-react';
-import { LEGAL_PAGES, PAGES } from '../lib/navigation';
+import { LEGAL_PAGES, PAGES, pagePath } from '../lib/navigation';
 import type { PageId } from '../lib/navigation';
 import styles from './site-navigation.module.css';
 import { BrandMark } from './brand-mark';
@@ -93,7 +93,7 @@ export default function SiteNavigation({
       }}
     >
       <div className={styles.header}>
-        <a className={styles.brand} href="#discover" aria-label="ScopeFlux home" onClick={event => followLink(event, 'discover')}>
+        <a className={styles.brand} href="/" aria-label="ScopeFlux home" onClick={event => followLink(event, 'discover')}>
           <span className={styles.brandIcon}><BrandMark size={24} /></span>
           <span>Scope<span className={styles.brandAccent}>Flux</span></span>
         </a>
@@ -119,7 +119,7 @@ export default function SiteNavigation({
             return (
               <a
                 key={page.id}
-                href={`#${page.id}`}
+                href={pagePath(page.id)}
                 className={styles.link}
                 aria-current={currentPage === page.id ? 'page' : undefined}
                 onClick={event => followLink(event, page.id)}
@@ -141,7 +141,7 @@ export default function SiteNavigation({
           <Radar size={41} aria-hidden="true" />
           <strong>A good name has its moment.</strong>
           <p>Save the domains you like and follow what changes.</p>
-          <a href="#watch" onClick={event => followLink(event, 'watch')}>
+          <a href={pagePath('watch')} onClick={event => followLink(event, 'watch')}>
             Build your watchlist <ArrowRight size={15} aria-hidden="true" />
           </a>
         </div>
@@ -150,7 +150,7 @@ export default function SiteNavigation({
           {LEGAL_PAGES.map(page => (
             <a
               key={page.id}
-              href={`#${page.id}`}
+              href={pagePath(page.id)}
               aria-current={currentPage === page.id ? 'page' : undefined}
               onClick={event => followLink(event, page.id)}
             >

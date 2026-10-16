@@ -7,7 +7,7 @@ const Pagination = require('../app/result-pagination.tsx').default;
 const Coverage = require('../app/catalogue-coverage.tsx').default;
 const Navigation = require('../app/site-navigation.tsx').default;
 const DomainLookup = require('../app/domain-lookup.tsx').default;
-const {PAGES} = require('../lib/navigation.ts');
+const {PAGES, pagePath} = require('../lib/navigation.ts');
 
 test('pagination renders all pages, correct range and available next/previous actions', () => {
   const props = {page: 2, totalPages: 3, start: 101, end: 200, total: 219, onPage() {}};
@@ -46,7 +46,7 @@ test('timestamp coverage dates follow local time, including releases after midni
 test('every menu destination has an accessible active link and the mobile disclosure has controls', () => {
   for (const page of PAGES) {
     const html = renderToStaticMarkup(React.createElement(Navigation, {currentPage: page.id, watchCount: 2, onNavigate() {}}));
-    for (const destination of PAGES) assert.ok(html.includes('href="#' + destination.id + '"'));
+    for (const destination of PAGES) assert.ok(html.includes('href="' + pagePath(destination.id) + '"'));
     assert.equal((html.match(/aria-current="page"/g) || []).length, 1);
     assert.match(html, /aria-controls="site-navigation-panel"/);
     assert.match(html, /aria-expanded="false"/);
@@ -89,7 +89,23 @@ test('privacy and contact pages name the contact address and are linked from the
   assert.match(privacy, /no analytics, advertising or tracking cookies/);
   assert.match(renderToStaticMarkup(React.createElement(ContactPage)), /mailto:hello@scopeflux\.io/);
   const nav = renderToStaticMarkup(React.createElement(Navigation, {currentPage: 'privacy', watchCount: 0, onNavigate() {}}));
-  for (const page of LEGAL_PAGES) assert.ok(nav.includes('href="#' + page.id + '"'));
+  for (const page of LEGAL_PAGES) assert.ok(nav.includes('href="/' + page.id + '"'));
   assert.equal((nav.match(/aria-current="page"/g) || []).length, 1);
   assert.equal(pageFromHash('#contact'), 'contact');
+});
+
+test('every page has its own address, and old #links still open the right page', () => {
+  const {pageFromLocation} = require('../lib/navigation.ts');
+  assert.equal(pageFromLocation('/privacy', ''), 'privacy');
+  assert.equal(pageFromLocation('/check-domain/', ''), 'lookup');
+  assert.equal(pageFromLocation('/', '#about'), 'about');
+  assert.equal(pageFromLocation('/', '#recent'), 'recent');
+  assert.equal(pageFromLocation('/nonsense', ''), 'discover');
+  const {PAGE_SEO, SITE_DESCRIPTION} = require('../lib/seo.ts');
+  for (const [id, seo] of Object.entries(PAGE_SEO)) {
+    assert.equal(seo.path, pagePath(id));
+    assert.ok(seo.description.length >= 70 && seo.description.length <= 300, id + ' description length');
+    assert.ok(seo.title.length <= 60, id + ' title length');
+  }
+  assert.ok(SITE_DESCRIPTION.length <= 300);
 });

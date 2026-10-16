@@ -17,8 +17,31 @@ const ALL_PAGES = [...PAGES, ...LEGAL_PAGES];
 
 export type PageId = (typeof ALL_PAGES)[number]['id'];
 
+// Pages with their own address can be indexed by search engines; the rest live
+// on the home page behind a #hash (they only show the visitor's own data).
+export const PAGE_PATHS: Record<PageId, string> = {
+  discover: '/',
+  recent: '/#recent',
+  watch: '/#watch',
+  lookup: '/check-domain',
+  sources: '/sources',
+  about: '/about',
+  privacy: '/privacy',
+  contact: '/contact',
+};
+
+export const pagePath = (id: PageId) => PAGE_PATHS[id];
+
 export function pageFromHash(hash: string): PageId {
   return ALL_PAGES.find(page => `#${page.id}` === hash)?.id ?? 'discover';
+}
+
+// A #hash wins (old links such as /#about keep working), then the path.
+export function pageFromLocation(pathname: string, hash: string): PageId {
+  const byHash = ALL_PAGES.find(page => `#${page.id}` === hash)?.id;
+  if (byHash) return byHash;
+  const path = pathname.replace(/\/+$/, '') || '/';
+  return (Object.keys(PAGE_PATHS) as PageId[]).find(id => PAGE_PATHS[id] === path) ?? 'discover';
 }
 
 export function pageLabel(id: PageId): string {
