@@ -26,6 +26,13 @@ Repozitár `metjus/scopeflux` je napojený na Cloudflare Worker **scopeflux** (W
 
 Nasledujúce kapitoly popisujú pôvodný ručný postup (vlastný Worker, vlastná D1).
 
+## SEO a súbory pre vyhľadávače
+
+- Stránky s vlastnou adresou: `/`, `/check-domain`, `/sources`, `/about`, `/privacy`, `/contact`. Titulky a popisy sú v `lib/seo.ts`, adresy v `lib/navigation.ts` (`PAGE_PATHS`).
+- Spoločné meta tagy, Open Graph, Twitter karta a štruktúrované dáta (JSON-LD) sú v `app/layout.tsx`.
+- `public/`: `robots.txt`, `sitemap.xml` (pri novej stránke ju doplň), `llms.txt` (zhrnutie pre AI asistentov), `site.webmanifest`, ikony, `og-image.png` (náhľad pri zdieľaní) a `.well-known/security.txt`.
+- Súkromná stavová stránka: `/status` len na adrese `*.workers.dev`, s heslom v secrete `STATUS_PASSWORD`.
+
 ## 1. Príprava
 
 Nainštaluj Node.js **24 LTS** a rozbaľ celý priečinok. V termináli v tomto priečinku spusti:

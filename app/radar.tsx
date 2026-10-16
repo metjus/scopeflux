@@ -10,7 +10,7 @@ import StatusGuide from './status-guide';
 import SiteNavigation from './site-navigation';
 import DomainLookup from './domain-lookup';
 import DomainDetails from './domain-details';
-import {pageFromHash,pageLabel} from '../lib/navigation';
+import {pageFromLocation,pageLabel,pagePath} from '../lib/navigation';
 import type {PageId} from '../lib/navigation';
 import {AboutPage,SourcesPage,PrivacyPage,ContactPage} from './info-pages';
 import {orderListings} from '../lib/list-order';
@@ -31,8 +31,8 @@ const expectedDate=expectedRelease;
 type ApiData={records:DomainRecord[];record:DomainRecord;feeds:FeedInfo[]};
 const api=(url:string,options?:RequestInit)=>apiRequest<ApiData>(url,options);
 const json=(body:unknown,method='POST')=>({method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-export default function Radar({signedIn}:{signedIn:boolean}){
- const [tab,setTab]=useState<PageId>('discover'),[rows,setRows]=useState<DomainRecord[]>([]),[saved,setSaved]=useState<DomainRecord[]>([]),[historyRows,setHistoryRows]=useState<DomainRecord[]>([]),[historyLoading,setHistoryLoading]=useState(false),[historyError,setHistoryError]=useState(''),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(''),[query,setQuery]=useState(''),[tlds,setTlds]=useState<string[]>([]),[period,setPeriod]=useState('7'),[status,setStatus]=useState('all'),[premium,setPremium]=useState('all'),[length,setLength]=useState('63'),[noHyphen,setNoHyphen]=useState(false),[noNumber,setNoNumber]=useState(false),[sort,setSort]=useState('mixed'),[detail,setDetail]=useState<DomainRecord|null>(null),[busy,setBusy]=useState(''),[toast,setToast]=useState(''),[mobileFilters,setMobileFilters]=useState(false),[lookupQuery,setLookupQuery]=useState(''),[feeds,setFeeds]=useState<FeedInfo[]>([]),[historyFeeds,setHistoryFeeds]=useState<FeedInfo[]>([]),[moreLoading,setMoreLoading]=useState(false),[clock,setClock]=useState(0);
+export default function Radar({signedIn,initialPage='discover'}:{signedIn:boolean;initialPage?:PageId}){
+ const [tab,setTab]=useState<PageId>(initialPage),[rows,setRows]=useState<DomainRecord[]>([]),[saved,setSaved]=useState<DomainRecord[]>([]),[historyRows,setHistoryRows]=useState<DomainRecord[]>([]),[historyLoading,setHistoryLoading]=useState(false),[historyError,setHistoryError]=useState(''),[loading,setLoading]=useState(true),[loadError,setLoadError]=useState(''),[query,setQuery]=useState(''),[tlds,setTlds]=useState<string[]>([]),[period,setPeriod]=useState('7'),[status,setStatus]=useState('all'),[premium,setPremium]=useState('all'),[length,setLength]=useState('63'),[noHyphen,setNoHyphen]=useState(false),[noNumber,setNoNumber]=useState(false),[sort,setSort]=useState('mixed'),[detail,setDetail]=useState<DomainRecord|null>(null),[busy,setBusy]=useState(''),[toast,setToast]=useState(''),[mobileFilters,setMobileFilters]=useState(false),[lookupQuery,setLookupQuery]=useState(''),[feeds,setFeeds]=useState<FeedInfo[]>([]),[historyFeeds,setHistoryFeeds]=useState<FeedInfo[]>([]),[moreLoading,setMoreLoading]=useState(false),[clock,setClock]=useState(0);
  const [catalogRefreshing,setCatalogRefreshing]=useState(false),[watchRefreshing,setWatchRefreshing]=useState(false),[watchLoading,setWatchLoading]=useState(signedIn),[watchError,setWatchError]=useState(''),[checkingDomain,setCheckingDomain]=useState(false);
  const catalogRequest=useRef(false),detailRequest=useRef(0);
  const feedPages=useRef<Record<string,number>>({}),extensionMenu=useRef<HTMLDetailsElement>(null);
@@ -128,7 +128,7 @@ export default function Radar({signedIn}:{signedIn:boolean}){
  useEffect(()=>{if(recent||tab==='sources')void loadHistory()},[recent,tab]);
  useEffect(() => {
    function syncLocation() {
-     const next = pageFromHash(window.location.hash);
+     const next = pageFromLocation(window.location.pathname, window.location.hash);
      setTab(next);
      setStatus('all');
      setSort(next === 'recent' ? 'recent' : 'mixed');
@@ -159,7 +159,8 @@ export default function Radar({signedIn}:{signedIn:boolean}){
    setMobileFilters(false);
    if (extensionMenu.current) extensionMenu.current.open = false;
    setTab(next);
-   if (window.location.hash !== '#' + next) window.history.pushState(null, '', '#' + next);
+   const target = pagePath(next);
+   if (window.location.pathname + window.location.hash !== target) window.history.pushState(null, '', target);
  }
  const pageTitle = pageLabel(tab);
  const filterTlds = watch ? Array.from(new Set([...TLDS, ...saved.map(record => record.tld)])).sort() : CATALOG_TLDS;
@@ -223,7 +224,7 @@ export default function Radar({signedIn}:{signedIn:boolean}){
  {!watch&&!recent&&feeds.some(f=>f.stored)&&<p className="preview-note">Last successful source update: {new Date(Math.min(...feeds.filter(f=>f.stored).map(f=>new Date(f.checkedAt).getTime()))).toLocaleString('en-GB')}. Saved listings remain available if a source cannot be reached.</p>}
  <div className="coverage"><span className="green-dot"/><span>{watch?'Checks on opening the page and on request.':recent?'Deletion reports and past estimates · current availability is not confirmed.':'Release estimates from source lists · not guaranteed availability.'}</span><button onClick={()=>navigate('sources')}>Data coverage <ArrowRight size={14}/></button></div></section></div></>}
  {!informational&&!watch&&<AdSlot placement="bottom"/>}
- <footer><span>ScopeFlux <span className="foot-dot">/</span> Good names are worth watching.</span><span className="foot-links"><button onClick={()=>navigate('privacy')}>Privacy</button><button onClick={()=>navigate('contact')}>Contact</button><button onClick={()=>navigate('sources')}>How to read the data <ArrowUpRight size={14}/></button></span></footer></main></div>
+ <footer><span>ScopeFlux <span className="foot-dot">/</span> Good names are worth watching.</span><span className="foot-links">{(['privacy','contact','sources'] as const).map(id=><a key={id} href={pagePath(id)} onClick={e=>{e.preventDefault();navigate(id)}}>{id==='sources'?<>How to read the data <ArrowUpRight size={14}/></>:id==='privacy'?'Privacy':'Contact'}</a>)}</span></footer></main></div>
  <dialog ref={dialog} aria-labelledby="domain-detail-title" onCancel={closeDetail} onClick={e=>{if(e.target===dialog.current)closeDetail()}}>{detail&&detailPremium&&<DomainDetails record={detail} premium={detailPremium} saved={saved.some(x=>x.domain===detail.domain)} busy={!!busy||checkingDomain} checking={checkingDomain} archived={recent} releaseCountdown={timeLeft(detail)} onClose={closeDetail} onSave={()=>save(detail.domain)}/>}</dialog>
  {toast&&<div className="toast" role="status"><Info size={18}/><span>{toast}</span><button aria-label="Dismiss notification" onClick={()=>setToast('')}><X size={17}/></button></div>}</div>
 }

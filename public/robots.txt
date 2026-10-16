@@ -1,6 +1,9 @@
+# ScopeFlux — expiring and dropping domains. All public pages may be indexed.
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /account/
+Disallow: /status
 
 Sitemap: https://scopeflux.io/sitemap.xml
+# A summary for AI assistants: https://scopeflux.io/llms.txt

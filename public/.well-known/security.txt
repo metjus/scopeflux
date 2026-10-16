@@ -1,0 +1,4 @@
+Contact: mailto:hello@scopeflux.io
+Expires: 2027-10-16T00:00:00.000Z
+Preferred-Languages: en, sk, cs
+Canonical: https://scopeflux.io/.well-known/security.txt
