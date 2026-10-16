@@ -11,7 +11,7 @@ ScopeFlux shows estimates published by public sources, not guarantees: a holder 
 - [Check domain](https://scopeflux.io/check-domain): registration status and expiration date of any domain, from public registry data (RDAP).
 - [Sources](https://scopeflux.io/sources): every data source, what it covers and its limits.
 - [About](https://scopeflux.io/about)
-- [Privacy](https://scopeflux.io/privacy): no analytics or tracking cookies; optional sign-in only for the watchlist.
+- [Privacy](https://scopeflux.io/privacy): no tracking cookies; cookieless visit counts (Cloudflare Web Analytics); optional sign-in only for the watchlist.
 - [Contact](https://scopeflux.io/contact): hello@scopeflux.io
 
 ## Data sources

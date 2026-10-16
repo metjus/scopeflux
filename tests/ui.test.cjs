@@ -87,6 +87,7 @@ test('privacy and contact pages name the contact address and are linked from the
   const privacy = renderToStaticMarkup(React.createElement(PrivacyPage));
   assert.match(privacy, /mailto:hello@scopeflux\.io/);
   assert.match(privacy, /no analytics, advertising or tracking cookies/);
+  assert.match(privacy, /Cloudflare Web Analytics/);
   assert.match(renderToStaticMarkup(React.createElement(ContactPage)), /mailto:hello@scopeflux\.io/);
   const nav = renderToStaticMarkup(React.createElement(Navigation, {currentPage: 'privacy', watchCount: 0, onNavigate() {}}));
   for (const page of LEGAL_PAGES) assert.ok(nav.includes('href="/' + page.id + '"'));
