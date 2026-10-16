@@ -1,7 +1,7 @@
 import {USER_AGENT,limitedText} from './http.ts';
-import {readSavedFeed,readSavedFeeds,feedParts} from './catalog-store.ts';
+import {readSavedFeed,readSavedFeeds} from './catalog-store.ts';
 import type {DomainRecord} from './domains';
-import {saveCatalogFeed,archiveStatement,recentCatalog} from './catalog-history.ts';
+import {saveCatalogFeed,archiveDue,recentCatalog} from './catalog-history.ts';
 import {isUpcomingDate,releaseTimestamp} from './release-time.ts';
 // .ai and .eu were dropped: their only source (Backorder.com) blocks Worker
 // requests and needed an external scraper. They can still be checked one by one.
@@ -102,7 +102,7 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):P
   }}
  const result=await feed(tld,page);
  if(db&&page===1)await saveCatalogFeed(db,tld,result.records,result.feed.checkedAt,result.observed||result.records);
- else if(db&&result.records.length)await db.batch(feedParts(result.observed||result.records).map(part=>archiveStatement(db,part)));
+ else if(db&&result.records.length){const due=archiveDue(db,result.observed||result.records);if(due.length)await db.batch(due);}
  return result;
  }catch(e){
  if(db&&page===1){try{const saved=await readSavedFeed(db,tld);if(saved)return storedFeed(tld,saved,publicFeedError(e));}catch{}}

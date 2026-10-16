@@ -41,3 +41,11 @@ test('source answers are read only up to a size limit, and requests name ScopeFl
   assert.equal(await limitedText(new Response('small answer'), 100), 'small answer');
   await assert.rejects(limitedText(new Response('x'.repeat(200)), 100), /too large/);
 });
+
+test('only listings released recently or within a few hours are archived, to stay inside the D1 write limit', async () => {
+  const {dueForArchive} = await import('../lib/catalog-history.ts');
+  const now = Date.parse('2026-10-16T12:00:00Z');
+  const at = hours => ({domain: 'x' + hours + '.cz', tld: 'cz', drop: new Date(now + hours * 3600000).toISOString()});
+  const rows = [at(-24 * 40), at(-24 * 2), at(-1), at(2), at(10), at(24 * 5)];
+  assert.deepEqual(dueForArchive(rows, now).map(r => r.domain), ['x-48.cz', 'x-1.cz', 'x2.cz']);
+});
