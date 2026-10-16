@@ -25,13 +25,15 @@ export function PrivacyPage() {
       <div className="section-intro">
         <span className="eyebrow">PRIVACY</span>
         <h2>What ScopeFlux stores, and why.</h2>
-        <p>Last updated 16 October 2026.</p>
+        <p>Last updated 17 October 2026.</p>
       </div>
       <h3>Who runs ScopeFlux</h3>
       <p>ScopeFlux is a personal project run from Slovakia. Questions about your data: {mail}.</p>
       <h3>Browsing without an account</h3>
       <p>You can use the catalogue, the history and the domain check without an account. ScopeFlux sets no analytics, advertising or tracking cookies and does not build a profile of you.</p>
       <p>When you check a domain, the name you typed is sent to public registration services (RDAP registries listed by IANA, and Backorder.sk for .sk details) to read its current status. ScopeFlux does not store which domains you looked up.</p>
+      <h3>Visit statistics</h3>
+      <p>To see how many people use the site, ScopeFlux uses Cloudflare Web Analytics. It counts page views and visits without cookies, without fingerprinting and without following you across other websites. The figures are only seen in aggregate.</p>
       <h3>Hosting</h3>
       <p>The site runs on Cloudflare. To deliver pages and protect the site, Cloudflare processes technical request data such as your IP address and browser type, and keeps short-lived logs. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noreferrer">Cloudflare’s privacy policy</a>.</p>
       <h3>Watchlist and sign-in</h3>
