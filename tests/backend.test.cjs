@@ -5,7 +5,6 @@ const catalog = require('../lib/catalog.ts');
 const history = require('../lib/catalog-history.ts');
 const domains = require('../lib/domains.ts');
 const routes = require('../app/api/domains/route.ts');
-const cacheRoute = require('../app/api/catalog-cache/route.ts');
 const watchlist = require('../app/api/watchlist/route.ts');
 
 env.CATALOG_REFRESH_TOKEN = 'test-refresh-secret-'.repeat(3);
@@ -40,10 +39,10 @@ test('all catalogue TLD routes, history and filters work with real SQLite storag
     const recentResponse = await routes.GET(new Request('https://site.test/api/domains?view=recent'));
     const recent = await recentResponse.json();
     assert.equal(recentResponse.status, 200);
-    assert.equal(recent.records.length, 8);
+    assert.equal(recent.records.length, catalog.CATALOG_TLDS.length);
     assert.ok(recent.records.every(row => row.status === 'Release estimate passed'));
-    const selected = await (await routes.GET(new Request('https://site.test/api/domains?view=recent&tlds=.AI,eu'))).json();
-    assert.deepEqual(new Set(selected.records.map(row => row.tld)), new Set(['ai', 'eu']));
+    const selected = await (await routes.GET(new Request('https://site.test/api/domains?view=recent&tlds=.SK,com'))).json();
+    assert.deepEqual(new Set(selected.records.map(row => row.tld)), new Set(['sk', 'com']));
     assert.equal(calls, 0);
     assert.equal((await routes.GET(new Request('https://site.test/api/domains?tlds=unknown'))).status, 400);
     assert.equal((await routes.GET(new Request('https://site.test/api/domains?domain=bad.com/path'))).status, 400);
@@ -98,22 +97,6 @@ test('history retains latest observations, excludes future and older-than-30-day
   env.DB.close();
 });
 
-test('public preview writer validates real calendar dates and retrieval timestamps before modifying any snapshot', async () => {
-  env.DB = createDatabase();
-  const checkedAt = stamp();
-  const row = record('preview.ai', new Date(Date.now() + day).toISOString().slice(0, 10), checkedAt);
-  const payload = {feeds: [{tld: 'ai', records: [row], checkedAt}]};
-  assert.equal((await cacheRoute.POST(request('/api/catalog-cache', null, payload))).status, 200);
-  const readback = await (await cacheRoute.GET(request('/api/catalog-cache', null, null, 'GET'))).json();
-  assert.deepEqual(readback.feeds, [{tld: 'ai', checkedAt, count: 1}]);
-  for (const changed of [{drop: '2026-02-30'}, {sourceUrl: 'https://wrong.test'}, {checkedAt: '2000-01-01T00:00:00Z'}, {domain: 'invalid-.ai'}]) {
-    const bad = {feeds: [{tld: 'ai', records: [{...row, ...changed}], checkedAt}]};
-    assert.equal((await cacheRoute.POST(request('/api/catalog-cache', null, bad))).status, 400);
-  }
-  assert.equal((await (await cacheRoute.GET(request('/api/catalog-cache', null, null, 'GET'))).json()).feeds[0].checkedAt, checkedAt);
-  env.DB.close();
-});
-
 test('watchlist authentication, user isolation, save, changed refresh, failed updates and delete', async () => {
   env.DB = createDatabase();
   const originalLookup = domains.lookup, originalSchedule = catalog.scheduledRelease;
@@ -159,59 +142,7 @@ test('parsers preserve public source dates, suffixes and timestamps and skip mal
   assert.equal(catalog.parseDynadot(nuxt, 'net', checkedAt).length, 0);
 });
 
-test('externally refreshed .ai/.eu snapshots avoid blocked Worker requests and retain timestamps; overdue refresh is visible', async () => {
-  env.DB = createDatabase();
-  const originalFetch = global.fetch;
-  let calls = 0;
-  global.fetch = async () => {calls++; return new Response('Blocked', {status: 403});};
-  try {
-    for (const [tld, hours] of [['ai', 1], ['eu', 3]]) {
-      const checkedAt = new Date(Date.now() - hours * 3600000).toISOString();
-      const value = record('saved.' + tld, new Date(Date.now() + day).toISOString(), checkedAt);
-      await history.saveCatalogFeed(env.DB, tld, [value], checkedAt);
-      const result = await catalog.upcomingCatalog([tld], 1, env.DB);
-      assert.equal(result.records.length, 1);
-      assert.equal(result.feeds[0].checkedAt, checkedAt);
-      if (hours === 1) assert.equal(result.feeds[0].refreshError, undefined);
-      else assert.match(result.feeds[0].refreshError, /overdue/);
-    }
-    assert.equal(calls, 0);
-  } finally {global.fetch = originalFetch; env.DB.close();}
-});
-
-test('public deletion previews persist into recent API with TLD filtering, original dates and stronger provenance than estimates', async () => {
-  env.DB = createDatabase();
-  const {parsePublicHistory} = require('../lib/public-history.ts');
-  const checkedAt = stamp(), sourceDate = new Date().toUTCString();
-  const html = name => `<table><tr><td class="field_domain"><a title="${name}">${name}</a></td><td class="field_changes">Yesterday 12:05</td></tr></table>All times are <strong>UTC</strong>.`;
-  const historyFeeds = ['com', 'org'].map(tld => ({tld, checkedAt, records: parsePublicHistory(html('dropped.' + tld), tld, sourceDate, checkedAt)}));
-  try {
-    assert.equal((await cacheRoute.POST(request('/api/catalog-cache', null, {historyFeeds}))).status, 200);
-    const readback = await (await cacheRoute.GET(request('/api/catalog-cache', null, null, 'GET'))).json();
-    assert.equal(readback.historyFeeds.length, 2);
-    for (const tld of ['com', 'org']) {
-      const result = await (await routes.GET(new Request('https://site.test/api/domains?view=recent&tlds=' + tld))).json();
-      assert.equal(result.records.length, 1);
-      assert.equal(result.records[0].status, 'Source-reported deletion');
-      assert.equal(result.records[0].reportedDrop.label, 'Yesterday 12:05');
-      assert.equal(result.records[0].reportedDrop.checkedAt, checkedAt);
-      assert.equal(result.records[0].drop, null);
-    }
-    // A later forecast must not replace a reported historical deletion.
-    await env.DB.batch([history.archiveStatement(env.DB, [record('dropped.com', new Date(Date.now() - day).toISOString(), new Date(Date.now() + 1000).toISOString())])]);
-    assert.ok((await history.recentCatalog(env.DB, ['com'])).records[0].reportedDrop);
-    for (const change of [{reportedDrop: {...historyFeeds[0].records[0].reportedDrop, at: '2026-02-30T12:05:00Z'}}, {sourceUrl: 'https://wrong.test/'}, {drop: checkedAt}]) {
-      const bad = {historyFeeds: [{...historyFeeds[0], records: [{...historyFeeds[0].records[0], ...change}]}]};
-      assert.equal((await cacheRoute.POST(request('/api/catalog-cache', null, bad))).status, 400);
-    }
-    assert.equal((await history.recentCatalog(env.DB, ['com'])).records[0].reportedDrop.checkedAt, checkedAt);
-    // One bad feed must reject the entire batch before it can replace a valid snapshot.
-    const invalid = {historyFeeds: [historyFeeds[0], {...historyFeeds[1], records: []}]};
-    assert.equal((await cacheRoute.POST(request('/api/catalog-cache', null, invalid))).status, 400);
-  } finally {env.DB.close();}
-});
-
-test('saved catalogue opens all eight extensions without external requests; individual checks reuse the original release observation', async () => {
+test('saved catalogue opens every extension without external requests; individual checks reuse the original release observation', async () => {
   env.DB = createDatabase();
   const originalFetch = global.fetch, originalLookup = domains.lookup;
   let calls = 0;
@@ -220,18 +151,18 @@ test('saved catalogue opens all eight extensions without external requests; indi
     const checkedAt = new Date(Date.now() - 3600000).toISOString();
     for (const tld of catalog.CATALOG_TLDS) await history.saveCatalogFeed(env.DB, tld, [record('saved.' + tld, new Date(Date.now() + day).toISOString(), checkedAt)], checkedAt);
     const cached = await (await routes.GET(new Request('https://site.test/api/domains?cached=1'))).json();
-    assert.equal(cached.records.length, 8);
+    assert.equal(cached.records.length, catalog.CATALOG_TLDS.length);
     assert.equal(calls, 0);
     assert.ok(cached.records.every(row => row.checkedAt === checkedAt));
     const selected = await (await routes.GET(new Request('https://site.test/api/domains?cached=1&tlds=org'))).json();
     assert.deepEqual(selected.records.map(row => row.tld), ['org']);
     domains.lookup = async name => ({...record(name, null), status: 'Registered', expiration: '2034-11-23'});
-    const checked = await (await routes.GET(new Request('https://site.test/api/domains?domain=saved.ai'))).json();
+    const checked = await (await routes.GET(new Request('https://site.test/api/domains?domain=saved.sk'))).json();
     assert.equal(checked.record.expiration, '2034-11-23');
     assert.ok(checked.record.drop);
     assert.equal(checked.record.availabilityCheckedAt, checkedAt);
     domains.lookup = async () => {throw new Error('Registry unavailable (503).');};
-    const fallbackResponse = await routes.GET(new Request('https://site.test/api/domains?domain=saved.ai'));
+    const fallbackResponse = await routes.GET(new Request('https://site.test/api/domains?domain=saved.sk'));
     const fallback = await fallbackResponse.json();
     assert.equal(fallbackResponse.status, 200);
     assert.equal(fallback.record.status, 'Unverified');
@@ -266,8 +197,3 @@ test('a background watchlist refresh cannot resurrect a domain deleted while the
   } finally {domains.lookup = originalLookup; env.DB.close();}
 });
 
-test('catalogue API enforces writer authentication even when invoked directly', async () => {
- const req = new Request('https://site.test/api/catalog-cache');
- assert.equal((await cacheRoute.GET(req)).status, 401);
- assert.equal((await cacheRoute.POST(new Request(req, {method: 'POST', body: '{}'}))).status, 401);
-});

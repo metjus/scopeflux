@@ -5,7 +5,7 @@ Samostatná anglická stránka na sledovanie domén pred očakávaným uvoľnen�
 ## Čo balík obsahuje
 
 - Zdrojový kód a zostavený Worker v `dist/server`, statické súbory v `dist/client`.
-- TLD filtre `.sk`, `.com`, `.net`, `.org`, `.io`, `.app`, `.ai`, `.eu`, 7/30 dní, vyhľadávanie, name-quality filtre a CSV.
+- TLD filtre `.sk`, `.com`, `.net`, `.org`, `.io`, `.app`, 7/30 dní, vyhľadávanie, name-quality filtre a CSV.
 - Kontrolu ľubovoľnej platnej domény cez dostupné registre; bez časového limitu na budúcu expiráciu.
 - Uložené verejné zdrojové náhľady: **8 512 upcoming** a **1 352 historických pozorovaní** pri exporte 15. 10. 2026. Presné časy získania sú v `data/manifest.json`, nie sú prepísané časom exportu.
 - Prázdnu osobnú watchlist databázu. Údaje účtov ani prihlasovacie údaje z pôvodnej stránky sa neexportujú.
@@ -21,7 +21,7 @@ Repozitár `metjus/scopeflux` je napojený na Cloudflare Worker **scopeflux** (W
   - **Build command:** `npx -y pnpm@11.25.0 install --frozen-lockfile && npx -y pnpm@11.25.0 run build`
   - **Deploy command:** `npx wrangler deploy` (build zanechá `.wrangler/deploy/config.json`, takže Wrangler nasadí zostavený `dist/server`)
 - Databáza: existujúca D1 `scopeflux` (binding `DB`). Tabuľky sa vytvoria samy pri prvej požiadavke (`lib/schema.ts`), migrácie netreba spúšťať ručne.
-- Počiatočné dáta (`data/catalog-seed.sql`) sa nenahrávajú automaticky. Katalóg sa plní zo zdrojov pri návštevách a cronom (`10 * * * *`); .ai/.eu a história potrebujú updater z kapitoly 5.
+- Počiatočné dáta (`data/catalog-seed.sql`) sa nenahrávajú automaticky. Katalóg sa plní zo zdrojov pri návštevách a cronom (`10 * * * *`); „Recently expired“ sa plní z vlastného archívu, keď dátum uvoľnenia uplynie.
 - `dist/` je výstup buildu a nie je v gite.
 
 Nasledujúce kapitoly popisujú pôvodný ručný postup (vlastný Worker, vlastná D1).
@@ -87,14 +87,9 @@ Dokumentácia: [Access JWT](https://developers.cloudflare.com/cloudflare-one/acc
 
 ## 5. Automatické aktualizácie
 
-Prečítaj **CATALOG_UPDATES.md**. Sú potrebné dve cesty:
+Cloudflare cron (`10 * * * *`, UTC) načítava verejné zoznamy Backorder.sk (.sk) a Dynadot (.com, .net, .org, .io, .app) a archivuje pozorovania; z archívu vzniká „Recently expired“.
 
-- Cloudflare cron v `wrangler.json` načítava verejný Backorder.sk a Dynadot a archivuje pozorovania.
-- Priložený GitHub Actions workflow aktualizuje verejné `.ai`/`.eu` náhľady a historické príklady ExpiredDomains.net z prostredia mimo Workeru. Poskytovatelia môžu Worker požiadavky blokovať.
-
-Nový hostname nepreberá updater pôvodnej ChatGPT stránky. Bez nastavenia updatera budú exportované údaje postupne starnúť. `.ai` a `.eu` snapshoty v tomto exporte pochádzajú z **15. 10. 2026, 11:12 UTC**; pri exporte poskytovateľ ich ďalšie načítanie odmietal. Predchádzajúce dáta sú zachované a stránka ukazuje vek zdroja.
-
-Pri verejnom nasadení nastav podľa očakávanej návštevnosti Cloudflare rate limiting pre `/api/domains?domain=...` a watchlist refresh, aby požiadavky návštevníkov zbytočne nezaťažovali registre.
+`.ai` a `.eu` boli z katalógu odstránené (október 2026): ich jediný zdroj (Backorder.com) blokuje požiadavky z Cloudflare a pôvodný externý updater (GitHub Actions + ExpiredDomains.net) sťahoval stránky, ktoré to v podmienkach zakazujú. Jednotlivé `.ai`/`.eu` domény sa dajú stále overiť cez „Check domain“ (RDAP).
 
 ## 6. Google AdSense
 

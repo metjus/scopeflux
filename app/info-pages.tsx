@@ -1,11 +1,9 @@
 'use client';
-import {Radar,Globe2,Clock3,Bookmark,ArrowUpRight,ArrowRight,Database,ShieldCheck,Search,History,Layers3} from 'lucide-react';
+import {Radar,Globe2,Clock3,Bookmark,ArrowUpRight,ArrowRight,Database,ShieldCheck,Search,History} from 'lucide-react';
 import type {FeedInfo} from '../lib/catalog';
 import type {PageId} from '../lib/navigation';
 const providers=[
- {name:'ExpiredDomains.net',label:'PUBLIC DELETION EXAMPLES',icon:History,tlds:['com','net','org','ai','eu','io','app'],description:'Ten publicly visible dropped-domain examples per extension per refresh. Source UTC timestamps are preserved with their original labels. Historical reports accumulate for 30 days; they do not confirm current availability. Full member lists are not accessed.',links:[{label:'Public .com examples',url:'https://www.expireddomains.net/tld/com/'},{label:'Public .org examples',url:'https://www.expireddomains.net/tld/org/'}]},
  {name:'Backorder.sk',label:'SLOVAK RELEASE LIST',icon:Globe2,tlds:['sk'],description:'Held .sk domains with source-listed deletion days. These are projected release dates; the source does not publish an exact hour.',links:[{label:'Public release list',url:'https://www.backorder.sk/zadrzane'}]},
- {name:'Backorder.com',label:'PUBLIC COUNTRY PREVIEWS',icon:Layers3,tlds:['ai','eu'],description:'Public pending-deletion previews for .ai and .eu, limited to the first 100 visible names per extension. Successful previews are saved and refreshed hourly.',links:[{label:'.ai preview',url:'https://backorder.com/en/pending-delete/ai'},{label:'.eu preview',url:'https://backorder.com/en/pending-delete/eu'}]},
  {name:'Dynadot',label:'GLOBAL RELEASE LISTS',icon:Database,tlds:['com','net','org','io','app'],description:'Public backorder listings with projected drop timestamps. Lists are loaded in pages. Load more to extend the selection; provider rate limits may temporarily pause pagination.',links:[{label:'Public backorder listings',url:'https://www.dynadot.com/market/backorder'}]},
 ];
 export function SourcesPage({feeds}:{feeds:FeedInfo[]}){
