@@ -6,7 +6,7 @@ import {
   Activity, ArrowRight, ArrowUpRight, Bookmark, Globe2,
   History, Info, Menu, Radar, Search, X,
 } from 'lucide-react';
-import { PAGES } from '../lib/navigation';
+import { LEGAL_PAGES, PAGES } from '../lib/navigation';
 import type { PageId } from '../lib/navigation';
 import styles from './site-navigation.module.css';
 import { BrandMark } from './brand-mark';
@@ -146,6 +146,18 @@ export default function SiteNavigation({
           </a>
         </div>
         <p className={styles.footnote}><span aria-hidden="true" /> Live sources · estimated dates</p>
+        <nav className={styles.legal} aria-label="Privacy and contact">
+          {LEGAL_PAGES.map(page => (
+            <a
+              key={page.id}
+              href={`#${page.id}`}
+              aria-current={currentPage === page.id ? 'page' : undefined}
+              onClick={event => followLink(event, page.id)}
+            >
+              {page.label}
+            </a>
+          ))}
+        </nav>
       </div>
     </aside>
   );

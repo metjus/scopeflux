@@ -50,3 +50,9 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .ad-preview{min-height:90px;display:grid;place-items:center;border:1px dashed #526078;border-radius:12px;color:#a2abc1}
 .ad-bottom .ad-preview{min-height:250px}
 @media(max-width:600px){.ad-container{margin:18px 0}.ad-top{min-height:150px}}
+/* Footer links and the Privacy / Contact pages. */
+.foot-links{display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+.legal-page{max-width:760px}
+.legal-page h3{margin:28px 0 8px;font-size:17px}
+.legal-page p{color:var(--muted);font-size:14px;line-height:1.75;margin:0 0 10px}
+.legal-page a{color:var(--cyan)}
