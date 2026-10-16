@@ -4,6 +4,7 @@ import type {FeedInfo} from '../lib/catalog';
 import type {PageId} from '../lib/navigation';
 const providers=[
  {name:'Backorder.sk',label:'SLOVAK RELEASE LIST',icon:Globe2,tlds:['sk'],description:'Held .sk domains with source-listed deletion days. These are projected release dates; the source does not publish an exact hour.',links:[{label:'Public release list',url:'https://www.backorder.sk/zadrzane'}]},
+ {name:'CZ.NIC',label:'OFFICIAL .CZ AUCTION LIST',icon:ShieldCheck,tlds:['cz'],description:'The .cz registry itself. Expired .cz domains go to a public auction instead of being released straight away; CZ.NIC publishes them about 15 days ahead with exact start and end times. Unsold names are released the day after the auction.',links:[{label:'Domain auctions',url:'https://www.domenovyprohlizec.cz/cs/aukce-domen/'},{label:'Auction rules',url:'https://www.nic.cz/files/documents/Pravidla_aukci.pdf'}]},
  {name:'Dynadot',label:'GLOBAL RELEASE LISTS',icon:Database,tlds:['com','net','org','io','app'],description:'Public backorder listings with projected drop timestamps. Lists are loaded in pages. Load more to extend the selection; provider rate limits may temporarily pause pagination.',links:[{label:'Public backorder listings',url:'https://www.dynadot.com/market/backorder'}]},
 ];
 export function SourcesPage({feeds}:{feeds:FeedInfo[]}){
