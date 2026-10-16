@@ -104,10 +104,11 @@ test('every page has its own address, and old #links still open the right page',
   const {PAGE_SEO, SITE_DESCRIPTION} = require('../lib/seo.ts');
   for (const [id, seo] of Object.entries(PAGE_SEO)) {
     assert.equal(seo.path, pagePath(id));
-    assert.ok(seo.description.length >= 70 && seo.description.length <= 300, id + ' description length');
+    assert.ok(seo.description.length >= 70 && seo.description.length <= 155, id + ' description length ' + seo.description.length);
+    assert.ok(seo.social.length >= 40 && seo.social.length <= 125, id + ' social length ' + seo.social.length);
     assert.ok(seo.title.length <= 60, id + ' title length');
   }
-  assert.ok(SITE_DESCRIPTION.length <= 300);
+  assert.ok(SITE_DESCRIPTION.length <= 155);
 });
 
 test('every share image has alt text', () => {
