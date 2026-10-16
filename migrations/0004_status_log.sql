@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS status_log (key TEXT PRIMARY KEY, ok_at TEXT, error_at TEXT, error TEXT, errors INTEGER NOT NULL DEFAULT 0);

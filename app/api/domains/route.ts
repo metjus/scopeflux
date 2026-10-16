@@ -2,6 +2,7 @@ import { env } from 'cloudflare:workers';
 import { normalizeDomain } from '../../../lib/domains';
 import {checkDomain} from '../../../lib/domain-check';
 import { savedCatalog, upcomingCatalog, recentReleaseCatalog, CATALOG_TLDS } from '../../../lib/catalog';
+import { recordError } from '../../../lib/status-log';
 
 export async function GET(request: Request) {
   try {
@@ -40,6 +41,7 @@ export async function GET(request: Request) {
   } catch (error) {
     // Details go to the Worker log; visitors get a plain sentence.
     console.error('domains API failed', { message: (error as Error)?.message });
+    await recordError(env.DB, 'api', error);
     return Response.json({ error: 'The domain list is temporarily unavailable. Please try again in a few minutes.' }, { status: 502 });
   }
 }

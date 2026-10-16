@@ -3,6 +3,8 @@ import {identify, identityRequest, teamOrigin} from './lib/access';
 import {upcomingCatalog, CATALOG_TLDS} from './lib/catalog';
 import {recentCatalog} from './lib/catalog-history';
 import {ensureSchema} from './lib/schema';
+import {recordOk, recordError} from './lib/status-log';
+import {isStatusRequest, statusResponse} from './lib/status-page';
 
 export default {
   async fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext) {
@@ -12,6 +14,8 @@ export default {
       if (origin && origin !== url.origin) return Response.json({error: 'Cross-origin changes are not allowed.'}, {status: 403});
     }
     await ensureSchema(env.DB);
+    // Owner-only health page, reachable only on the *.workers.dev address.
+    if (isStatusRequest(url)) return statusResponse(request, env);
     const user = await identify(request, env);
     if (url.pathname === '/account/login') {
       if (!teamOrigin(env) || !env.ACCESS_AUD) return new Response('Account sign-in is not configured. Follow the Cloudflare Access section in README.md.', {status: 503});
@@ -30,9 +34,15 @@ export default {
   },
   async scheduled(_event: ScheduledController, env: Cloudflare.Env, ctx: ExecutionContext) {
     ctx.waitUntil((async () => {
-      await ensureSchema(env.DB);
-      await upcomingCatalog(CATALOG_TLDS, 1, env.DB);
-      await recentCatalog(env.DB, CATALOG_TLDS);
+      try {
+        await ensureSchema(env.DB);
+        await upcomingCatalog(CATALOG_TLDS, 1, env.DB);
+        await recentCatalog(env.DB, CATALOG_TLDS);
+        await recordOk(env.DB, 'cron');
+      } catch (error) {
+        console.error('cron failed', {message: (error as Error)?.message});
+        await recordError(env.DB, 'cron', error);
+      }
     })());
   }
 };
