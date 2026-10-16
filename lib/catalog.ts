@@ -94,15 +94,19 @@ async function feed(tld:string,page=1){
  const data={records,observed:all,feed:{tld,source,url,loaded:records.length,more:page<20&&!!DYNA[tld]&&all.length>=100,limited:!DYNA[tld]&&tld!=='sk'&&tld!=='cz',checkedAt}};
  cache.set(key,{at:Date.now(),data});if(cache.size>40)cache.delete(cache.keys().next().value!);return data;
 }
+function logStorageError(error:unknown):null{console.error('catalogue storage failed',{message:(error as Error)?.message});return null;}
 export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):Promise<CatalogResult>{
  const results=await Promise.all(tlds.filter(t=>CATALOG_TLDS.includes(t)).map(async tld=>{try{
- if(db&&page===1){const saved=await readSavedFeed(db,tld);if(saved){
+ if(db&&page===1){const saved=await readSavedFeed(db,tld).catch(logStorageError);if(saved){
    const age=Date.now()-new Date(saved.checked_at).getTime();
    if(age<900000)return storedFeed(tld,saved);
   }}
  const result=await feed(tld,page);
- if(db&&page===1)await saveCatalogFeed(db,tld,result.records,result.feed.checkedAt,result.observed||result.records);
- else if(db&&result.records.length){const due=archiveDue(db,result.observed||result.records);if(due.length)await db.batch(due);}
+ // Storage problems (e.g. the D1 daily limit) must not hide listings that were just fetched.
+ try{
+  if(db&&page===1)await saveCatalogFeed(db,tld,result.records,result.feed.checkedAt,result.observed||result.records);
+  else if(db&&result.records.length){const due=archiveDue(db,result.observed||result.records);if(due.length)await db.batch(due);}
+ }catch(error){logStorageError(error);}
  return result;
  }catch(e){
  if(db&&page===1){try{const saved=await readSavedFeed(db,tld);if(saved)return storedFeed(tld,saved,publicFeedError(e));}catch{}}
