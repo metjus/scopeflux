@@ -83,3 +83,11 @@ test('source pagination chooses one fair next page and respects TLD selection an
   assert.equal(nextSourcePage(feeds, ['org'], {}, {org: now + 60000}, now), undefined);
   assert.equal(nextSourcePage(feeds, ['org'], {}, {org: now - 1}, now).tld, 'org');
 });
+
+test('.sk deletion days carry the usual next-day 02:00 release hint; exact-time sources do not', async () => {
+  const {usualReleaseHint} = await import('../lib/release-time.ts');
+  assert.match(usualReleaseHint({tld: 'sk', drop: '2026-10-20'}), /02:00 Slovak time the next day/);
+  assert.equal(usualReleaseHint({tld: 'cz', drop: '2026-10-20T10:00:00.000Z'}), null);
+  assert.equal(usualReleaseHint({tld: 'sk', drop: '2026-10-20T10:00:00.000Z'}), null);
+  assert.equal(usualReleaseHint({tld: 'com', drop: '2026-10-20'}), null);
+});

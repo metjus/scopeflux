@@ -17,7 +17,7 @@ ScopeFlux shows estimates published by public sources, not guarantees: a holder 
 ## Data sources
 
 - .cz: the official CZ.NIC auction list. Expired .cz domains go to a public registry auction about 15 days after being listed; unsold names are released the day after the auction. ScopeFlux shows when bidding opens.
-- .sk: Backorder.sk's public list of held .sk domains with their deletion days (date only, no hour).
+- .sk: Backorder.sk's public list of held .sk domains with their deletion days (date only, no hour). In practice a deleted .sk name can usually be registered from about 02:00 Slovak time (Europe/Bratislava) on the following day.
 - .com, .net, .org, .io, .app: Dynadot's public backorder listings with projected drop times.
 - Single-domain checks: RDAP registries listed by IANA.
 

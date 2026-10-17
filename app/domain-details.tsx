@@ -4,7 +4,7 @@ import {Bookmark, ExternalLink, Info, RefreshCw, X} from 'lucide-react';
 import type {DomainRecord} from '../lib/domains';
 import type {assessPremium} from '../lib/premium';
 import {statusInfo} from '../lib/status';
-import {calendarDaysFromToday} from '../lib/release-time';
+import {calendarDaysFromToday,usualReleaseHint} from '../lib/release-time';
 
 type DomainDetailsProps = {
   record: DomainRecord;
@@ -57,7 +57,7 @@ export default function DomainDetails({record, premium, saved, busy, checking, a
           <span>Expected availability</span>
           <strong>{releaseDisplay}</strong>
           {conditional && <small>If not renewed · lifecycle estimate</small>}
-          {record.drop && <small>{record.drop.length === 10 ? 'Source estimate · hour not published' : 'Source estimate · local time'}</small>}
+          {record.drop && <small>{usualReleaseHint(record) ? 'Deletion day · ' + usualReleaseHint(record) : record.drop.length === 10 ? 'Source estimate · hour not published' : 'Source estimate · local time'}</small>}
         </div>
         {record.listedDate && <div><span>{archived ? 'Archived release estimate' : 'Listed date'}</span><strong>{formatDate(record.listedDate)}</strong></div>}
         <div><span>{record.checkError&&!record.drop?'Last check attempt':'Last retrieval'}</span><strong>{new Date(record.checkedAt).toLocaleString('en-GB')}</strong></div>
