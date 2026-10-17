@@ -25,9 +25,9 @@ export const TRACKS:Track[]=[
   {name:'Expired, unpaid',when:'Right after expiry',caption:'The renewal was not paid in time. The registrar still holds the name for the owner.',owner:'Can still pay and keep it.',cost:'Usually the normal renewal',tone:'warn'},
   {name:'Held',when:'Until the deletion day',caption:'The name is listed as held, with its deletion day. This is the list ScopeFlux shows.',owner:'Can usually still save it by paying.',cost:'Usually the normal renewal',tone:'risk'},
   {name:'Deletion day',when:'Date on the list',caption:'The registry deletes the domain. The source gives only the date, not the hour.',owner:'Too late to save it.',cost:'Not possible',tone:'lock'},
-  {name:'Free',when:'From about 02:00 the next day',caption:'Usually free to register from about 02:00 Slovak time the following day.',owner:'Anyone can register it.',cost:'Normal registration',tone:'free'},
+  {name:'Free',when:'Usually the next day',caption:'The name can be registered again, first come, first served.',owner:'Anyone can register it.',cost:'Normal registration',tone:'free'},
  ],notes:[
-  {title:'Be ready at 02:00',text:'For a name you really want, have a registrar account ready and paid credit before the night after the deletion day. Backorder services for .sk also exist.'},
+  {title:'Be ready early',text:'For a name you really want, have a registrar account ready and paid credit before the release. Backorder services for .sk also exist.'},
   {title:'The date can still change',text:'If the owner pays while the name is held, it disappears from the list and is never deleted.'},
  ]},
  {id:'cz',label:'.cz',tlds:'.cz',intro:'Czech domains are run by CZ.NIC. Instead of simply dropping, an expired .cz name goes to a public auction run by the registry itself.',stages:[
@@ -42,16 +42,15 @@ export const TRACKS:Track[]=[
  ]},
 ];
 
-// Read top to bottom: each step is later than the one before. Same three
-// columns in every step, so the extensions can be compared at a glance.
+// Read top to bottom: each step is later than the one before. One general
+// line per step for every extension; the timeline above has the specifics.
 export const FEES=[
- {step:'Pays on time',when:'Before the expiration date',prices:{global:'Normal renewal, e.g. about 10–20 EUR a year for a .com',sk:'Normal renewal',cz:'Normal renewal'}},
- {step:'Pays a little late',when:'First days or weeks after expiry',prices:{global:'Normal renewal, sometimes plus a late fee',sk:'Usually still the normal renewal',cz:'Normal renewal'}},
- {step:'Pays very late',when:'Last stage before deletion',prices:{global:'Restore fee, often about 50–200 EUR, plus the renewal',sk:'Usually still the normal renewal, while the name is held',cz:'Normal renewal, up to about 60 days after expiry'}},
- {step:'Too late for the owner',when:'Deletion or auction',prices:{global:'Not possible: locked for 5 days, then deleted',sk:'Not possible: deleted on the listed day',cz:'Owner has lost it: CZ.NIC auctions the name'}},
- {step:'Someone else gets it',when:'After release',prices:{global:'Normal registration if you are first, or a backorder fee',sk:'Normal registration from about 02:00 the next day, or a backorder',cz:'Your winning bid, or normal registration if nobody bought it'}},
+ {step:'Pays on time',when:'Before the expiration date',price:'Normal yearly price',note:'The usual renewal at the registrar.'},
+ {step:'Pays a little late',when:'First days or weeks after expiry',price:'Usually still the normal price',note:'Some registrars add a small late fee.'},
+ {step:'Pays very late',when:'Last stage before deletion',price:'Can cost a lot more',note:'Some extensions charge a restore fee, often about 50–200 EUR, on top of the renewal.'},
+ {step:'Too late for the owner',when:'Deletion or auction',price:'Cannot be saved any more',note:'The domain is deleted, or sold in an auction.'},
+ {step:'Someone else gets it',when:'After release',price:'Normal price, a backorder fee or an auction bid',note:'Whoever is first registers it at the normal price. A backorder service or an auction can cost more.'},
 ];
-const FEE_COLUMNS=[{id:'global',label:'Global',tlds:'.com .net .org .io .app'},{id:'sk',label:'.sk',tlds:''},{id:'cz',label:'.cz',tlds:''}] as const;
 
 const QUESTIONS=[
  {q:'If a domain is on the list, will it definitely become free?',a:'No. The owner can renew it until the last stage, and a registrar may sell it at auction first. A release date is an estimate from the source, not a promise.'},
@@ -106,14 +105,15 @@ export function HowItWorksPage({navigate}:{navigate:(tab:PageId)=>void}){
   <div className="section-intro how-section">
    <span className="eyebrow">WHAT IT COSTS</span>
    <h2>Fees when an owner forgets to pay.</h2>
-   <p>Read from top to bottom: each step comes later than the one before, and costs the owner more. Prices are typical; the registrar’s own price list is what counts.</p>
+   <p>Read from top to bottom: each step comes later than the one before. This applies to every extension; prices are typical, and the registrar’s own price list is what counts.</p>
   </div>
   <ol className="how-fees">
    {FEES.map((fee,i)=><li key={fee.step}>
     <span className="how-fee-n">{i+1}</span>
     <div>
      <strong>{fee.step}</strong><span className="how-when">{fee.when}</span>
-     <dl>{FEE_COLUMNS.map(col=><div key={col.id}><dt>{col.label}{col.tlds&&<small> {col.tlds}</small>}</dt><dd>{fee.prices[col.id]}</dd></div>)}</dl>
+     <b>{fee.price}</b>
+     <p>{fee.note}</p>
     </div>
    </li>)}
   </ol>

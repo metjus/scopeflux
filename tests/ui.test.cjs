@@ -129,9 +129,10 @@ test('how it works explains every stage per extension with its cost, without emo
   const html = renderToStaticMarkup(React.createElement(HowItWorksPage, {navigate() {}}));
   assert.match(html, /role="tablist"/);
   assert.match(html, /Redemption/);
-  assert.match(html, /Restore fee/);
+  assert.match(html, /restore fee/i);
   const {FEES} = require('../app/how-it-works.tsx');
-  for (const fee of FEES) for (const ext of ['global', 'sk', 'cz']) assert.ok(fee.prices[ext], fee.step + ' ' + ext);
+  for (const fee of FEES) assert.ok(fee.price && fee.note, fee.step);
+  assert.doesNotMatch(html, /02:00/);
   assert.match(html, /<ol class="how-fees">/);
   assert.doesNotMatch(html, /\p{Extended_Pictographic}/u);
 });
