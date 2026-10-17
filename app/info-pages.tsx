@@ -40,7 +40,8 @@ export function PrivacyPage() {
       <h3>Hosting</h3>
       <p>The site runs on Cloudflare. To deliver pages and protect the site, Cloudflare processes technical request data such as your IP address and browser type, and keeps short-lived logs. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noreferrer">Cloudflare’s privacy policy</a>.</p>
       <h3>Watchlist and sign-in</h3>
-      <p>Signing in is optional and only needed for the watchlist. Sign-in is handled by Cloudflare Access, which sets a sign-in cookie (CF_Authorization) that is needed for the account to work. ScopeFlux stores your account identifier and the domains you save, with their last checked status, in its database until you remove them. To delete your watchlist, remove the domains or write to {mail}.</p>
+      <p>You can keep a watchlist without an account: it is then stored only in your browser (local storage) and never sent to ScopeFlux, except to check the names you saved.</p>
+      <p>Signing in is optional. It keeps the watchlist on all your devices. Sign-in is done with your Google account: Google tells ScopeFlux your name, email address and a Google account ID, and ScopeFlux sets one sign-in cookie (sf_session) that is needed for the account to work. ScopeFlux never sees your Google password. To delete your account and everything saved with it, open the account menu and choose Delete account. ScopeFlux stores your account ID, name, email address and the domains you save, with their last checked status, in its database until you remove them. To delete your watchlist, remove the domains or write to {mail}.</p>
       <h3>Your rights</h3>
       <p>Under the GDPR you can ask what data is held about you, and ask for it to be corrected or deleted. Write to {mail}. You can also complain to the Slovak data protection authority (Úrad na ochranu osobných údajov SR).</p>
       <h3>Advertising</h3>

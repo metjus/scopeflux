@@ -150,3 +150,15 @@ test('the home page renders saved listings into the HTML, without the promo card
   const contact = renderToStaticMarkup(React.createElement(Radar, {signedIn: false, initialPage: 'contact'}));
   assert.doesNotMatch(contact, /Browse \.sk releases|DOMAINS ON THE HORIZON/);
 });
+
+test('the watchlist alert email has an HTML and a plain-text version and escapes names', () => {
+  const {releaseAlertEmail} = require('../lib/alert-email.ts');
+  const now = Date.parse('2026-10-17T10:00:00Z');
+  const mail = releaseAlertEmail({name: '<b>Ann</b> Lee', domains: [{domain: 'brightcloud.com', drop: '2026-10-18T09:00:00Z', source: 'Dynadot'}], now});
+  assert.equal(mail.subject, 'brightcloud.com may be released soon');
+  assert.match(mail.html, /Tomorrow/);
+  assert.match(mail.html, /&lt;b&gt;Ann&lt;\/b&gt;/);
+  assert.doesNotMatch(mail.html, /<b>Ann/);
+  assert.match(mail.text, /brightcloud\.com: Tomorrow/);
+  assert.match(mail.html, /Turn off alerts/);
+});

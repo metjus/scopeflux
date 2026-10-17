@@ -1,35 +1,51 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {verifyAccessToken, identify, identityRequest, isRefreshAuthorized} from '../lib/access.ts';
+import {identityRequest, isRefreshAuthorized} from '../lib/access.ts';
+import {currentAccount, finishLogin, readIdToken, safeNext, sign, startLogin, SESSION_COOKIE} from '../lib/auth.ts';
 import {validAdUnit, adsConfig} from '../lib/ads-config.ts';
-const config = {ACCESS_TEAM_DOMAIN: 'https://test-team.cloudflareaccess.com', ACCESS_AUD: 'test-audience'};
-const pair = await crypto.subtle.generateKey({name: 'RSASSA-PKCS1-v1_5', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256'}, true, ['sign', 'verify']);
-const jwk = {...await crypto.subtle.exportKey('jwk', pair.publicKey), kid: 'test-key'};
-const fetcher = async url => {assert.equal(url, config.ACCESS_TEAM_DOMAIN + '/cdn-cgi/access/certs');return Response.json({keys: [jwk]});};
+const config = {GOOGLE_CLIENT_ID: 'client-123.apps.googleusercontent.com', GOOGLE_CLIENT_SECRET: 'test-client-secret-value'};
 const b64 = value => Buffer.from(value).toString('base64url');
-async function token(extra = {}) {
-  const payload = {iss: config.ACCESS_TEAM_DOMAIN, aud: [config.ACCESS_AUD], sub: 'person-one', exp: Date.now() / 1000 + 60, ...extra};
-  const body = b64(JSON.stringify({alg: 'RS256', kid: 'test-key'})) + '.' + b64(JSON.stringify(payload));
-  const signature = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', pair.privateKey, new TextEncoder().encode(body));
-  return body + '.' + b64(signature);
-}
-test('Access verifies signature and supports header or post-login cookie', async () => {
-  const jwt = await token();
-  assert.equal(await verifyAccessToken(jwt, config, fetcher), 'access:person-one');
-  assert.equal(await identify(new Request('https://example.test', {headers: {'Cf-Access-Jwt-Assertion': jwt}}), config, fetcher), 'access:person-one');
-  assert.equal(await identify(new Request('https://example.test', {headers: {Cookie: 'CF_Authorization=' + jwt}}), config, fetcher), 'access:person-one');
+const idToken = claims => b64('{"alg":"RS256"}') + '.' + b64(JSON.stringify({iss: 'https://accounts.google.com', aud: config.GOOGLE_CLIENT_ID, sub: '42', email: 'person@example.com', email_verified: true, name: 'Person', nonce: 'n1', exp: Date.now() / 1000 + 300, ...claims})) + '.sig';
+test('Google sign-in: login redirects to Google with state, callback creates a signed session', async () => {
+  const start = await startLogin(new Request('https://scopeflux.test/account/login?next=/how-it-works'), config);
+  assert.equal(start.status, 302);
+  const location = new URL(start.headers.get('Location'));
+  assert.equal(location.origin + location.pathname, 'https://accounts.google.com/o/oauth2/v2/auth');
+  assert.equal(location.searchParams.get('redirect_uri'), 'https://scopeflux.test/account/callback');
+  const stateCookie = start.headers.get('Set-Cookie').split(';')[0];
+  assert.match(start.headers.get('Set-Cookie'), /HttpOnly; Secure; SameSite=Lax/);
+  const state = location.searchParams.get('state'), nonce = location.searchParams.get('nonce');
+  const fetcher = async (url, init) => {assert.equal(url, 'https://oauth2.googleapis.com/token'); assert.match(String(init.body), /client_secret=test-client-secret-value/); return Response.json({id_token: idToken({nonce})});};
+  const done = await finishLogin(new Request('https://scopeflux.test/account/callback?code=abc&state=' + state, {headers: {Cookie: stateCookie}}), config, undefined, fetcher);
+  assert.equal(done.headers.get('Location'), '/how-it-works');
+  const session = done.headers.getSetCookie().find(value => value.startsWith(SESSION_COOKIE + '='));
+  assert.ok(session);
+  const account = await currentAccount(new Request('https://scopeflux.test/', {headers: {Cookie: session.split(';')[0]}}), config);
+  assert.deepEqual(account, {id: 'google:42', email: 'person@example.com', name: 'Person'});
+  // A wrong state never reaches Google's token endpoint.
+  const forged = await finishLogin(new Request('https://scopeflux.test/account/callback?code=abc&state=other', {headers: {Cookie: stateCookie}}), config, undefined, async () => {throw new Error('must not be called');});
+  assert.match(forged.headers.get('Location'), /signin=failed/);
 });
-test('Access rejects expiry, audience, issuer, unsigned and modified tokens', async () => {
-  for (const extra of [{exp: 1}, {aud: 'wrong'}, {iss: 'https://evil.test'}, {nbf: Date.now() / 1000 + 100}]) assert.equal(await verifyAccessToken(await token(extra), config, fetcher), null);
-  const jwt = await token();
-  assert.equal(await verifyAccessToken(jwt.slice(0, -10) + 'aaaaaaaaaa', config, fetcher), null);
-  assert.equal(await verifyAccessToken('eyJhbGciOiJub25lIn0.e30.', config, fetcher), null);
-  assert.equal(await verifyAccessToken(jwt, {...config, ACCESS_TEAM_DOMAIN: 'https://attacker.test'}, fetcher), null);
+test('Google sign-in rejects tampered sessions and invalid ID tokens', async () => {
+  const good = await sign({id: 'google:1', email: 'a@b.c', name: 'A', exp: Date.now() + 60000}, config.GOOGLE_CLIENT_SECRET);
+  const ok = cookie => currentAccount(new Request('https://x.test/', {headers: {Cookie: SESSION_COOKIE + '=' + cookie}}), config);
+  assert.ok(await ok(good));
+  assert.equal(await ok(good.slice(0, -2) + 'AA'), null);
+  assert.equal(await ok(b64(JSON.stringify({id: 'google:1', exp: Date.now() + 60000})) + '.' + good.split('.')[1]), null);
+  assert.equal(await ok(await sign({id: 'google:1', exp: Date.now() - 1}, config.GOOGLE_CLIENT_SECRET)), null);
+  assert.equal(await ok(await sign({id: 'google:1', exp: Date.now() + 60000}, 'another-secret-value-xx')), null);
+  assert.equal(await currentAccount(new Request('https://x.test/', {headers: {Cookie: SESSION_COOKIE + '=' + good}}), {}), null);
+  for (const claims of [{aud: 'other'}, {iss: 'https://evil.test'}, {nonce: 'n2'}, {email_verified: false}, {exp: 1}]) assert.equal(readIdToken(idToken(claims), config.GOOGLE_CLIENT_ID, 'n1'), null);
+  assert.equal(readIdToken(idToken({}), config.GOOGLE_CLIENT_ID, 'n1').id, 'google:42');
+  assert.equal(safeNext('https://evil.test'), '/#watch');
+  assert.equal(safeNext('//evil.test'), '/#watch');
+  assert.equal(safeNext('/sources'), '/sources');
 });
 test('untrusted identity headers are removed before routing', async () => {
   const request = new Request('https://example.test', {headers: {'x-domainradar-user': 'admin', 'oai-authenticated-user-id': 'owner'}});
   assert.equal(identityRequest(request, null).headers.get('x-domainradar-user'), null);
-  assert.equal(identityRequest(request, 'access:verified').headers.get('x-domainradar-user'), 'access:verified');
+  assert.equal(identityRequest(request, {id: 'google:1', email: 'a@b.c', name: 'Ann'}).headers.get('x-domainradar-user'), 'google:1');
+  assert.equal(identityRequest(new Request('https://example.test', {headers: {'x-domainradar-email': 'forged'}}), null).headers.get('x-domainradar-email'), null);
   assert.equal(identityRequest(request, null).headers.get('oai-authenticated-user-id'), null);
 });
 test('catalogue writer requires a long independent bearer token', async () => {
