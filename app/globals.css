@@ -128,3 +128,12 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .coverage-lines{list-style:none;margin:0;padding:0;display:grid;gap:2px;font-size:12px}
 .coverage-lines strong{color:var(--ink);font-weight:600}
 .catalogue-coverage .source-warnings{margin-top:4px}
+/* Beta badge links to feedback; "Coming soon" on About and in the account menu. */
+a.beta:hover{color:#e2d8ff;border-color:#6a5596}
+.coming-soon{margin-top:48px;padding:24px;border:1px dashed #4a3b6a;border-radius:12px;background:#1a1830}
+.coming-soon h2{font:600 24px/1.3 Manrope;letter-spacing:-.6px;margin:0 0 12px}
+.coming-soon ul{margin:0 0 12px;padding-left:18px;color:#c4cde0;font-size:14px;line-height:1.7}
+.coming-soon p{margin:0;color:var(--muted);font-size:13px}
+.coming-soon a{color:var(--cyan)}
+.coming-row{display:flex;align-items:center;gap:8px;margin:2px 0 6px;padding:10px;border:1px dashed var(--line);border-radius:8px;font-size:13px;color:var(--muted)}
+.coming-row small{margin-left:auto;padding:2px 7px;border-radius:10px;background:#2e2645;color:#c0adff;font-size:10px;font-weight:700}

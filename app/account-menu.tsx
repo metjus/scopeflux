@@ -1,6 +1,6 @@
 'use client';
 import {useEffect, useRef, useState} from 'react';
-import {ArrowUpRight, LogOut, Trash2} from 'lucide-react';
+import {ArrowUpRight, Bell, LogOut, Trash2} from 'lucide-react';
 
 type Props = {signedIn: boolean; account?: {email: string; name: string}; next: string};
 
@@ -41,6 +41,7 @@ export default function AccountMenu({signedIn, account, next}: Props) {
       <div className="account-panel">
         <strong>{account?.name || 'Signed in'}</strong>
         {account?.email && <span>{account.email}</span>}
+        <p className="coming-row"><Bell size={15}/> Email alerts <small>Coming soon</small></p>
         <a href="/account/logout"><LogOut size={15}/> Sign out</a>
         <button type="button" onClick={deleteAccount} disabled={deleting}><Trash2 size={15}/> {deleting ? 'Deleting…' : 'Delete account'}</button>
       </div>
