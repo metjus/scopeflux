@@ -11,7 +11,7 @@ export const STAGES:Stage[]=[
  {name:'Active',when:'Until the expiration date',caption:'The domain is registered and paid.',owner:'Renews at the normal price.',cost:'Normal renewal',tone:'safe'},
  {name:'Grace period',when:'First days or weeks',caption:'Expired, but the owner can still renew it. The website and email may stop working.',owner:'Can renew, usually at the normal price.',cost:'Normal renewal, sometimes a late fee',tone:'warn'},
  {name:'Last chance',when:'Before deletion',caption:'The final stage before the domain is deleted. Only the old owner can still save it.',owner:'Can still save it, sometimes with an extra restore fee.',cost:'Renewal or a restore fee',tone:'risk'},
- {name:'Deletion or auction',when:'A set day',caption:'The registry deletes the domain, or sells it in a public auction.',owner:'Too late to save it.',cost:'Not possible',tone:'lock'},
+ {name:'Deletion or auction',when:'A set day',caption:'Locked: nobody can renew or register it. Then the registry deletes it, or sells it in a public auction.',owner:'Too late to save it.',cost:'Not possible',tone:'lock'},
  {name:'Released',when:'After deletion or auction',caption:'The domain is free again. The first registration wins.',owner:'Anyone can register it.',cost:'Normal registration or a backorder',tone:'free'},
 ];
 
