@@ -119,3 +119,16 @@ test('every share image has alt text', () => {
     for (const image of [...meta.openGraph.images, ...meta.twitter.images]) assert.ok(image.alt && image.alt.length > 10, id);
   }
 });
+
+test('how it works explains every stage per extension with its cost, without emoji', () => {
+  const {HowItWorksPage, TRACKS} = require('../app/how-it-works.tsx');
+  const {pageFromLocation} = require('../lib/navigation.ts');
+  assert.equal(pageFromLocation('/how-it-works', ''), 'how');
+  assert.deepEqual(TRACKS.map(t => t.id), ['global', 'sk', 'cz']);
+  for (const track of TRACKS) for (const stage of track.stages) assert.ok(stage.caption && stage.when && stage.owner && stage.cost, track.id + ' ' + stage.name);
+  const html = renderToStaticMarkup(React.createElement(HowItWorksPage, {navigate() {}}));
+  assert.match(html, /role="tablist"/);
+  assert.match(html, /Redemption/);
+  assert.match(html, /Restore fee/);
+  assert.doesNotMatch(html, /\p{Extended_Pictographic}/u);
+});

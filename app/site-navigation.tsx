@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { MouseEvent } from 'react';
 import {
   Activity, ArrowRight, ArrowUpRight, Bookmark, Globe2,
-  History, Info, Menu, Radar, Search, X,
+  History, Info, Menu, Radar, Route, Search, X,
 } from 'lucide-react';
 import { LEGAL_PAGES, PAGES, pagePath } from '../lib/navigation';
 import type { PageId } from '../lib/navigation';
@@ -16,6 +16,7 @@ const PAGE_ICONS = {
   recent: History,
   watch: Bookmark,
   lookup: Search,
+  how: Route,
   sources: Activity,
   about: Info,
 };

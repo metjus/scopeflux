@@ -9,6 +9,7 @@ ScopeFlux shows estimates published by public sources, not guarantees: a holder 
 - [Expiring soon](https://scopeflux.io/): upcoming releases for .sk, .cz, .com, .net, .org, .io and .app, filterable by extension, date range (7 or 30 days), name length, hyphens, numbers and an estimated name quality.
 - [Recently expired](https://scopeflux.io/#recent): listings whose release date passed in the last 30 days, kept from ScopeFlux's own archive.
 - [Check domain](https://scopeflux.io/check-domain): registration status and expiration date of any domain, from public registry data (RDAP).
+- [How domain expiry works](https://scopeflux.io/how-it-works): the stages between expiry and release (grace period, redemption, pending delete, release; .sk held and deletion day; .cz protection period and registry auction) and the typical fees at each stage.
 - [Sources](https://scopeflux.io/sources): every data source, what it covers and its limits.
 - [About](https://scopeflux.io/about)
 - [Privacy](https://scopeflux.io/privacy): no tracking cookies; cookieless visit counts (Cloudflare Web Analytics); optional sign-in only for the watchlist.
