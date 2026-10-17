@@ -3,6 +3,7 @@ export const PAGES = [
   { id: 'recent', label: 'Recently expired', description: 'Revisit past release estimates' },
   { id: 'watch', label: 'Watchlist', description: 'Follow your saved domain names' },
   { id: 'lookup', label: 'Check domain', description: 'Look up a specific domain name' },
+  { id: 'how', label: 'How it works', description: 'Expiry stages and fees' },
   { id: 'sources', label: 'Sources', description: 'Providers, updates and coverage' },
   { id: 'about', label: 'About', description: 'Get to know ScopeFlux' },
 ] as const;
@@ -24,6 +25,7 @@ export const PAGE_PATHS: Record<PageId, string> = {
   recent: '/#recent',
   watch: '/#watch',
   lookup: '/check-domain',
+  how: '/how-it-works',
   sources: '/sources',
   about: '/about',
   privacy: '/privacy',

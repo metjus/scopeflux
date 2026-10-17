@@ -58,3 +58,59 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .legal-page a{color:var(--cyan)}
 .foot-links a{display:flex;align-items:center;gap:6px;color:inherit;text-decoration:none;white-space:nowrap}
 .foot-links a:hover{color:var(--text,#e8e9f2)}
+/* How it works: stage timeline (horizontal on wide screens, vertical on phones), fees and FAQ. */
+.how-page{--safe:#7ee1ce;--warn:#e8ca98;--risk:#f0a07a;--lock:#a991ff;--free:#8fe38a;max-width:1180px}
+.how-page .tone-safe{--tone:var(--safe)}.how-page .tone-warn{--tone:var(--warn)}.how-page .tone-risk{--tone:var(--risk)}.how-page .tone-lock{--tone:var(--lock)}.how-page .tone-free{--tone:var(--free)}
+.how-summary{padding:22px 26px;margin:0 0 40px;border:1px solid #42415e;background:linear-gradient(100deg,#2c2540,#1b3037);border-radius:12px}
+.how-summary .eyebrow{margin-bottom:12px}
+.how-summary ol{margin:0;padding-left:20px;display:grid;gap:10px}
+.how-summary li{font-size:14px;line-height:1.7;color:#b8c3d7;padding-left:4px}
+.how-summary li strong{color:var(--ink);font-weight:600}
+.how-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.how-tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:48px;padding:9px 18px;border:1px solid var(--line);background:#161d2b;border-radius:10px;font:600 14px Manrope;color:var(--ink)}
+.how-tabs button small{font:400 11px 'DM Sans';color:var(--muted)}
+.how-tabs button.active{border-color:var(--cyan);background:#1b3037;box-shadow:inset 0 0 0 1px var(--cyan)}
+.how-panel{padding:24px;border:1px solid var(--line);background:var(--surface);border-radius:14px}
+.how-intro{font-size:14px;line-height:1.75;color:var(--muted);margin:0 0 24px;max-width:760px}
+.how-timeline{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.how-timeline>li{min-width:0;display:flex;flex-direction:column}
+.how-bar{position:relative;height:10px;border-radius:5px;background:var(--tone);margin:0 0 22px}
+.how-bar span{position:absolute;left:0;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--bg);border:2px solid var(--tone);font:700 11px Manrope;color:var(--tone)}
+.how-stage{flex:1;display:flex;flex-direction:column;padding:16px;border:1px solid var(--line);border-top:3px solid var(--tone);background:#161d2b;border-radius:10px}
+.how-stage>strong{font:700 16px Manrope;letter-spacing:-.3px}
+.how-when{display:inline-block;align-self:flex-start;margin:8px 0 0;padding:3px 9px;border-radius:20px;background:#ffffff0d;color:var(--tone);font-size:11px;font-weight:600}
+.how-stage>p{font-size:13px;line-height:1.65;color:#c4cde0;margin:12px 0 14px}
+.how-stage dl{margin:auto 0 0;display:grid;gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+.how-stage dt{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted)}
+.how-stage dd{margin:2px 0 0;font-size:12px;line-height:1.55;color:var(--ink)}
+.how-legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:20px 0 0;font-size:11px;color:var(--muted)}
+.how-legend span{display:flex;align-items:center;gap:7px}
+.how-legend span::before{content:'';width:12px;height:6px;border-radius:3px;background:var(--tone)}
+.how-notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:22px 0 0}
+.how-notes article{padding:16px 18px;border-left:3px solid var(--cyan);background:#1b2233;border-radius:0 10px 10px 0}
+.how-notes h3{font:700 14px Manrope;margin:0 0 6px}
+.how-notes p{font-size:13px;line-height:1.7;color:var(--muted);margin:0}
+.how-section{margin-top:52px}
+.how-fees{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.how-fees>div{padding:18px;border:1px solid var(--line);background:#161d2b;border-radius:10px}
+.how-fees span{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.how-fees strong{display:block;font:700 16px/1.4 Manrope;margin:8px 0 6px;color:var(--cyan)}
+.how-fees p{font-size:12px;line-height:1.65;color:#b8c3d7;margin:0}
+.how-faq{display:grid;gap:10px;max-width:860px}
+.how-faq details{border:1px solid var(--line);background:#161d2b;border-radius:10px}
+.how-faq summary{cursor:pointer;padding:16px 18px;font:600 14px/1.5 Manrope;min-height:48px}
+.how-faq details p{margin:0;padding:0 18px 16px;font-size:13px;line-height:1.75;color:var(--muted)}
+.how-cta{margin-top:48px}
+.how-cta>button{margin-left:auto;flex-shrink:0}
+.how-source{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:11px;color:var(--muted);margin:22px 0 0}
+.how-source a{display:inline-flex;align-items:center;gap:5px;color:var(--cyan)}
+@media(max-width:1200px){.how-timeline{grid-template-columns:repeat(5,minmax(170px,1fr));overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory}.how-timeline>li{scroll-snap-align:start}.how-fees{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.how-summary{padding:18px}.how-summary li{font-size:13px}.how-panel{padding:16px}.how-tabs button{flex:1;min-width:0;padding:9px 12px}
+.how-timeline{grid-template-columns:1fr;overflow:visible;gap:0;padding:0}
+.how-timeline>li{flex-direction:row;gap:14px}
+.how-bar{width:8px;height:auto;margin:0;flex-shrink:0;margin-left:11px}
+.how-bar span{left:50%;top:14px;transform:translateX(-50%)}
+.how-stage{margin:0 0 12px}
+.how-timeline>li:last-child .how-stage{margin-bottom:0}
+.how-notes,.how-fees{grid-template-columns:1fr}
+.how-cta>button{margin-left:0;width:100%}}
