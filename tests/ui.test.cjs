@@ -121,14 +121,13 @@ test('every share image has alt text', () => {
 });
 
 test('how it works explains every stage per extension with its cost, without emoji', () => {
-  const {HowItWorksPage, TRACKS} = require('../app/how-it-works.tsx');
+  const {HowItWorksPage, STAGES} = require('../app/how-it-works.tsx');
   const {pageFromLocation} = require('../lib/navigation.ts');
   assert.equal(pageFromLocation('/how-it-works', ''), 'how');
-  assert.deepEqual(TRACKS.map(t => t.id), ['global', 'sk', 'cz']);
-  for (const track of TRACKS) for (const stage of track.stages) assert.ok(stage.caption && stage.when && stage.owner && stage.cost, track.id + ' ' + stage.name);
+  assert.equal(STAGES.length, 5);
+  for (const stage of STAGES) assert.ok(stage.caption && stage.when && stage.owner && stage.cost, stage.name);
   const html = renderToStaticMarkup(React.createElement(HowItWorksPage, {navigate() {}}));
-  assert.match(html, /role="tablist"/);
-  assert.match(html, /Redemption/);
+  assert.doesNotMatch(html, /role="tablist"/);
   assert.match(html, /restore fee/i);
   const {FEES} = require('../app/how-it-works.tsx');
   for (const fee of FEES) assert.ok(fee.price && fee.note, fee.step);
