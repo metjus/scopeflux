@@ -146,9 +146,9 @@ test('the home page renders saved listings into the HTML, without the promo card
   const home = renderToStaticMarkup(React.createElement(Radar, {signedIn: false, initialCatalogue: catalogue}));
   assert.match(home, /visible-name\.com/);
   assert.match(home, /DOMAINS ON THE HORIZON/);
-  assert.match(home, /Browse \.sk releases/);
+  assert.match(home, /Browse \.com releases/);
   const contact = renderToStaticMarkup(React.createElement(Radar, {signedIn: false, initialPage: 'contact'}));
-  assert.doesNotMatch(contact, /Browse \.sk releases|DOMAINS ON THE HORIZON/);
+  assert.doesNotMatch(contact, /Browse \.com releases|DOMAINS ON THE HORIZON/);
 });
 
 test('the watchlist alert email has an HTML and a plain-text version and escapes names', () => {
