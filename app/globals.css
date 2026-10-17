@@ -125,3 +125,6 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .account-panel button{color:#f0a07a}
 /* Listings expected to be released later today. */
 .today-badge{display:inline-block!important;margin:0 0 0 7px;padding:3px 6px;border-radius:4px;background:#183a36;color:#7ee1ce;font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
+.coverage-lines{list-style:none;margin:0;padding:0;display:grid;gap:2px;font-size:12px}
+.coverage-lines strong{color:var(--ink);font-weight:600}
+.catalogue-coverage .source-warnings{margin-top:4px}

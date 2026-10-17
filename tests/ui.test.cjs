@@ -27,20 +27,22 @@ test('history coverage explains missing TLD observations rather than implying av
   assert.match(html, /does not mean those domains are available/);
 });
 
-test('saved preview source failures and the 30-day filter coverage are visible', () => {
-  const row = {domain: 'cloud.ai', tld: 'ai', drop: '2026-10-15'};
-  const feed = {tld: 'ai', refreshError: 'Source unavailable (403).', checkedAt: '2026-10-15T10:00:00Z'};
-  const html = renderToStaticMarkup(React.createElement(Coverage, {records: [row], feeds: [feed], tlds: ['ai'], recent: false, period: '30'}));
-  assert.match(html, /following 30 calendar days/);
+test('coverage is one short line per chosen extension, a quiet failure note, and nothing for the all-extensions preview', () => {
+  const row = {domain: 'cloud.com', tld: 'com', drop: '2026-10-20T10:00:00Z'};
+  const feed = {tld: 'com', refreshError: 'Source unavailable (403).', checkedAt: '2026-10-15T10:00:00Z'};
+  const html = renderToStaticMarkup(React.createElement(Coverage, {records: [row], feeds: [feed], tlds: ['com'], recent: false, period: '7'}));
+  assert.match(html, /\.com<\/strong>: 1 listing · until 20 Oct · updated 15 Oct/);
   assert.match(html, /last successful snapshot/);
   assert.match(html, /403/);
+  assert.doesNotMatch(html, /loaded|Filters apply/);
+  assert.equal(renderToStaticMarkup(React.createElement(Coverage, {records: [row], feeds: [{tld: 'com', checkedAt: '2026-10-15T10:00:00Z'}], tlds: [], recent: false, period: '7'})), '');
 });
 
-test('timestamp coverage dates follow local time, including releases after midnight', () => {
+test('coverage dates follow local time, including releases after midnight', () => {
   const value = '2026-10-15T23:45:00Z';
-  const date = new Date(value).toLocaleDateString('en-GB', {day: 'numeric', month: 'short', year: 'numeric'});
-  const html = renderToStaticMarkup(React.createElement(Coverage, {records: [{domain: 'cloud.app', tld: 'app', drop: value}], feeds: [], tlds: ['app'], recent: false, period: '30'}));
-  assert.ok(html.includes(date));
+  const date = new Date(value).toLocaleDateString('en-GB', {day: 'numeric', month: 'short'});
+  const html = renderToStaticMarkup(React.createElement(Coverage, {records: [{domain: 'cloud.app', tld: 'app', drop: value}], feeds: [], tlds: ['app'], recent: false, period: '7'}));
+  assert.ok(html.includes('until ' + date));
 });
 
 test('every menu destination has an accessible active link and the mobile disclosure has controls', () => {
