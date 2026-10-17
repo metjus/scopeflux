@@ -26,6 +26,6 @@ Lists refresh about every hour. Coverage is partial: these are public previews, 
 
 ## Data access
 
-- JSON: `https://scopeflux.io/api/domains?cached=1&tlds=cz` returns the saved upcoming listings for one or more extensions (comma-separated: sk, cz, com, net, org, io, app, info, co, me, xyz, biz, us, pro, cc, tv). Each record has domain, tld, status, drop (release date or time, ISO 8601), source and sourceUrl.
+- JSON: `https://scopeflux.io/api/domains?cached=1&tlds=cz` returns the saved upcoming listings for one or two extensions (comma-separated: sk, cz, com, net, org, io, app, info, co, me, xyz, biz, us, pro, cc, tv). Each record has domain, tld, status, drop (release date or time, ISO 8601), source and sourceUrl.
 - JSON: `https://scopeflux.io/api/domains?domain=example.com` checks one domain.
 - Please cache results and keep request rates low.

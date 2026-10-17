@@ -1,7 +1,7 @@
 import { env } from 'cloudflare:workers';
 import { normalizeDomain } from '../../../lib/domains';
 import {checkDomain} from '../../../lib/domain-check';
-import { savedCatalog, upcomingCatalog, recentReleaseCatalog, CATALOG_TLDS } from '../../../lib/catalog';
+import { savedCatalog, upcomingCatalog, recentReleaseCatalog, previewCatalog, CATALOG_TLDS, MAX_EXTENSIONS, RECENT_PREVIEW_LIMIT } from '../../../lib/catalog';
 import { recordError } from '../../../lib/status-log';
 
 export async function GET(request: Request) {
@@ -25,10 +25,20 @@ export async function GET(request: Request) {
     if (tlds.some(tld => !CATALOG_TLDS.includes(tld))) {
       return Response.json({error: 'Unsupported catalogue extension. Use the individual domain checker for other endings.'}, {status: 400});
     }
+    // Whole lists are read for a few extensions at a time (Workers free plan CPU limit).
+    if (requested && tlds.length > MAX_EXTENSIONS) {
+      return Response.json({error: `Choose up to ${MAX_EXTENSIONS} extensions at a time.`}, {status: 400});
+    }
 
     if (params.get('view') === 'recent') {
       if (!env.DB) return Response.json({ error: 'History is unavailable.' }, { status: 503 });
-      return Response.json(await recentReleaseCatalog(env.DB, tlds));
+      return Response.json(await recentReleaseCatalog(env.DB, tlds, requested ? undefined : RECENT_PREVIEW_LIMIT));
+    }
+
+    // No extension chosen: the soonest releases of every extension, from small preview rows.
+    if (!requested) {
+      if (!env.DB) return Response.json({error: 'Saved catalogue unavailable.'}, {status: 503});
+      return Response.json(await previewCatalog(env.DB));
     }
 
     if (params.get('cached') === '1') {

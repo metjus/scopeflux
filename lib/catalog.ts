@@ -14,6 +14,10 @@ const DYNA:Record<string,string>={com:'tld_0',info:'tld_1',org:'tld_2',co:'tld_4
 // D1 on the free plan allows about 50 queries per invocation, so one request or
 // cron run refreshes only the most out-of-date feeds; the rest show saved data.
 export const MAX_REFRESH=5;
+// Full lists are loaded for at most this many extensions at a time; without a
+// choice the catalogue shows the small preview of every extension instead.
+export const MAX_EXTENSIONS=2;
+export const RECENT_PREVIEW_LIMIT=300;
 export type FeedInfo={tld:string;source:string;url:string;loaded:number;more:boolean;limited:boolean;checkedAt:string;error?:string;stored?:boolean;refreshError?:string;retryAfter?:number};
 export type CatalogResult={records:DomainRecord[];feeds:FeedInfo[]};
 const cache=new Map<string,{at:number;data:{records:DomainRecord[];feed:FeedInfo;observed?:DomainRecord[]}}>();
@@ -153,6 +157,12 @@ export async function savedCatalog(db:D1Database,tlds=CATALOG_TLDS):Promise<Cata
  return {records:results.flatMap(result=>result.records),feeds:results.map(result=>result.feed)};
 }
 
+/** The soonest releases of every extension, from the small catalog_preview rows. */
+export async function previewCatalog(db:D1Database,now=Date.now()):Promise<CatalogResult>{
+ const rows=(await db.prepare('SELECT tld,records,total,checked_at FROM catalog_preview').all<{tld:string;records:string;total:number;checked_at:string}>()).results.filter(row=>CATALOG_TLDS.includes(row.tld));
+ const records=rows.flatMap(row=>JSON.parse(row.records) as DomainRecord[]).filter(r=>isUpcomingDate(r.drop,now));
+ return {records,feeds:rows.map(row=>previewFeedInfo(row.tld,row.total,row.checked_at))};
+}
 // Feed details for the home page preview, without reading the whole feed.
 export function previewFeedInfo(tld:string,total:number,checkedAt:string):FeedInfo{
  return {tld,source:feedSource(tld),url:feedPage(tld),loaded:total,more:!!DYNA[tld]&&total>=100,limited:!DYNA[tld]&&tld!=='sk'&&tld!=='cz',checkedAt,stored:true};
@@ -163,9 +173,9 @@ function storedFeed(tld:string,saved:{records:string;checked_at:string},refreshE
  return {records,feed:{tld,source:feedSource(tld),url:feedPage(tld),loaded:records.length,more:!!DYNA[tld]&&observed.length>=100,limited:!DYNA[tld]&&tld!=='sk'&&tld!=='cz',checkedAt:saved.checked_at,stored:true,refreshError}};
 }
 
-export async function recentReleaseCatalog(db:D1Database,tlds=CATALOG_TLDS){
+export async function recentReleaseCatalog(db:D1Database,tlds=CATALOG_TLDS,limit?:number){
  // History is a saved observation, not another live-feed request. Source outages must not block it.
- const result=await recentCatalog(db,tlds);
+ const result=await recentCatalog(db,tlds,Date.now(),limit);
  const saved=await db.prepare("SELECT tld,checked_at,records FROM catalog_feeds WHERE tld LIKE 'history:%'").all<{tld:string;checked_at:string;records:string}>();
  const feeds:FeedInfo[]=saved.results.filter(row=>tlds.includes(row.tld.replace('history:',''))).map(row=>{
    const tld=row.tld.replace('history:','');
