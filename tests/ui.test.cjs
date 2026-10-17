@@ -162,3 +162,15 @@ test('the watchlist alert email has an HTML and a plain-text version and escapes
   assert.match(mail.text, /brightcloud\.com: Tomorrow/);
   assert.match(mail.html, /Turn off alerts/);
 });
+
+test('listings are soonest first by default, and later-today releases carry a Today badge', () => {
+  const Radar = require('../app/radar.tsx').default;
+  const now = Date.now();
+  const soon = new Date(now + 60000).toISOString(); // one minute from now: still today except in the last minute of the day
+  const later = new Date(now + 3 * 86400000).toISOString();
+  const row = (domain, drop) => ({domain, tld: 'com', drop, checkedAt: drop, expiration: null, status: 'Expected release', source: 'Dynadot', sourceUrl: 'https://www.dynadot.com/'});
+  const html = renderToStaticMarkup(React.createElement(Radar, {signedIn: false, initialCatalogue: {records: [row('later-name.com', later), row('soon-name.com', soon)], feeds: []}}));
+  assert.ok(html.indexOf('soon-name') < html.indexOf('later-name'), 'soonest first');
+  assert.equal((html.match(/class="today-badge"/g) || []).length, 1);
+  assert.match(html, /<option value="date" selected="">Soonest first<\/option>/);
+});

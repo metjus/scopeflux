@@ -123,3 +123,5 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .account-panel a,.account-panel button{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 10px;border-radius:8px;font-size:13px;color:var(--ink);text-align:left}
 .account-panel a:hover,.account-panel button:hover{background:#ffffff0d}
 .account-panel button{color:#f0a07a}
+/* Listings expected to be released later today. */
+.today-badge{display:inline-block!important;margin:0 0 0 7px;padding:3px 6px;border-radius:4px;background:#183a36;color:#7ee1ce;font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap}
