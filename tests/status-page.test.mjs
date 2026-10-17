@@ -59,3 +59,11 @@ test('a broken database never breaks recording, and an empty log says so', async
   await recordError(broken, 'cron', new Error('x'));
   assert.match(renderStatus([], ''), /Nothing recorded yet/);
 });
+
+test('passwords with diacritics and copy-paste spaces are accepted', async () => {
+  const utf8 = text => 'Basic ' + Buffer.from(text, 'utf8').toString('base64');
+  const ok = async (header, secret) => (await statusResponse(new Request('https://x.workers.dev/status', {headers: {Authorization: header}}), {STATUS_PASSWORD: secret})).status;
+  assert.equal(await ok(utf8('owner:Žltý kôň 2026'), 'Žltý kôň 2026'), 200);
+  assert.equal(await ok(utf8('anything:secret'), ' secret \n'), 200);
+  assert.equal(await ok(utf8('owner:Zlty kon 2026'), 'Žltý kôň 2026'), 401);
+});
