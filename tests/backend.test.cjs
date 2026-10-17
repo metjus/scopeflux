@@ -235,3 +235,15 @@ test('the home page HTML reads only the small preview rows, not whole feeds', as
   assert.equal(initial.feeds[0].loaded, 80);
   assert.ok(reads.every(sql => !/catalog_feeds|catalog_feed_parts/.test(sql)), reads.join('; '));
 });
+
+test('without a chosen extension the API returns the cheap preview, and at most two extensions load at once', async () => {
+  env.DB = createDatabase();
+  for (const tld of ['sk', 'com', 'io']) await history.saveCatalogFeed(env.DB, tld, [record('soon.' + tld, new Date(Date.now() + day).toISOString())], stamp());
+  const preview = await (await routes.GET(new Request('https://site.test/api/domains'))).json();
+  assert.deepEqual(new Set(preview.records.map(row => row.tld)), new Set(['sk', 'com', 'io']));
+  const tooMany = await routes.GET(new Request('https://site.test/api/domains?cached=1&tlds=sk,com,io'));
+  assert.equal(tooMany.status, 400);
+  assert.match((await tooMany.json()).error, /up to 2 extensions/);
+  const two = await (await routes.GET(new Request('https://site.test/api/domains?cached=1&tlds=sk,com'))).json();
+  assert.deepEqual(new Set(two.records.map(row => row.tld)), new Set(['sk', 'com']));
+});
