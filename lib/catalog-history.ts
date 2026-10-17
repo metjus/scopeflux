@@ -26,6 +26,13 @@ export function archiveDue(db:D1Database,records:DomainRecord[],now=Date.now()){
 }
 export function archiveStatement(db:D1Database,records:DomainRecord[]){return db.prepare(ARCHIVE_SQL).bind(JSON.stringify(records));}
 export function snapshotStatement(db:D1Database,tld:string,records:DomainRecord[],checkedAt:string){return db.prepare('INSERT INTO catalog_feeds(tld,records,checked_at) VALUES(?,?,?) ON CONFLICT(tld) DO UPDATE SET records=excluded.records,checked_at=excluded.checked_at').bind(tld,JSON.stringify(records),checkedAt);}
+// A small copy of the soonest releases per extension. The home page renders it
+// into the HTML without parsing whole feeds (the free plan allows ~10 ms CPU).
+export const PREVIEW_SIZE=30;
+export function previewStatement(db:D1Database,tld:string,records:DomainRecord[],checkedAt:string){
+ const soon=records.filter(r=>Number.isFinite(releaseTimestamp(r.drop))).sort((a,b)=>releaseTimestamp(a.drop)-releaseTimestamp(b.drop)).slice(0,PREVIEW_SIZE);
+ return db.prepare('INSERT INTO catalog_preview(tld,records,total,checked_at) VALUES(?,?,?,?) ON CONFLICT(tld) DO UPDATE SET records=excluded.records,total=excluded.total,checked_at=excluded.checked_at').bind(tld,JSON.stringify(soon),records.length,checkedAt);
+}
 export async function saveCatalogFeed(db:D1Database,tld:string,records:DomainRecord[],checkedAt:string,observed=records){
  const previous=await readSavedFeed(db,tld);
  // An overlapping older refresh must never replace a newer saved snapshot.
@@ -35,6 +42,7 @@ export async function saveCatalogFeed(db:D1Database,tld:string,records:DomainRec
  statements.push(...archiveDue(db,observed));
  const parts=feedParts(records);
  statements.push(snapshotStatement(db,tld,parts[0],checkedAt));
+ statements.push(previewStatement(db,tld,records,checkedAt));
  statements.push(db.prepare('DELETE FROM catalog_feed_parts WHERE tld=?').bind(tld));
  parts.slice(1).forEach((part,index)=>statements.push(db.prepare('INSERT INTO catalog_feed_parts(tld,part,records) VALUES(?,?,?)').bind(tld,index+1,JSON.stringify(part))));
  await db.batch(statements);

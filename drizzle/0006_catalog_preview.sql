@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS catalog_preview (tld TEXT PRIMARY KEY, records TEXT NOT NULL, total INTEGER NOT NULL, checked_at TEXT NOT NULL);

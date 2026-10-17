@@ -19,7 +19,7 @@ test('a fresh database gets every table the migrations create, and a second call
   await ensureSchema(db);
   await ensureSchema(db);
   const tables = db.sqlite.prepare("SELECT name FROM sqlite_master WHERE type IN ('table','index') AND name NOT LIKE 'sqlite_%' ORDER BY name").all().map(r => r.name);
-  assert.deepEqual(tables, ['catalog_feed_parts', 'catalog_feeds', 'catalog_history', 'catalog_history_release_idx', 'status_log', 'users', 'watchlist']);
+  assert.deepEqual(tables, ['catalog_feed_parts', 'catalog_feeds', 'catalog_history', 'catalog_history_release_idx', 'catalog_preview', 'status_log', 'users', 'watchlist']);
 });
 
 test('visitors see a plain sentence, not a raw fetch error', () => {
