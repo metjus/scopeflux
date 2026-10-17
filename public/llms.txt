@@ -6,7 +6,7 @@ ScopeFlux shows estimates published by public sources, not guarantees: a holder 
 
 ## Pages
 
-- [Expiring soon](https://scopeflux.io/): upcoming releases for .com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv, .sk and .cz, filterable by extension, date range (7 or 30 days), name length, hyphens, numbers and an estimated name quality.
+- [Expiring soon](https://scopeflux.io/): upcoming releases for .com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv, .sk and .cz, filterable by extension, date range (today, 7 days or all dates), name length, hyphens, numbers and an estimated name quality.
 - [Recently expired](https://scopeflux.io/#recent): listings whose release date passed in the last 30 days, kept from ScopeFlux's own archive.
 - [Check domain](https://scopeflux.io/check-domain): registration status and expiration date of any domain, from public registry data (RDAP).
 - [How domain expiry works](https://scopeflux.io/how-it-works): the stages between expiry and release (grace period, redemption, pending delete, release; .sk held and deletion day; .cz protection period and registry auction) and the typical fees at each stage.
