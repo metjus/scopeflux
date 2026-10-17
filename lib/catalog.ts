@@ -6,7 +6,8 @@ import {saveCatalogFeed,archiveDue,recentCatalog} from './catalog-history.ts';
 import {isUpcomingDate,releaseTimestamp} from './release-time.ts';
 // .ai and .eu were dropped: their only source (Backorder.com) blocks Worker
 // requests and needed an external scraper. They can still be checked one by one.
-export const CATALOG_TLDS=['sk','cz','com','net','org','io','app','info','co','me','xyz','biz','us','pro','cc','tv'];
+// Global extensions first; country extensions (.cz, .sk) last.
+export const CATALOG_TLDS=['com','net','org','io','app','co','xyz','info','me','biz','us','pro','cc','tv','cz','sk'];
 // Dynadot's filter checkbox ids (from its backorder page, October 2026). They are
 // ranked by listing count and can shift; parseDynadot keeps only names that end
 // in the requested extension, so a stale id shows fewer names, never wrong ones.

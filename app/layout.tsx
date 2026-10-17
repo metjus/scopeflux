@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
   category: 'technology',
-  keywords: ['expiring domains', 'dropping domains', 'domain drops', 'expired domains', 'domain auctions', '.cz domain auction', '.sk domains', 'domain expiration date', 'domain availability'],
+  keywords: ['expiring domains', 'dropping domains', 'domain drops', 'expired domains', 'domain auctions', '.com domain drops', 'pending delete domains', 'domain expiration date', 'domain availability'],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
