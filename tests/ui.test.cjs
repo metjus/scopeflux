@@ -89,6 +89,7 @@ test('privacy and contact pages name the contact address and are linked from the
   assert.match(privacy, /no analytics, advertising or tracking cookies/);
   assert.match(privacy, /Cloudflare Web Analytics/);
   assert.match(renderToStaticMarkup(React.createElement(ContactPage)), /mailto:hello@scopeflux\.io/);
+  for (const page of [privacy, renderToStaticMarkup(React.createElement(ContactPage))]) assert.match(page, /Matúš Šturdík.*Nová 407, Veľká Mača.*51628163/);
   const nav = renderToStaticMarkup(React.createElement(Navigation, {currentPage: 'privacy', watchCount: 0, onNavigate() {}}));
   for (const page of LEGAL_PAGES) assert.ok(nav.includes('href="/' + page.id + '"'));
   assert.equal((nav.match(/aria-current="page"/g) || []).length, 1);
