@@ -3,7 +3,7 @@ import {recordOk,recordError} from './status-log.ts';
 import {readSavedFeed,readSavedFeeds} from './catalog-store.ts';
 import type {DomainRecord} from './domains';
 import {saveCatalogFeed,archiveDue,recentCatalog} from './catalog-history.ts';
-import {isUpcomingDate,releaseTimestamp} from './release-time.ts';
+import {isUpcomingDate,releaseTimestamp,skReleaseTime} from './release-time.ts';
 // .ai and .eu were dropped: their only source (Backorder.com) blocks Worker
 // requests and needed an external scraper. They can still be checked one by one.
 // Global extensions first; country extensions (.cz, .sk) last.
@@ -52,7 +52,7 @@ export function parseSkDrops(html:string,checkedAt=new Date().toISOString()):Dom
  const out:DomainRecord[]=[];
  for(const m of html.matchAll(/<li[^>]*>\s*<a[^>]*href="\/domena\/([a-z0-9-]+\.sk)"[^>]*>[\s\S]*?<\/a>\s*<span[^>]*>\s*(\d{1,2})\.(\d{1,2})\.(\d{4})\s*<\/span>\s*<\/li>/gi)){
  const date=`${m[4]}-${m[3].padStart(2,'0')}-${m[2].padStart(2,'0')}`;
- if(valid(m[1],'sk')&&Number.isFinite(releaseTimestamp(date)))out.push(record(m[1].toLowerCase(),date,'Backorder.sk','https://www.backorder.sk/domena/'+m[1].toLowerCase(),checkedAt));
+ if(valid(m[1],'sk')&&Number.isFinite(releaseTimestamp(date)))out.push(record(m[1].toLowerCase(),skReleaseTime(date),'Backorder.sk','https://www.backorder.sk/domena/'+m[1].toLowerCase(),checkedAt));
  }return out;
 }
 // CZ.NIC auction list: [{item_title, auction_from, auction_to}] with UTC times.
