@@ -1,6 +1,6 @@
 'use client';
 import {useEffect, useRef, useState} from 'react';
-import {ArrowUpRight, LogOut, Trash2} from 'lucide-react';
+import {ArrowUpRight, Bell, LogOut, Trash2} from 'lucide-react';
 
 type Props = {signedIn: boolean; account?: {email: string; name: string}; next: string};
 
@@ -8,6 +8,20 @@ type Props = {signedIn: boolean; account?: {email: string; name: string}; next: 
 export default function AccountMenu({signedIn, account, next}: Props) {
   const menu = useRef<HTMLDetailsElement>(null);
   const [deleting, setDeleting] = useState(false);
+  // Email alerts: null until loaded; available is false until sending is configured.
+  const [alerts, setAlerts] = useState<{enabled: boolean; available: boolean} | null>(null);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    if (!signedIn) return;
+    fetch('/api/account/alerts').then(r => r.ok ? r.json() : null).then((data: {enabled: boolean; available: boolean} | null) => data && setAlerts(data)).catch(() => {});
+  }, [signedIn]);
+  async function toggleAlerts(enabled: boolean) {
+    setSaving(true);
+    try {
+      const response = await fetch('/api/account/alerts', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({enabled})});
+      if (response.ok) setAlerts(await response.json());
+    } finally {setSaving(false);}
+  }
   useEffect(() => {
     function close(event: PointerEvent) {
       if (menu.current?.open && event.target instanceof Node && !menu.current.contains(event.target)) menu.current.open = false;
@@ -41,6 +55,10 @@ export default function AccountMenu({signedIn, account, next}: Props) {
       <div className="account-panel">
         <strong>{account?.name || 'Signed in'}</strong>
         {account?.email && <span>{account.email}</span>}
+        <label className="alert-toggle">
+          <input type="checkbox" checked={!!alerts?.enabled} disabled={!alerts?.available || saving} onChange={event => toggleAlerts(event.target.checked)}/>
+          <span><Bell size={15}/> Email alerts<small>{alerts && !alerts.available ? 'Coming soon' : 'A day before a saved domain is released'}</small></span>
+        </label>
         <a href="/account/logout"><LogOut size={15}/> Sign out</a>
         <button type="button" onClick={deleteAccount} disabled={deleting}><Trash2 size={15}/> {deleting ? 'Deleting…' : 'Delete account'}</button>
       </div>

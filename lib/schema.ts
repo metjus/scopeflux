@@ -1,8 +1,9 @@
 import {STATUS_TABLE_SQL} from './status-log.ts';
+import {ALERT_TABLES_SQL} from './alerts.ts';
 // Accounts signed in with Google. Email is kept for optional alerts later.
 export const USERS_TABLE_SQL = 'CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT NOT NULL, name TEXT NOT NULL, created_at TEXT NOT NULL, last_login_at TEXT NOT NULL)';
 // Creates the D1 tables on first use, so a fresh database works without running
-// `wrangler d1 migrations apply` by hand. Same tables as migrations/0000–0006.
+// `wrangler d1 migrations apply` by hand. Same tables as migrations/0000–0007.
 const STATEMENTS = [
   'CREATE TABLE IF NOT EXISTS `watchlist` (`user_id` text NOT NULL, `domain` text NOT NULL, `snapshot` text NOT NULL, `checked_at` text NOT NULL, PRIMARY KEY(`user_id`, `domain`))',
   'CREATE TABLE IF NOT EXISTS `catalog_feeds` (`tld` text PRIMARY KEY NOT NULL, `records` text NOT NULL, `checked_at` text NOT NULL)',
@@ -11,6 +12,7 @@ const STATEMENTS = [
   'CREATE TABLE IF NOT EXISTS catalog_feed_parts (tld TEXT NOT NULL, part INTEGER NOT NULL, records TEXT NOT NULL, PRIMARY KEY (tld, part))',
   STATUS_TABLE_SQL,
   USERS_TABLE_SQL,
+  ...ALERT_TABLES_SQL,
   'CREATE TABLE IF NOT EXISTS catalog_preview (tld TEXT PRIMARY KEY, records TEXT NOT NULL, total INTEGER NOT NULL, checked_at TEXT NOT NULL)',
 ];
 

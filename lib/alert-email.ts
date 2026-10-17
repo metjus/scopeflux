@@ -1,6 +1,7 @@
 // The "release soon" email for watchlist alerts. Email clients ignore most CSS,
 // so the layout uses tables and inline styles only, and every email also has a
-// plain-text version. Sending is added later; this only builds the message.
+// plain-text version. Times are shown in UTC (readers are in any time zone).
+// Sending: lib/alerts.ts.
 import {SITE_URL} from './seo.ts';
 
 export type AlertDomain = {domain: string; drop: string; source?: string};
@@ -11,11 +12,11 @@ const escape = (value: string) => value.replace(/[&<>"']/g, c => ({'&': '&amp;',
 function when(drop: string, now: number) {
   const dateOnly = drop.length === 10;
   const at = new Date(dateOnly ? drop + 'T12:00:00Z' : drop);
-  const date = at.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Europe/Bratislava'});
-  const time = dateOnly ? '' : at.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Bratislava'});
+  const date = at.toLocaleDateString('en-GB', {weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC'});
+  const time = dateOnly ? '' : at.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit', timeZone: 'UTC'});
   const days = Math.round((Date.parse(dateOnly ? drop + 'T00:00:00Z' : drop) - now) / 86400000);
   const label = days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days} days`;
-  return {label, date: time ? `${date}, ${time}` : date};
+  return {label, date: time ? `${date}, ${time} UTC` : date};
 }
 
 export function releaseAlertEmail({name, domains, settingsUrl = SITE_URL + '/#watch', now = Date.now()}: {name?: string; domains: AlertDomain[]; settingsUrl?: string; now?: number}): AlertEmail {

@@ -151,6 +151,8 @@ export function logout() {
 export async function deleteAccount(db: D1Database, id: string) {
   await db.batch([
     db.prepare('DELETE FROM watchlist WHERE user_id=?').bind(id),
+    db.prepare('DELETE FROM alert_settings WHERE user_id=?').bind(id),
+    db.prepare('DELETE FROM alert_sent WHERE user_id=?').bind(id),
     db.prepare('DELETE FROM users WHERE id=?').bind(id),
   ]);
 }
