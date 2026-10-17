@@ -51,7 +51,7 @@ export function HowItWorksPage({navigate}:{navigate:(tab:PageId)=>void}){
   <div className="section-intro">
    <span className="eyebrow">THE TIMELINE</span>
    <h2>From expired to available, step by step.</h2>
-   <p>The same path applies to every extension. Read it from left to right; the exact number of days depends on the registry and the registrar.</p>
+   <p>The same order applies to every extension, from stage 1 to stage 5. The exact number of days depends on the registry and the registrar.</p>
   </div>
 
   <div className="how-panel">
@@ -69,14 +69,14 @@ export function HowItWorksPage({navigate}:{navigate:(tab:PageId)=>void}){
      </div>
     </li>)}
    </ol>
-   <div className="how-legend" aria-hidden="true"><span className="tone-safe">Owner is safe</span><span className="tone-warn">Owner should pay now</span><span className="tone-risk">Last chance for the owner</span><span className="tone-lock">Locked or auction</span><span className="tone-free">Free to register</span></div>
+   <div className="how-legend" aria-label="Colour key"><span className="tone-safe">Owner is safe</span><span className="tone-warn">Owner should pay now</span><span className="tone-risk">Last chance for the owner</span><span className="tone-lock">Locked or auction</span><span className="tone-free">Free to register</span></div>
    <div className="how-notes">{NOTES.map(note=><article key={note.title}><h3>{note.title}</h3><p>{note.text}</p></article>)}</div>
   </div>
 
   <div className="section-intro how-section">
    <span className="eyebrow">WHAT IT COSTS</span>
    <h2>Fees when an owner forgets to pay.</h2>
-   <p>Read from top to bottom: each step comes later than the one before. This applies to every extension; prices are typical, and the registrar’s own price list is what counts.</p>
+   <p>Steps 1 to 5 follow each other in time. This is the general pattern: the details differ by extension (a .cz name, for example, goes to a registry auction), prices are typical, and the registrar’s own price list is what counts.</p>
   </div>
   <ol className="how-fees">
    {FEES.map((fee,i)=><li key={fee.step}>

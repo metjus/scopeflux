@@ -135,3 +135,17 @@ test('how it works explains every stage per extension with its cost, without emo
   assert.match(html, /<ol class="how-fees">/);
   assert.doesNotMatch(html, /\p{Extended_Pictographic}/u);
 });
+
+test('the home page renders saved listings into the HTML, without the promo card on other pages', async () => {
+  const {initialCatalogue} = require('../lib/initial-catalog.ts');
+  assert.equal(await initialCatalogue(undefined), undefined);
+  const Radar = require('../app/radar.tsx').default;
+  const drop = new Date(Date.now() + 2 * 86400000).toISOString();
+  const catalogue = {records: [{domain: 'visible-name.com', tld: 'com', drop, checkedAt: drop, expiration: null, status: 'Expected release', source: 'Dynadot', sourceUrl: 'https://www.dynadot.com/'}], feeds: []};
+  const home = renderToStaticMarkup(React.createElement(Radar, {signedIn: false, initialCatalogue: catalogue}));
+  assert.match(home, /visible-name\.com/);
+  assert.match(home, /DOMAINS ON THE HORIZON/);
+  assert.match(home, /Browse \.sk releases/);
+  const contact = renderToStaticMarkup(React.createElement(Radar, {signedIn: false, initialPage: 'contact'}));
+  assert.doesNotMatch(contact, /Browse \.sk releases|DOMAINS ON THE HORIZON/);
+});
