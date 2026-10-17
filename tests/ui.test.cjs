@@ -176,3 +176,15 @@ test('listings are soonest first by default, and later-today releases carry a To
   assert.equal((html.match(/class="today-badge"/g) || []).length, 1);
   assert.match(html, /<option value="date" selected="">Soonest first<\/option>/);
 });
+
+test('beta feedback is one click away, and email alerts are announced as coming soon', () => {
+  const Radar = require('../app/radar.tsx').default;
+  const {AboutPage, FEEDBACK_URL} = require('../app/info-pages.tsx');
+  assert.match(FEEDBACK_URL, /^mailto:hello@scopeflux\.io\?subject=ScopeFlux%20beta%20feedback$/);
+  const page = renderToStaticMarkup(React.createElement(Radar, {signedIn: false, initialPage: 'contact'}));
+  assert.ok((page.match(/href="mailto:hello@scopeflux\.io\?subject=ScopeFlux%20beta%20feedback"/g) || []).length >= 2, 'badge and footer');
+  assert.match(page, /Send feedback/);
+  const about = renderToStaticMarkup(React.createElement(AboutPage, {navigate() {}}));
+  assert.match(about, /COMING SOON/);
+  assert.match(about, /Email alerts/);
+});
