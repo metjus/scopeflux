@@ -18,10 +18,6 @@
       "migrations_dir": "migrations"
     }
   ],
-  "vars": {
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": ""
-  },
   "triggers": {
     "crons": [
       "*/15 * * * *"

@@ -1,6 +1,5 @@
 import {USER_AGENT,limitedText} from './http.ts';
 import {parseBackorderDetail} from './backorder-detail.ts';
-export const TLDS=['sk','cz','com','net','org','eu','ai','io','dev','app'];
 export type ReportedDrop={at:string;label:string;sourceDate:string;source:string;url:string;checkedAt:string};
 export type DomainRecord={checkError?:string;checkAttemptedAt?:string;availabilityCheckedAt?:string;reportedDrop?:ReportedDrop;domain:string;tld:string;status:string;expiration:string|null;drop:string|null;listedDate?:string|null;registered?:string|null;source:string;sourceUrl:string;checkedAt:string;sourceCheckedDate?:string|null;conditionalRelease?:string|null;lifecycleUrl?:string;note?:string;changed?:boolean;availabilitySource?:string;availabilityUrl?:string};
 export function normalizeDomain(input:string){

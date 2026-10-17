@@ -113,3 +113,13 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .how-timeline>li:last-child .how-stage{margin-bottom:0}
 .how-notes{grid-template-columns:1fr}.how-fees>li{gap:10px}.how-fees>li>div{padding:14px}
 .how-cta>button{margin-left:0;width:100%}}
+/* Account menu in the top bar. */
+.account-menu{position:relative}
+.account-menu>summary{list-style:none;cursor:pointer;border-radius:50%}
+.account-menu>summary::-webkit-details-marker{display:none}
+.account-panel{position:absolute;right:0;top:calc(100% + 10px);z-index:30;display:grid;gap:4px;min-width:240px;max-width:calc(100vw - 32px);padding:14px;border:1px solid var(--line);background:var(--raised);border-radius:12px;box-shadow:0 18px 40px #0008}
+.account-panel strong{font:600 14px Manrope}
+.account-panel>span{font-size:12px;color:var(--muted);overflow-wrap:anywhere;margin-bottom:8px}
+.account-panel a,.account-panel button{display:flex;align-items:center;gap:8px;min-height:40px;padding:0 10px;border-radius:8px;font-size:13px;color:var(--ink);text-align:left}
+.account-panel a:hover,.account-panel button:hover{background:#ffffff0d}
+.account-panel button{color:#f0a07a}

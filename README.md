@@ -9,7 +9,7 @@ Samostatná anglická stránka na sledovanie domén pred očakávaným uvoľnen�
 - Kontrolu ľubovoľnej platnej domény cez dostupné registre; bez časového limitu na budúcu expiráciu.
 - Uložené verejné zdrojové náhľady: **8 512 upcoming** a **1 352 historických pozorovaní** pri exporte 15. 10. 2026. Presné časy získania sú v `data/manifest.json`, nie sú prepísané časom exportu.
 - Prázdnu osobnú watchlist databázu. Údaje účtov ani prihlasovacie údaje z pôvodnej stránky sa neexportujú.
-- Voliteľné Cloudflare Access prihlásenie, vlastný chránený updater a dva vypnuté bloky Google AdSense.
+- Prihlásenie cez Google (voliteľné), watchlist v prehliadači aj v účte, vlastný chránený updater a dva vypnuté bloky Google AdSense.
 
 Katalóg nie je úplný zoznam všetkých domén na internete. Niektoré zdroje poskytujú iba verejný náhľad. Expirácia, plánované uvoľnenie a potvrdená registrácia sú odlišné údaje. Dátum uvoľnenia nie je zárukou dostupnosti. Presná hodina sa nezobrazuje, ak ju zdroj nepublikuje.
 
@@ -81,16 +81,19 @@ Wrangler zobrazí URL tvojho Workeru. V Cloudflare Workers → Settings → Doma
 
 ## 4. Prihlásenie a watchlist
 
-Katalóg a kontrola domény fungujú bez účtu. Watchlist potrebuje Cloudflare Access; samostatný balík nepoužíva ChatGPT prihlásenie.
+Katalóg a kontrola domény fungujú bez účtu. Watchlist funguje aj bez účtu: domény sa uložia len v prehliadači. Po prihlásení cez Google sa presunú do účtu a sú dostupné na všetkých zariadeniach.
 
-1. V Cloudflare Zero Trust vytvor **Access → Applications → Self-hosted** aplikáciu pre `tvoj-hostname/account/*` a nastav pravidlo, kto sa smie prihlásiť. Pre súkromnú celú stránku chráň celý hostname namiesto samotnej cesty.
-2. Skopíruj Application Audience (AUD). Do `wrangler.json` → `vars` vlož `ACCESS_TEAM_DOMAIN` v tvare `https://tvoj-team.cloudflareaccess.com` a `ACCESS_AUD`.
-3. Znovu zostav/nasaď. Odkaz **Sign in** prejde cez `/account/login` a po overení sa vráti do katalógu. Odhlásenie je `/account/logout`.
-4. Skontroluj, že aplikácia Access zahŕňa nasadený hostname aj každú alternatívnu adresu, ktorú používaš.
+Nastavenie prihlásenia cez Google (jednorazovo):
 
-Worker kontroluje podpis RS256, issuer, audience a platnosť Access JWT. Identitu nepreberá z používateľom poslaného ID ani e-mailového headera. Watchlist je oddelený podľa overeného `sub`. Bez Access konfigurácie sa používateľ neprihlási; ostatné časti stránky fungujú.
+1. [Google Cloud Console](https://console.cloud.google.com/) → nový projekt (napr. ScopeFlux) → **APIs & Services → OAuth consent screen**: typ **External**, názov ScopeFlux, support email, logo voliteľné, publikovať (**Publish app**).
+2. **APIs & Services → Credentials → Create credentials → OAuth client ID** → typ **Web application**.
+   - Authorized JavaScript origins: `https://scopeflux.io`
+   - Authorized redirect URIs: `https://scopeflux.io/account/callback` (pre test aj `https://scopeflux.<účet>.workers.dev/account/callback`)
+3. Cloudflare → Workers → scopeflux → **Settings → Variables and Secrets** → pridaj dve položky typu **Secret**: `GOOGLE_CLIENT_ID` a `GOOGLE_CLIENT_SECRET`. (Typ Secret, aby ich ďalšie nasadenie nezmazalo.)
 
-Dokumentácia: [Access JWT](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/).
+Prihlásenie: `/account/login` → Google → `/account/callback`. Worker overí `state` a `nonce`, vymení kód za ID token priamo u Google, skontroluje issuer, audience, platnosť a overený email a nastaví podpísané HttpOnly cookie `sf_session` na 30 dní. Kľúč na podpis sa odvodzuje z `GOOGLE_CLIENT_SECRET`. Heslá sa neukladajú. Identita sa nikdy neberie z hlavičiek poslaných prehliadačom. Účet a watchlist sa dajú zmazať v menu účtu (`DELETE /api/account`). Bez týchto dvoch hodnôt je prihlásenie vypnuté a zvyšok stránky funguje.
+
+Email upozornenia: šablóna je v `lib/alert-email.ts`; odosielanie sa pridá neskôr.
 
 ## 5. Automatické aktualizácie
 
@@ -121,6 +124,6 @@ npx pnpm@11.25.0 run dev
 
 Lokálne migrácie môžeš aplikovať pomocou `npx pnpm@11.25.0 exec wrangler d1 migrations apply DB --local --config wrangler.json`. `db:migrate` a `db:seed` v skriptoch cielia na **remote** databázu.
 
-Testy pokrývajú filtre všetkých TLD, 30 dní, históriu, parsery, databázu, watchlist izoláciu, Access JWT, ochranu updatera a import veľkého feedu. Skutočné reklamné požiadavky sa v testoch neposielajú. Overenie v reálnom prehliadači a v tvojom Cloudflare/AdSense účte je potrebné po nasadení.
+Testy pokrývajú filtre všetkých TLD, 30 dní, históriu, parsery, databázu, watchlist izoláciu, prihlásenie cez Google, ochranu updatera a import veľkého feedu. Skutočné reklamné požiadavky sa v testoch neposielajú. Overenie v reálnom prehliadači a v tvojom Cloudflare/AdSense účte je potrebné po nasadení.
 
 Zdrojová štruktúra: `app/` UI a API, `lib/` registre/katalóg/filtre/autentifikácia, `worker.ts` vstup Workeru a cron, `migrations/` D1 schéma, `data/` počiatočné verejné snapshoty, `scripts/` updater a nasadenie.
