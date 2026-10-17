@@ -130,5 +130,8 @@ test('how it works explains every stage per extension with its cost, without emo
   assert.match(html, /role="tablist"/);
   assert.match(html, /Redemption/);
   assert.match(html, /Restore fee/);
+  const {FEES} = require('../app/how-it-works.tsx');
+  for (const fee of FEES) for (const ext of ['global', 'sk', 'cz']) assert.ok(fee.prices[ext], fee.step + ' ' + ext);
+  assert.match(html, /<ol class="how-fees">/);
   assert.doesNotMatch(html, /\p{Extended_Pictographic}/u);
 });
