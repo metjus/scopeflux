@@ -17,7 +17,7 @@ ScopeFlux shows estimates published by public sources, not guarantees: a holder 
 
 ## Data sources
 
-- .com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv: Dynadot's public backorder listings with projected drop times.
+- .com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv: Dynadot's public backorder listings with projected drop times, names without numbers or hyphens, about 5 days ahead.
 - .cz: the official CZ.NIC auction list. Expired .cz domains go to a public registry auction about 15 days after being listed; unsold names are released the day after the auction. ScopeFlux shows when bidding opens.
 - .sk: Backorder.sk's public list of held .sk domains with their deletion days. The source gives only the day, so the release time shown is an estimate: about 02:00 Slovak time (Europe/Bratislava) the day after deletion.
 - Single-domain checks: RDAP registries listed by IANA.
