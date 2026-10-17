@@ -6,7 +6,7 @@ ScopeFlux shows estimates published by public sources, not guarantees: a holder 
 
 ## Pages
 
-- [Expiring soon](https://scopeflux.io/): upcoming releases for .sk, .cz, .com, .net, .org, .io and .app, filterable by extension, date range (7 or 30 days), name length, hyphens, numbers and an estimated name quality.
+- [Expiring soon](https://scopeflux.io/): upcoming releases for .com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv, .sk and .cz, filterable by extension, date range (7 or 30 days), name length, hyphens, numbers and an estimated name quality.
 - [Recently expired](https://scopeflux.io/#recent): listings whose release date passed in the last 30 days, kept from ScopeFlux's own archive.
 - [Check domain](https://scopeflux.io/check-domain): registration status and expiration date of any domain, from public registry data (RDAP).
 - [How domain expiry works](https://scopeflux.io/how-it-works): the stages between expiry and release (grace period, redemption, pending delete, release; .sk held and deletion day; .cz protection period and registry auction) and the typical fees at each stage.
@@ -19,13 +19,13 @@ ScopeFlux shows estimates published by public sources, not guarantees: a holder 
 
 - .cz: the official CZ.NIC auction list. Expired .cz domains go to a public registry auction about 15 days after being listed; unsold names are released the day after the auction. ScopeFlux shows when bidding opens.
 - .sk: Backorder.sk's public list of held .sk domains with their deletion days (date only, no hour). In practice a deleted .sk name can usually be registered from about 02:00 Slovak time (Europe/Bratislava) on the following day.
-- .com, .net, .org, .io, .app: Dynadot's public backorder listings with projected drop times.
+- .com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv: Dynadot's public backorder listings with projected drop times.
 - Single-domain checks: RDAP registries listed by IANA.
 
 Lists refresh about every hour. Coverage is partial: these are public previews, not complete registry dumps.
 
 ## Data access
 
-- JSON: `https://scopeflux.io/api/domains?cached=1&tlds=cz` returns the saved upcoming listings for one or more extensions (comma-separated: sk, cz, com, net, org, io, app). Each record has domain, tld, status, drop (release date or time, ISO 8601), source and sourceUrl.
+- JSON: `https://scopeflux.io/api/domains?cached=1&tlds=cz` returns the saved upcoming listings for one or more extensions (comma-separated: sk, cz, com, net, org, io, app, info, co, me, xyz, biz, us, pro, cc, tv). Each record has domain, tld, status, drop (release date or time, ISO 8601), source and sourceUrl.
 - JSON: `https://scopeflux.io/api/domains?domain=example.com` checks one domain.
 - Please cache results and keep request rates low.

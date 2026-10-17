@@ -6,8 +6,14 @@ import {saveCatalogFeed,archiveDue,recentCatalog} from './catalog-history.ts';
 import {isUpcomingDate,releaseTimestamp} from './release-time.ts';
 // .ai and .eu were dropped: their only source (Backorder.com) blocks Worker
 // requests and needed an external scraper. They can still be checked one by one.
-export const CATALOG_TLDS=['sk','cz','com','net','org','io','app'];
-const DYNA:Record<string,string>={com:'tld_0',net:'tld_10',org:'tld_3',io:'tld_8',app:'tld_11'};
+export const CATALOG_TLDS=['sk','cz','com','net','org','io','app','info','co','me','xyz','biz','us','pro','cc','tv'];
+// Dynadot's filter checkbox ids (from its backorder page, October 2026). They are
+// ranked by listing count and can shift; parseDynadot keeps only names that end
+// in the requested extension, so a stale id shows fewer names, never wrong ones.
+const DYNA:Record<string,string>={com:'tld_0',info:'tld_1',org:'tld_2',co:'tld_4',pro:'tld_5',me:'tld_8',io:'tld_9',net:'tld_10',xyz:'tld_11',app:'tld_14',cc:'tld_15',biz:'tld_26',us:'tld_40',tv:'tld_91'};
+// D1 on the free plan allows about 50 queries per invocation, so one request or
+// cron run refreshes only the most out-of-date feeds; the rest show saved data.
+export const MAX_REFRESH=5;
 export type FeedInfo={tld:string;source:string;url:string;loaded:number;more:boolean;limited:boolean;checkedAt:string;error?:string;stored?:boolean;refreshError?:string;retryAfter?:number};
 export type CatalogResult={records:DomainRecord[];feeds:FeedInfo[]};
 const cache=new Map<string,{at:number;data:{records:DomainRecord[];feed:FeedInfo;observed?:DomainRecord[]}}>();
@@ -97,11 +103,16 @@ async function feed(tld:string,page=1){
 }
 function logStorageError(error:unknown):null{console.error('catalogue storage failed',{message:(error as Error)?.message});return null;}
 export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):Promise<CatalogResult>{
- const results=await Promise.all(tlds.filter(t=>CATALOG_TLDS.includes(t)).map(async tld=>{try{
- if(db&&page===1){const saved=await readSavedFeed(db,tld).catch(logStorageError);if(saved){
-   const age=Date.now()-new Date(saved.checked_at).getTime();
-   if(age<900000)return storedFeed(tld,saved);
-  }}
+ const selected=tlds.filter(t=>CATALOG_TLDS.includes(t));
+ const savedRows=db&&page===1?await readSavedFeeds(db,selected).catch(logStorageError):undefined;
+ const savedBy=new Map((savedRows||[]).map(row=>[row.tld,row]));
+ // Never-saved feeds first, then the oldest; fresh ones (under 15 minutes) are not refreshed.
+ const stale=selected.filter(tld=>{const row=savedBy.get(tld);return !row||Date.now()-new Date(row.checked_at).getTime()>=900000;})
+  .sort((a,b)=>(savedBy.has(a)?Date.parse(savedBy.get(a)!.checked_at):0)-(savedBy.has(b)?Date.parse(savedBy.get(b)!.checked_at):0));
+ const refresh=new Set(db&&page===1?stale.slice(0,MAX_REFRESH):selected);
+ const results=await Promise.all(selected.map(async tld=>{try{
+ const saved=savedBy.get(tld);
+ if(saved&&!refresh.has(tld))return storedFeed(tld,saved);
  const result=await feed(tld,page);
  if(db)await recordOk(db,'feed:'+tld);
  // Storage problems (e.g. the D1 daily limit) must not hide listings that were just fetched.
@@ -112,7 +123,7 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):P
  return result;
  }catch(e){
  if(db)await recordError(db,'feed:'+tld,e);
- if(db&&page===1){try{const saved=await readSavedFeed(db,tld);if(saved)return storedFeed(tld,saved,publicFeedError(e));}catch{}}
+ if(db&&page===1){const saved=savedBy.get(tld);if(saved)return storedFeed(tld,saved,publicFeedError(e));}
  return {records:[],feed:{tld,source:feedSource(tld),url:feedPage(tld),loaded:0,more:false,limited:false,checkedAt:new Date().toISOString(),error:publicFeedError(e),retryAfter:e instanceof FeedSourceError?e.retryAfter:undefined}}}}));
  return {records:results.flatMap(r=>r.records),feeds:results.map(r=>r.feed)};
 }

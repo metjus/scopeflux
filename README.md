@@ -21,7 +21,7 @@ Repozitár `metjus/scopeflux` je napojený na Cloudflare Worker **scopeflux** (W
   - **Build command:** `npx -y pnpm@11.25.0 install --frozen-lockfile && npx -y pnpm@11.25.0 run build`
   - **Deploy command:** `npx wrangler deploy` (build zanechá `.wrangler/deploy/config.json`, takže Wrangler nasadí zostavený `dist/server`)
 - Databáza: existujúca D1 `scopeflux` (binding `DB`). Tabuľky sa vytvoria samy pri prvej požiadavke (`lib/schema.ts`), migrácie netreba spúšťať ručne.
-- Počiatočné dáta (`data/catalog-seed.sql`) sa nenahrávajú automaticky. Katalóg sa plní zo zdrojov pri návštevách a cronom (`10 * * * *`); „Recently expired“ sa plní z vlastného archívu, keď dátum uvoľnenia uplynie.
+- Počiatočné dáta (`data/catalog-seed.sql`) sa nenahrávajú automaticky. Katalóg sa plní zo zdrojov pri návštevách a cronom (`*/15 * * * *`); „Recently expired“ sa plní z vlastného archívu, keď dátum uvoľnenia uplynie.
 - `dist/` je výstup buildu a nie je v gite.
 
 Nasledujúce kapitoly popisujú pôvodný ručný postup (vlastný Worker, vlastná D1).
@@ -94,7 +94,7 @@ Dokumentácia: [Access JWT](https://developers.cloudflare.com/cloudflare-one/acc
 
 ## 5. Automatické aktualizácie
 
-Cloudflare cron (`10 * * * *`, UTC) načítava verejné zoznamy Backorder.sk (.sk) a Dynadot (.com, .net, .org, .io, .app) a archivuje pozorovania; z archívu vzniká „Recently expired“.
+Cloudflare cron (`*/15 * * * *`, UTC) načítava verejné zoznamy Backorder.sk (.sk), CZ.NIC (.cz) a Dynadot (.com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv); naraz obnoví najviac 5 najstarších zoznamov (limit D1 na free pláne) a archivuje pozorovania; z archívu vzniká „Recently expired“.
 
 `.ai` a `.eu` boli z katalógu odstránené (október 2026): ich jediný zdroj (Backorder.com) blokuje požiadavky z Cloudflare a pôvodný externý updater (GitHub Actions + ExpiredDomains.net) sťahoval stránky, ktoré to v podmienkach zakazujú. Jednotlivé `.ai`/`.eu` domény sa dajú stále overiť cez „Check domain“ (RDAP).
 
