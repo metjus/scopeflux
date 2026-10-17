@@ -91,3 +91,12 @@ test('.sk deletion days become an estimated release time: 02:00 Slovak time the 
   const local = new Date(skReleaseTime('2026-10-24')).toLocaleTimeString('en-GB', {timeZone: 'Europe/Bratislava', hour: '2-digit', minute: '2-digit'});
   assert.equal(local, '02:00'); // night of the clock change
 });
+
+test('global lists ask Dynadot for names without numbers or hyphens', async () => {
+  const {dynadotUrl} = await import('../lib/catalog.ts');
+  const url = new URL(dynadotUrl('com', 2));
+  assert.equal(url.searchParams.get('tld_0'), 'com');
+  assert.equal(url.searchParams.get('no_numbers'), '1');
+  assert.equal(url.searchParams.get('no_hyphens'), '1');
+  assert.equal(url.searchParams.get('page_index'), '2');
+});

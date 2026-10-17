@@ -15,6 +15,12 @@ const DYNA:Record<string,string>={com:'tld_0',info:'tld_1',org:'tld_2',co:'tld_4
 // D1 on the free plan allows about 50 queries per invocation, so one request or
 // cron run refreshes only the most out-of-date feeds; the rest show saved data.
 export const MAX_REFRESH=5;
+// Dynadot lists the soonest drops first, and for .com those are almost all
+// names with numbers or hyphens. Asking Dynadot for names without them keeps
+// the 100 listings per page useful (its own "No Numbers" / "No Hyphens" filters).
+export function dynadotUrl(tld:string,page=1){
+ return `https://www.dynadot.com/market/backorder?${DYNA[tld]}=${tld}&no_numbers=1&no_hyphens=1&page_size=100&order_by=3&page_index=${page}`;
+}
 // Full lists are loaded for at most this many extensions at a time; without a
 // choice the catalogue shows the small preview of every extension instead.
 export const MAX_EXTENSIONS=2;
@@ -93,7 +99,7 @@ export function parseDynadot(html:string,tld:string,checkedAt=new Date().toISOSt
 async function feed(tld:string,page=1){
  const key=tld+':'+page,old=cache.get(key);if(old&&Date.now()-old.at<900000){const records=old.data.records.filter(r=>isUpcomingDate(r.drop));return {...old.data,records,feed:{...old.data.feed,loaded:records.length}};}
  const source=feedSource(tld);
- const url=tld==='sk'||tld==='cz'?feedPage(tld):DYNA[tld]?`https://www.dynadot.com/market/backorder?${DYNA[tld]}=${tld}&page_size=100&order_by=3&page_index=${page}`:`https://backorder.com/en/pending-delete/${tld}`;
+ const url=tld==='sk'||tld==='cz'?feedPage(tld):DYNA[tld]?dynadotUrl(tld,page):`https://backorder.com/en/pending-delete/${tld}`;
  const checkedAt=new Date().toISOString();
  if(page>1&&!DYNA[tld])return {records:[],feed:{tld,source,url,loaded:0,more:false,limited:tld!=='sk',checkedAt}};
  const response=await fetch(tld==='cz'?CZ_AUCTIONS_JSON:url,{headers:{Accept:tld==='cz'?'application/json':'text/html','User-Agent':USER_AGENT},signal:AbortSignal.timeout(16000)});
