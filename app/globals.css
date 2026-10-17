@@ -91,11 +91,17 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .how-notes h3{font:700 14px Manrope;margin:0 0 6px}
 .how-notes p{font-size:13px;line-height:1.7;color:var(--muted);margin:0}
 .how-section{margin-top:52px}
-.how-fees{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.how-fees>div{padding:18px;border:1px solid var(--line);background:#161d2b;border-radius:10px}
-.how-fees span{display:block;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.how-fees strong{display:block;font:700 16px/1.4 Manrope;margin:8px 0 6px;color:var(--cyan)}
-.how-fees p{font-size:12px;line-height:1.65;color:#b8c3d7;margin:0}
+.how-fees{list-style:none;margin:0;padding:0;display:grid;gap:0;max-width:980px}
+.how-fees>li{display:flex;gap:16px;position:relative;padding:0 0 18px}
+.how-fees>li:not(:last-child)::before{content:'';position:absolute;left:15px;top:32px;bottom:0;width:2px;background:var(--line)}
+.how-fee-n{flex-shrink:0;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;border:2px solid var(--cyan);font:700 13px Manrope;color:var(--cyan);background:var(--bg)}
+.how-fees>li>div{flex:1;min-width:0;padding:14px 18px;border:1px solid var(--line);background:#161d2b;border-radius:10px}
+.how-fees strong{font:700 16px Manrope;margin-right:10px}
+.how-fees .how-when{color:var(--muted);margin:0}
+.how-fees dl{margin:14px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.how-fees dt{font:700 13px Manrope;color:var(--cyan)}
+.how-fees dt small{font:400 10px 'DM Sans';color:var(--muted)}
+.how-fees dd{margin:4px 0 0;font-size:13px;line-height:1.6;color:#c4cde0}
 .how-faq{display:grid;gap:10px;max-width:860px}
 .how-faq details{border:1px solid var(--line);background:#161d2b;border-radius:10px}
 .how-faq summary{cursor:pointer;padding:16px 18px;font:600 14px/1.5 Manrope;min-height:48px}
@@ -104,7 +110,7 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .how-cta>button{margin-left:auto;flex-shrink:0}
 .how-source{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:11px;color:var(--muted);margin:22px 0 0}
 .how-source a{display:inline-flex;align-items:center;gap:5px;color:var(--cyan)}
-@media(max-width:1200px){.how-timeline{grid-template-columns:repeat(5,minmax(170px,1fr));overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory}.how-timeline>li{scroll-snap-align:start}.how-fees{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:1200px){.how-timeline{grid-template-columns:repeat(5,minmax(170px,1fr));overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory}.how-timeline>li{scroll-snap-align:start}}
 @media(max-width:700px){.how-summary{padding:18px}.how-summary li{font-size:13px}.how-panel{padding:16px}.how-tabs button{flex:1;min-width:0;padding:9px 12px}
 .how-timeline{grid-template-columns:1fr;overflow:visible;gap:0;padding:0}
 .how-timeline>li{flex-direction:row;gap:14px}
@@ -112,5 +118,5 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .how-bar span{left:50%;top:14px;transform:translateX(-50%)}
 .how-stage{margin:0 0 12px}
 .how-timeline>li:last-child .how-stage{margin-bottom:0}
-.how-notes,.how-fees{grid-template-columns:1fr}
+.how-notes{grid-template-columns:1fr}.how-fees>li{gap:10px}.how-fees>li>div{padding:14px}.how-fees dl{grid-template-columns:1fr;gap:0}.how-fees dl>div{display:grid;grid-template-columns:62px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--line)}.how-fees dd{margin:0}.how-fees dt small{display:none}
 .how-cta>button{margin-left:0;width:100%}}
