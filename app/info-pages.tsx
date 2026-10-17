@@ -16,6 +16,9 @@ export function AboutPage({navigate}:{navigate:(tab:PageId)=>void}){
 
 export const CONTACT_EMAIL = 'hello@scopeflux.io';
 const mail = <a href={'mailto:' + CONTACT_EMAIL}>{CONTACT_EMAIL}</a>;
+// The operator (data controller under the GDPR), shown on Privacy and Contact.
+export const OPERATOR = {name: 'Matúš Šturdík', address: 'Nová 407, Veľká Mača, Slovakia', companyId: '51628163'};
+const operator = <>{OPERATOR.name}, {OPERATOR.address}, IČO (company ID) {OPERATOR.companyId}</>;
 
 // Plain description of what the site actually does with data. Keep it in step
 // with the code: update it whenever storage, sign-in, analytics or ads change.
@@ -28,7 +31,7 @@ export function PrivacyPage() {
         <p>Last updated 17 October 2026.</p>
       </div>
       <h3>Who runs ScopeFlux</h3>
-      <p>ScopeFlux is a personal project run from Slovakia. Questions about your data: {mail}.</p>
+      <p>ScopeFlux is run by {operator}. This is the controller of your personal data. Questions about your data: {mail}.</p>
       <h3>Browsing without an account</h3>
       <p>You can use the catalogue, the history and the domain check without an account. ScopeFlux sets no analytics, advertising or tracking cookies and does not build a profile of you.</p>
       <p>When you check a domain, the name you typed is sent to public registration services (RDAP registries listed by IANA, and Backorder.sk for .sk details) to read its current status. ScopeFlux does not store which domains you looked up.</p>
@@ -54,6 +57,8 @@ export function ContactPage() {
         <h2>Get in touch.</h2>
         <p>Questions, corrections to a listing, ideas or data requests: write to {mail}.</p>
       </div>
+      <h3>Operator</h3>
+      <p>{operator}</p>
       <p>ScopeFlux shows release estimates from public sources. It cannot reserve, buy or transfer domains. To register a domain, use a registrar.</p>
     </section>
   );
