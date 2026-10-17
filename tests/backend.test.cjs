@@ -197,3 +197,25 @@ test('a background watchlist refresh cannot resurrect a domain deleted while the
   } finally {domains.lookup = originalLookup; env.DB.close();}
 });
 
+
+test('one request refreshes at most MAX_REFRESH feeds, oldest first, and shows saved data for the rest', async () => {
+  env.DB = createDatabase();
+  const originalFetch = global.fetch;
+  const fetched = [];
+  global.fetch = async url => {fetched.push(String(url)); throw new Error('Source unavailable');};
+  try {
+    const old = new Date(Date.now() - 2 * 3600000).toISOString();
+    const older = new Date(Date.now() - 5 * 3600000).toISOString();
+    for (const tld of catalog.CATALOG_TLDS) {
+      const checkedAt = tld === 'xyz' || tld === 'tv' ? older : old;
+      await history.saveCatalogFeed(env.DB, tld, [record('saved.' + tld, new Date(Date.now() + day).toISOString(), checkedAt)], checkedAt);
+    }
+    const result = await catalog.upcomingCatalog(catalog.CATALOG_TLDS, 1, env.DB);
+    assert.ok(fetched.length <= catalog.MAX_REFRESH, 'fetched ' + fetched.length);
+    assert.ok(fetched.some(url => url.includes('=xyz')) && fetched.some(url => url.includes('=tv')));
+    assert.equal(result.feeds.length, catalog.CATALOG_TLDS.length);
+    assert.deepEqual(new Set(result.records.map(row => row.tld)), new Set(catalog.CATALOG_TLDS));
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
