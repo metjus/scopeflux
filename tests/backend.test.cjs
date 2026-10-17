@@ -219,3 +219,19 @@ test('one request refreshes at most MAX_REFRESH feeds, oldest first, and shows s
     global.fetch = originalFetch;
   }
 });
+
+test('the home page HTML reads only the small preview rows, not whole feeds', async () => {
+  env.DB = createDatabase();
+  const {initialCatalogue} = require('../lib/initial-catalog.ts');
+  const many = Array.from({length: 80}, (_, i) => record('name' + i + '.sk', new Date(Date.now() + (i % 10 + 1) * 3600000).toISOString()));
+  await history.saveCatalogFeed(env.DB, 'sk', many, stamp());
+  const preview = await env.DB.prepare('SELECT records,total FROM catalog_preview WHERE tld=?').bind('sk').first();
+  assert.equal(JSON.parse(preview.records).length, history.PREVIEW_SIZE);
+  assert.equal(preview.total, 80);
+  const reads = [];
+  const spy = {prepare(sql) {reads.push(sql); return env.DB.prepare(sql);}};
+  const initial = await initialCatalogue(spy);
+  assert.equal(initial.records.length, history.PREVIEW_SIZE);
+  assert.equal(initial.feeds[0].loaded, 80);
+  assert.ok(reads.every(sql => !/catalog_feeds|catalog_feed_parts/.test(sql)), reads.join('; '));
+});

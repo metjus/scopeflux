@@ -153,6 +153,10 @@ export async function savedCatalog(db:D1Database,tlds=CATALOG_TLDS):Promise<Cata
  return {records:results.flatMap(result=>result.records),feeds:results.map(result=>result.feed)};
 }
 
+// Feed details for the home page preview, without reading the whole feed.
+export function previewFeedInfo(tld:string,total:number,checkedAt:string):FeedInfo{
+ return {tld,source:feedSource(tld),url:feedPage(tld),loaded:total,more:!!DYNA[tld]&&total>=100,limited:!DYNA[tld]&&tld!=='sk'&&tld!=='cz',checkedAt,stored:true};
+}
 function storedFeed(tld:string,saved:{records:string;checked_at:string},refreshError?:string){
  const observed=JSON.parse(saved.records) as DomainRecord[];
  const records=observed.filter(r=>isUpcomingDate(r.drop));
