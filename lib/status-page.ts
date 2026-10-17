@@ -18,12 +18,15 @@ async function samePassword(given: string, expected: string) {
   return diff === 0;
 }
 
+// Browsers send the name and password as UTF-8 (the realm asks for it), so a
+// password with diacritics (š, č, ž…) must be decoded as UTF-8, not Latin-1.
+// Spaces around a copy-pasted password or secret are ignored.
 async function authorized(request: Request, password: string) {
   const header = request.headers.get('Authorization') ?? '';
   if (!header.startsWith('Basic ')) return false;
   let decoded = '';
-  try { decoded = atob(header.slice(6)); } catch { return false; }
-  return samePassword(decoded.slice(decoded.indexOf(':') + 1), password);
+  try { decoded = new TextDecoder().decode(Uint8Array.from(atob(header.slice(6).trim()), c => c.charCodeAt(0))); } catch { return false; }
+  return samePassword(decoded.slice(decoded.indexOf(':') + 1).trim(), password.trim());
 }
 
 const headers = {'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'X-Frame-Options': 'DENY'};
