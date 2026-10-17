@@ -135,7 +135,7 @@ test('parsers preserve public source dates, suffixes and timestamps and skip mal
   assert.equal(parsed[0].drop, '2026-11-10');
   assert.equal(parsed[0].checkedAt, checkedAt);
   const sk = catalog.parseSkDrops('<li><a href="/domena/cloud.sk">cloud.sk</a><span>15.11.2026</span></li>', checkedAt);
-  assert.equal(sk[0].drop, '2026-11-15');
+  assert.equal(sk[0].drop, '2026-11-16T01:00:00.000Z'); // deletion day 15 Nov -> about 02:00 Slovak time on 16 Nov
   const timestamp = Date.parse('2026-11-15T11:45:00Z');
   const nuxt = '<script id="__NUXT_DATA__">' + JSON.stringify(['cloud.com', timestamp, {backorder_id: 4, name: 0, end_time_stamp: 1}]) + '</script>';
   assert.equal(catalog.parseDynadot(nuxt, 'com', checkedAt)[0].drop, '2026-11-15T11:45:00.000Z');
