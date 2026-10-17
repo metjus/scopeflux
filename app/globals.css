@@ -96,8 +96,8 @@ footer{display:flex;justify-content:space-between;gap:15px;align-items:center;bo
 .how-fees>li:not(:last-child)::before{content:'';position:absolute;left:15px;top:32px;bottom:0;width:2px;background:var(--line)}
 .how-fee-n{flex-shrink:0;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;border:2px solid var(--cyan);font:700 13px Manrope;color:var(--cyan);background:var(--bg)}
 .how-fees>li>div{flex:1;min-width:0;padding:14px 18px;border:1px solid var(--line);background:#161d2b;border-radius:10px}
-.how-fees strong{font:700 16px Manrope;margin-right:10px}
-.how-fees .how-when{color:var(--muted);margin:0}
+.how-fees strong{display:block;font:700 16px Manrope}
+.how-fees .how-when{color:var(--muted);margin:8px 0 0}
 .how-fees b{display:block;margin:10px 0 4px;font:700 15px/1.5 Manrope;color:var(--cyan)}
 .how-fees li p{margin:0;font-size:13px;line-height:1.65;color:#b8c3d7}
 .how-faq{display:grid;gap:10px;max-width:860px}
