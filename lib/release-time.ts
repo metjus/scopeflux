@@ -29,3 +29,11 @@ export function calendarDaysFromToday(value: string | null | undefined, now = Da
   const current = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
   return Math.round((day - current) / DAY_MS);
 }
+
+// Backorder.sk lists only the deletion day of a .sk domain. In practice (seen by
+// the site owner) the name can be registered from about 02:00 Slovak time
+// (Europe/Bratislava) on the following day. Shown as a hint, not as a source date.
+export const SK_RELEASE_HINT = 'usually free from ~02:00 Slovak time the next day';
+export function usualReleaseHint(record: {tld?: string; drop?: string | null}): string | null {
+  return record.tld === 'sk' && typeof record.drop === 'string' && record.drop.length === 10 ? SK_RELEASE_HINT : null;
+}
