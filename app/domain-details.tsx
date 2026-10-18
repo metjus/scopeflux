@@ -5,6 +5,7 @@ import type {DomainRecord} from '../lib/domains';
 import type {assessPremium} from '../lib/premium';
 import {statusInfo} from '../lib/status';
 import {calendarDaysFromToday} from '../lib/release-time';
+import {QRKO_URL} from './info-pages';
 
 type DomainDetailsProps = {
   record: DomainRecord;
@@ -86,6 +87,10 @@ export default function DomainDetails({record, premium, saved, busy, checking, a
         {checking ? <RefreshCw size={16} className="spin"/> : <Bookmark size={17}/>}
         {saved ? 'Update watchlist' : 'Add to watchlist'}
       </button>
+      <a className="partner-tip" href={QRKO_URL} target="_blank" rel="noopener">
+        <span>Our other project</span>
+        Got the domain? Make a free QR code for it with <b>QRko</b> <ExternalLink size={12}/>
+      </a>
     </div>
   );
 }

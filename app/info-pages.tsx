@@ -16,6 +16,8 @@ export function AboutPage({navigate}:{navigate:(tab:PageId)=>void}){
 
 export const CONTACT_EMAIL = 'hello@scopeflux.io';
 // Beta feedback goes to the same inbox, with a subject that is easy to filter.
+// Our other project. The ref parameter shows ScopeFlux visits in QRko's analytics.
+export const QRKO_URL = 'https://qrko.net/?ref=scopeflux';
 export const FEEDBACK_URL = 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent('ScopeFlux beta feedback');
 const mail = <a href={'mailto:' + CONTACT_EMAIL}>{CONTACT_EMAIL}</a>;
 // The operator (data controller under the GDPR), shown on Privacy and Contact.
