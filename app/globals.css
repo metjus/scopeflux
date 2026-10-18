@@ -137,3 +137,4 @@ a.beta:hover{color:#e2d8ff;border-color:#6a5596}
 .coming-soon a{color:var(--cyan)}
 .coming-row{display:flex;align-items:center;gap:8px;margin:2px 0 6px;padding:10px;border:1px dashed var(--line);border-radius:8px;font-size:13px;color:var(--muted)}
 .coming-row small{margin-left:auto;padding:2px 7px;border-radius:10px;background:#2e2645;color:#c0adff;font-size:10px;font-weight:700}
+.foot-partner b,.partner-tip b{color:var(--cyan);font-weight:600}.partner-tip{display:block;margin-top:16px;font-size:11px;line-height:1.7;color:var(--muted);text-align:center}.partner-tip span{display:block;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#7d86a0;margin-bottom:2px}.partner-tip svg{vertical-align:-1px}.partner-tip:hover b,.foot-partner:hover b{text-decoration:underline}
