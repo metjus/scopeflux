@@ -28,7 +28,7 @@ jobs:
               content=r.read(2_000_000).decode('utf-8','replace')
               print('status:',r.status,'content_type:',r.headers.get('Content-Type'))
           import re
-          rows=[x for x in content.splitlines() if re.match(r'^[a-z0-9-]+\\.(?:com|net):',x,re.I)]
+          rows=[x for x in content.splitlines() if re.match(r'^[a-z0-9-]+\.(?:com|net):',x,re.I)]
           print('recognized rows in first 2MB:',len(rows))
           print('one sample:',rows[0][:120] if rows else 'none')
           assert len(rows)>0,'Feed sample does not match parser format'
