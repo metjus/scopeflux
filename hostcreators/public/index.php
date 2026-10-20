@@ -22,6 +22,11 @@ if ($path === '/api/domains' && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET')
         scopeflux_json(['error' => 'The catalogue is temporarily unavailable.'], 503);
     }
 }
+if ($path === '/radar-preview') {
+    header('Content-Type: text/html; charset=utf-8');
+    require dirname(__DIR__) . '/lib/radar-view.php';
+    exit;
+}
 http_response_code(503);
 header('Content-Type: text/html; charset=utf-8');
 echo '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>ScopeFlux migration staging</title><body><h1>ScopeFlux migration staging</h1><p>The PHP backend is not ready for public use.</p></body></html>';
