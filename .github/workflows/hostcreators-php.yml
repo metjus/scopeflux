@@ -1,0 +1,23 @@
+name: Verify HostCreators PHP migration
+on:
+  pull_request:
+    paths:
+      - 'hostcreators/**'
+      - '.github/workflows/hostcreators-php.yml'
+  workflow_dispatch:
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, openssl, json, curl
+      - name: Lint PHP files
+        run: |
+          find hostcreators -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Validate domain parser
+        run: |
+          php -r 'require "hostcreators/lib/catalog-api.php"; if (scopeflux_tlds("com,net") !== ["com","net"]) exit(1); if (!scopeflux_upcoming(gmdate("Y-m-d",time()+86400))) exit(2); echo "Catalogue PHP helpers OK\n";'
