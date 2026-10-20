@@ -47,7 +47,7 @@ export async function GET(request: Request) {
     }
 
     const page = Math.max(1, Math.min(20, Math.floor(Number(params.get('page'))) || 1));
-    return Response.json(await upcomingCatalog(tlds, page, env.DB, env.UNSTOPPABLE_API_KEY));
+    return Response.json(await upcomingCatalog(tlds, page, env.DB));
   } catch (error) {
     // Details go to the Worker log; visitors get a plain sentence.
     console.error('domains API failed', { message: (error as Error)?.message });
