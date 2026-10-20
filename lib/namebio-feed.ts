@@ -2,10 +2,11 @@ import type {DomainRecord} from './domains.ts';
 import {isUpcomingDate} from './release-time.ts';
 
 export const NAMEBIO_URL='https://api.namebio.com/verisign-download';
-const MAX_BYTES=2_000_000;
+const MAX_BYTES=8_000_000;
 const MAX_ITEMS=350;
 type Entry={domain:string;drop:string};
 let cached:{at:number;items:Entry[]}|undefined;
+let retryAfter=0;
 let inflight:Promise<Entry[]>|undefined;
 
 // The full Verisign report can be large. Read at most 2 MB per refresh so the
@@ -26,8 +27,9 @@ export function parseNameBio(text:string):Entry[] {
 }
 async function load():Promise<Entry[]>{
  if(cached&&Date.now()-cached.at<86400000)return cached.items;
- const response=await fetch(NAMEBIO_URL,{headers:{Accept:'text/plain'},signal:AbortSignal.timeout(18000)});
- if(!response.ok||!response.body)throw new Error('NameBio download unavailable ('+response.status+').');
+ if(Date.now()<retryAfter)throw new Error('NameBio temporarily unavailable; retry later.');
+ const response=await fetch(NAMEBIO_URL,{headers:{Accept:'text/plain'},signal:AbortSignal.timeout(18000)}).catch(error=>{retryAfter=Date.now()+3600000;throw error;});
+ if(!response.ok||!response.body){retryAfter=Date.now()+3600000;throw new Error('NameBio download unavailable ('+response.status+').');}
  const reader=response.body.getReader();
  const decoder=new TextDecoder();
  let body='',size=0;
@@ -42,7 +44,7 @@ async function load():Promise<Entry[]>{
  // Ignore the final potentially truncated row.
  const last=body.lastIndexOf('\n');if(last>0)body=body.slice(0,last+1);
  const items=parseNameBio(body);
- if(!items.length)throw new Error('NameBio returned no readable future drops in the sampled text.');
+ if(!items.length){retryAfter=Date.now()+3600000;throw new Error('NameBio returned no readable future drops in the sampled text.');}
  cached={at:Date.now(),items};
  return items;
 }
