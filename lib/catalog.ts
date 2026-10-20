@@ -136,7 +136,7 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):P
    return row?storedFeed(tld,row,error):null;
  };
  // Never-saved feeds first, then the oldest; fresh ones (under 15 minutes) are not refreshed.
- const stale=selected.filter(tld=>{const row=savedBy.get(tld);return !row||Date.now()-new Date(row.checked_at).getTime()>=900000;})
+ const stale=selected.filter(tld=>{const row=savedBy.get(tld);return !row||Date.now()-new Date(row.checked_at).getTime()>=(tld==='com'||tld==='net'?86400000:900000);})
   .sort((a,b)=>(savedBy.has(a)?Date.parse(savedBy.get(a)!.checked_at):0)-(savedBy.has(b)?Date.parse(savedBy.get(b)!.checked_at):0));
  // .sk and .cz currently have working public, credential-free feeds.
  // Other TLDs use saved snapshots until a reliable replacement exists.
