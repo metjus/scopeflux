@@ -43,7 +43,7 @@ export default {
     ctx.waitUntil((async () => {
       try {
         await ensureSchema(env.DB);
-        await upcomingCatalog(CATALOG_TLDS, 1, env.DB, env.UNSTOPPABLE_API_KEY);
+        await upcomingCatalog(CATALOG_TLDS, 1, env.DB);
         await recentCatalog(env.DB, CATALOG_TLDS);
         await recordOk(env.DB, 'cron');
       } catch (error) {
