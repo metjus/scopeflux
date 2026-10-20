@@ -2,7 +2,7 @@ import type {DomainRecord} from './domains.ts';
 import {isUpcomingDate} from './release-time.ts';
 
 export const NAMEBIO_URL='https://api.namebio.com/verisign-download';
-const MAX_BYTES=8_000_000;
+const MAX_BYTES=2_000_000;
 const MAX_ITEMS=350;
 type Entry={domain:string;drop:string};
 let cached:{at:number;items:Entry[]}|undefined;
