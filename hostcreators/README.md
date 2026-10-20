@@ -1,0 +1,34 @@
+# HostCreators Basic migration — phase 1 (NOT a deployable replacement)
+
+This directory is a **staging skeleton**, not a complete rewrite of ScopeFlux.
+Do not point scopeflux.io to it or disable Cloudflare yet.
+
+## Hosting prerequisites to confirm
+- PHP 8.1+ with PDO MySQL, JSON, OpenSSL, cURL
+- MySQL or MariaDB database access
+- Apache mod_rewrite or equivalent routing
+- Cron task execution via CLI PHP
+- Outbound HTTPS requests to domain-list providers
+- Ability to keep config.php outside the public document root
+
+## Initial staging setup
+1. Create a separate subdomain, e.g. staging.scopeflux.io, and point its document root to `hostcreators/public/`.
+2. Upload this directory to hosting (not the full Next.js source).
+3. Open `/health` on staging to verify PHP routing.
+4. Create a MySQL database and run `sql/001_initial.sql` on an **empty staging DB**.
+5. Copy `config.example.php` to private `config.php` outside public/, supply credentials there, and exclude it from backups shared publicly.
+
+## Still to implement before migration
+- PHP equivalents of all public Next.js pages and metadata, matching CSS/assets/layout
+- Domain check and RDAP APIs, catalog feed imports, archive/history, statuses
+- Google OAuth (state, nonce, session signature, expiry), account deletion and watchlist APIs
+- D1-to-MySQL **data migration** with row-count and integrity verification
+- Cron jobs and safe import limits, actual third-party feed access tests
+- Complete authentication, regression and SEO tests
+- Final staging verification, then planned DNS switch and rollback strategy
+
+## Safeguards
+- Never commit Google secrets or database passwords.
+- No import of user data until an authenticated secure backend is complete.
+- The staging route returns HTTP 503 and noindex on all routes except /health.
+- Existing Cloudflare production remains the sole source of truth until cutover.
