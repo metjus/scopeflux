@@ -11,6 +11,17 @@ if ($path === '/health') {
     echo json_encode(['ok' => true, 'runtime' => 'php', 'version' => PHP_VERSION], JSON_THROW_ON_ERROR);
     exit;
 }
+if ($path === '/api/domains' && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET') {
+    require_once dirname(__DIR__) . '/lib/catalog-api.php';
+    try {
+        $db = scopeflux_database();
+        $requested = isset($_GET['tlds']) && is_string($_GET['tlds']) ? $_GET['tlds'] : null;
+        scopeflux_json(scopeflux_domains($db, $requested, ($_GET['view'] ?? '') === 'recent'));
+    } catch (Throwable $error) {
+        error_log('ScopeFlux PHP API error: ' . $error->getMessage());
+        scopeflux_json(['error' => 'The catalogue is temporarily unavailable.'], 503);
+    }
+}
 http_response_code(503);
 header('Content-Type: text/html; charset=utf-8');
-echo '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>ScopeFlux migration staging</title><body><h1>ScopeFlux migration staging</h1><p>The PHP backend is not ready for public use. Production stays on Cloudflare.</p></body></html>';
+echo '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>ScopeFlux migration staging</title><body><h1>ScopeFlux migration staging</h1><p>The PHP backend is not ready for public use.</p></body></html>';
