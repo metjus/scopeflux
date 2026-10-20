@@ -32,3 +32,13 @@ Do not point scopeflux.io to it or disable Cloudflare yet.
 - No import of user data until an authenticated secure backend is complete.
 - The staging route returns HTTP 503 and noindex on all routes except /health.
 - Existing Cloudflare production remains the sole source of truth until cutover.
+
+## Phase 2 progress — read-only catalogue API
+- `lib/catalog-api.php` provides PDO MariaDB access and reads imported snapshots.
+- `public/index.php` now handles `/health`, `/api/domains`, `/api/domains?tlds=com`, and `/api/domains?view=recent`.
+- Only stored data is served; this phase **does not fetch external feeds**.
+- `scripts/import-json.php` is CLI-only, transactional, and intended for an empty MariaDB staging database. It accepts one private JSON file keyed by D1 table names. Do not upload that export to `public/`, and do not share it in chat or commits.
+- D1 data extraction/export and parity verification have **not** been done yet.
+- PHP CI lint is checked by `Verify HostCreators PHP migration`.
+
+Do not publish this to the live domain yet: routing, sign-in, watchlists, individual domain lookup, and frontend are not complete.
