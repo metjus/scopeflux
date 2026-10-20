@@ -1,9 +1,11 @@
-# ScopeFlux — expiring and dropping domains. All public pages may be indexed.
+# ScopeFlux public search and content discovery policy.
+# Public pages are crawlable; private account and application API routes are not.
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /account/
 Disallow: /status
 
+# Machine-readable discovery documents are public.
 Sitemap: https://scopeflux.io/sitemap.xml
-# A summary for AI assistants: https://scopeflux.io/llms.txt
+# AI-facing site overview: https://scopeflux.io/llms.txt
