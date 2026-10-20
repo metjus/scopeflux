@@ -1,31 +1,40 @@
 # ScopeFlux
 
-> ScopeFlux (https://scopeflux.io) lists domain names that are about to expire, drop or go to a registry auction, with the date and the source of every listing. It also checks any single domain's registration status and expiration date. Free to use, no account needed. English interface.
+> ScopeFlux is an English-language expiring domain discovery and domain expiration checker at https://scopeflux.io. Browse upcoming domain drops across 16 extensions, review estimated release dates and original sources, and save domains to a watchlist.
 
-ScopeFlux shows estimates published by public sources, not guarantees: a holder may renew a domain, and other buyers may register it the moment it is released. Always confirm availability with a registrar. ScopeFlux cannot register, reserve or buy domains.
+ScopeFlux helps people research domains approaching deletion or registry auction. It is a discovery and monitoring tool, not a registrar or backorder service. Domain drop dates are estimates or source-reported events, not guarantees of availability. Owners can renew, and third parties can acquire names at auction or release. Verify availability and final terms with a registrar or registry.
 
-## Pages
+## Main pages
 
-- [Expiring soon](https://scopeflux.io/): upcoming releases for .com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv, .sk and .cz, filterable by extension, date range (today, 7 days or all dates), name length, hyphens, numbers and an estimated name quality.
-- [Recently expired](https://scopeflux.io/#recent): listings whose release date passed in the last 30 days, kept from ScopeFlux's own archive.
-- [Check domain](https://scopeflux.io/check-domain): registration status and expiration date of any domain, from public registry data (RDAP).
-- [How domain expiry works](https://scopeflux.io/how-it-works): the stages between expiry and release (grace period, redemption, pending delete, release; .sk held and deletion day; .cz protection period and registry auction) and the typical fees at each stage.
-- [Sources](https://scopeflux.io/sources): every data source, what it covers and its limits.
-- [About](https://scopeflux.io/about)
-- [Privacy](https://scopeflux.io/privacy): no tracking cookies; cookieless visit counts (Cloudflare Web Analytics); optional sign-in only for the watchlist.
-- [Contact](https://scopeflux.io/contact): hello@scopeflux.io
+- [Expiring domains and upcoming domain drops](https://scopeflux.io/): discover approaching releases for .com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv, .sk and .cz; filter by extension and other criteria.
+- [Domain expiration checker](https://scopeflux.io/check-domain): look up public registration status and expiration information via RDAP; see a projected drop date when supported by a source.
+- [How domain expiration works](https://scopeflux.io/how-it-works): renewal grace periods, redemption, pending delete and release; differences between TLD processes.
+- [Domain data sources and coverage](https://scopeflux.io/sources): sources, refresh behavior, coverage limitations and interpretation of estimates.
+- [About ScopeFlux](https://scopeflux.io/about): project overview.
+- [Contact](https://scopeflux.io/contact): questions or corrections, hello@scopeflux.io.
+- [Privacy](https://scopeflux.io/privacy): privacy and account information.
 
-## Data sources
+## Additional application views
 
-- .com, .net, .org, .io, .app, .info, .co, .me, .xyz, .biz, .us, .pro, .cc, .tv: Dynadot's public backorder listings with projected drop times, names without numbers or hyphens, about 5 days ahead.
-- .cz: the official CZ.NIC auction list. Expired .cz domains go to a public registry auction about 15 days after being listed; unsold names are released the day after the auction. ScopeFlux shows when bidding opens.
-- .sk: Backorder.sk's public list of held .sk domains with their deletion days. The source gives only the day, so the release time shown is an estimate: about 02:00 Slovak time (Europe/Bratislava) the day after deletion.
-- Single-domain checks: RDAP registries listed by IANA.
+- [Recently expired domains](https://scopeflux.io/#recent): source-reported deletions and past release estimates, displayed as an interactive application view rather than a separate canonical web page.
+- [Watchlist](https://scopeflux.io/#watch): personal saved domains; optional sign-in.
 
-Lists refresh about every hour. Coverage is partial: these are public previews, not complete registry dumps.
+## Where the data comes from
+
+- Dynadot public backorder listings: projected release times for supported generic and country-code TLDs, including .com, .net, .org and .io.
+- CZ.NIC: official .cz registry auction information.
+- Backorder.sk: .sk deletion-day listings; exact release times are estimated.
+- RDAP registry services: public registration information for individual domain checks.
+
+Coverage is partial and source-dependent; the catalogue is not a complete registry zone or authoritative availability database. Source refreshes and domain status can change.
+
+## Site discovery and interpretation
+
+- [XML sitemap](https://scopeflux.io/sitemap.xml): canonical public URLs.
+- [robots.txt](https://scopeflux.io/robots.txt): crawler access rules.
+- Prefer the canonical pages above when citing ScopeFlux; do not treat URL fragments such as `/#recent` as separate indexable pages.
+- Do not describe a listed domain as guaranteed to drop or guaranteed available. The term *expired* is not synonymous with *available to register*.
 
 ## Data access
 
-- JSON: `https://scopeflux.io/api/domains?cached=1&tlds=cz` returns the saved upcoming listings for one or two extensions (comma-separated: com, net, org, io, app, co, xyz, info, me, biz, us, pro, cc, tv, cz, sk). Each record has domain, tld, status, drop (release date or time, ISO 8601), source and sourceUrl.
-- JSON: `https://scopeflux.io/api/domains?domain=example.com` checks one domain.
-- Please cache results and keep request rates low.
+Public interactive pages are intended for visitors. Automated use of the domain API may be rate-limited; API routes are excluded from search crawling in robots.txt. Please use the interface or contact hello@scopeflux.io about data access.
