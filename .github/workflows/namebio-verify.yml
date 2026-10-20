@@ -1,0 +1,39 @@
+name: Verify NameBio feed
+on:
+  pull_request:
+    paths:
+      - 'lib/namebio-feed.ts'
+      - 'lib/catalog.ts'
+      - 'tests/namebio-feed.test.mjs'
+      - '.github/workflows/namebio-verify.yml'
+  workflow_dispatch:
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Parser tests
+        run: node --experimental-strip-types --test tests/namebio-feed.test.mjs
+      - name: Check live NameBio report
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          u='https://api.namebio.com/verisign-download'
+          req=urllib.request.Request(u,headers={'User-Agent':'ScopeFlux feed compatibility check/1.0','Accept':'text/plain'})
+          with urllib.request.urlopen(req,timeout=18) as r:
+              content=r.read(2_000_000).decode('utf-8','replace')
+              print('status:',r.status,'content_type:',r.headers.get('Content-Type'))
+          import re
+          rows=[x for x in content.splitlines() if re.match(r'^[a-z0-9-]+\.(?:com|net):',x,re.I)]
+          print('recognized rows in first 2MB:',len(rows))
+          print('one sample:',rows[0][:120] if rows else 'none')
+          com=sum(x.lower().split(':',1)[0].endswith('.com') for x in rows)
+          net=sum(x.lower().split(':',1)[0].endswith('.net') for x in rows)
+          print('com:',com,'net:',net)
+          assert com>0 and net>0,'Both com and net must be present in the bounded sample'
+          assert len(rows)>0,'Feed sample does not match parser format'
+          PY
