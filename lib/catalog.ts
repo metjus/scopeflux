@@ -4,7 +4,6 @@ import {readSavedFeed,readSavedFeeds} from './catalog-store.ts';
 import type {DomainRecord} from './domains';
 import {saveCatalogFeed,archiveDue,recentCatalog} from './catalog-history.ts';
 import {isUpcomingDate,releaseTimestamp,skReleaseTime} from './release-time.ts';
-import {fetchUnstoppableListings} from './unstoppable-feed.ts';
 // .ai and .eu were dropped: their only source (Backorder.com) blocks Worker
 // requests and needed an external scraper. They can still be checked one by one.
 // Global extensions first; country extensions (.cz, .sk) last.
@@ -97,16 +96,8 @@ export function parseDynadot(html:string,tld:string,checkedAt=new Date().toISOSt
  if(typeof domain==='string'&&valid(domain,tld)&&typeof stamp==='number'&&stamp>1e12&&stamp<4e12)out.push(record(domain,new Date(stamp).toISOString(),'Dynadot','https://www.dynadot.com/market/backorder?keyword='+encodeURIComponent(domain),checkedAt));
  }return out;
 }
-async function feed(tld:string,page=1,unstoppableKey?:string){
+async function feed(tld:string,page=1){
  const key=tld+':'+page,old=cache.get(key);if(old&&Date.now()-old.at<900000){const records=old.data.records.filter(r=>isUpcomingDate(r.drop));return {...old.data,records,feed:{...old.data.feed,loaded:records.length}};}
- if(unstoppableKey && (tld==='com'||tld==='net')){
-   const checkedAt=new Date().toISOString();
-   const {records,more}=await fetchUnstoppableListings(tld,unstoppableKey,page,checkedAt);
-   if(!records.length)throw new FeedSourceError('Unstoppable Domains returned no upcoming domain listings.');
-   const result={records,observed:records,feed:{tld,source:'Unstoppable Domains',url:'https://unstoppabledomains.com/',loaded:records.length,more,limited:true,checkedAt}};
-   cache.set(key,{at:Date.now(),data:result});
-   return result;
- }
  const source=feedSource(tld);
  const url=tld==='sk'||tld==='cz'?feedPage(tld):DYNA[tld]?dynadotUrl(tld,page):`https://backorder.com/en/pending-delete/${tld}`;
  const checkedAt=new Date().toISOString();
@@ -122,7 +113,7 @@ async function feed(tld:string,page=1,unstoppableKey?:string){
  cache.set(key,{at:Date.now(),data});if(cache.size>40)cache.delete(cache.keys().next().value!);return data;
 }
 function logStorageError(error:unknown):null{console.error('catalogue storage failed',{message:(error as Error)?.message});return null;}
-export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database,unstoppableKey?:string):Promise<CatalogResult>{
+export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):Promise<CatalogResult>{
  const selected=tlds.filter(t=>CATALOG_TLDS.includes(t));
  // Only read lightweight timestamps up front. Reassembling every large saved
  // feed (notably .sk) before a live fetch wastes CPU on Workers Free.
@@ -138,11 +129,18 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database,un
  // Never-saved feeds first, then the oldest; fresh ones (under 15 minutes) are not refreshed.
  const stale=selected.filter(tld=>{const row=savedBy.get(tld);return !row||Date.now()-new Date(row.checked_at).getTime()>=900000;})
   .sort((a,b)=>(savedBy.has(a)?Date.parse(savedBy.get(a)!.checked_at):0)-(savedBy.has(b)?Date.parse(savedBy.get(b)!.checked_at):0));
- const refresh=new Set(db&&page===1?stale.slice(0,MAX_REFRESH):selected);
+ // .sk and .cz currently have working public, credential-free feeds.
+ // Other TLDs use saved snapshots until a reliable replacement exists.
+ const liveTlds=new Set(['sk','cz']);
+ const refresh=new Set((db&&page===1?stale.slice(0,MAX_REFRESH):selected).filter(tld=>liveTlds.has(tld)));
  const results=await Promise.all(selected.map(async tld=>{try{
  const saved=savedBy.get(tld);
- if(saved&&!refresh.has(tld)){const existing=await stored(tld);if(existing)return existing;}
- const result=await feed(tld,page,unstoppableKey);
+ if(!refresh.has(tld)){
+   const existing=saved?await stored(tld):null;
+   if(existing)return {...existing,feed:{...existing.feed,refreshError:liveTlds.has(tld)?existing.feed.refreshError:'Live source unavailable. Showing saved records only.'}};
+   return {records:[],feed:{tld,source:feedSource(tld),url:feedPage(tld),loaded:0,more:false,limited:true,checkedAt:new Date().toISOString(),error:'No working public feed for this extension.'}};
+ }
+ const result=await feed(tld,page);
  if(db)await recordOk(db,'feed:'+tld);
  // Storage problems (e.g. the D1 daily limit) must not hide listings that were just fetched.
  try{
