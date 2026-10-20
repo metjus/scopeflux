@@ -42,3 +42,11 @@ Do not point scopeflux.io to it or disable Cloudflare yet.
 - PHP CI lint is checked by `Verify HostCreators PHP migration`.
 
 Do not publish this to the live domain yet: routing, sign-in, watchlists, individual domain lookup, and frontend are not complete.
+
+## Phase 3 staging additions
+- `/radar-preview`: styled, mobile-responsive, noindex catalogue viewer with search, filters and pagination. This is a **preview**, not the full original Next.js experience.
+- `scripts/refresh-cz.php`: scheduled CLI adapter for CZ.NIC auction data. Run at most every 15 minutes after testing.
+- `scripts/prune-history.php`: daily removal of history older than 31 days.
+- Missing: verified Backorder.sk adapter, global domains feeds and full historical archive ingestion, Google OAuth/account/watchlist routes, domain lookup and full parity with original frontend.
+- Do NOT publish the PHP staging root on the live domain; the existing maintenance page must remain until hosting tests pass.
+- No MariaDB credentials have been set or accessed by this migration code.
