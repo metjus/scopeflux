@@ -129,10 +129,17 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):P
  // Never-saved feeds first, then the oldest; fresh ones (under 15 minutes) are not refreshed.
  const stale=selected.filter(tld=>{const row=savedBy.get(tld);return !row||Date.now()-new Date(row.checked_at).getTime()>=900000;})
   .sort((a,b)=>(savedBy.has(a)?Date.parse(savedBy.get(a)!.checked_at):0)-(savedBy.has(b)?Date.parse(savedBy.get(b)!.checked_at):0));
- const refresh=new Set(db&&page===1?stale.slice(0,MAX_REFRESH):selected);
+ // .sk and .cz currently have working public, credential-free feeds.
+ // Other TLDs use saved snapshots until a reliable replacement exists.
+ const liveTlds=new Set(['sk','cz']);
+ const refresh=new Set((db&&page===1?stale.slice(0,MAX_REFRESH):selected).filter(tld=>liveTlds.has(tld)));
  const results=await Promise.all(selected.map(async tld=>{try{
  const saved=savedBy.get(tld);
- if(saved&&!refresh.has(tld)){const existing=await stored(tld);if(existing)return existing;}
+ if(!refresh.has(tld)){
+   const existing=saved?await stored(tld):null;
+   if(existing)return {...existing,feed:{...existing.feed,refreshError:liveTlds.has(tld)?existing.feed.refreshError:'Live source unavailable. Showing saved records only.'}};
+   return {records:[],feed:{tld,source:feedSource(tld),url:feedPage(tld),loaded:0,more:false,limited:true,checkedAt:new Date().toISOString(),error:'No working public feed for this extension.'}};
+ }
  const result=await feed(tld,page);
  if(db)await recordOk(db,'feed:'+tld);
  // Storage problems (e.g. the D1 daily limit) must not hide listings that were just fetched.
