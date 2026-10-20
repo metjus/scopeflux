@@ -115,15 +115,24 @@ async function feed(tld:string,page=1){
 function logStorageError(error:unknown):null{console.error('catalogue storage failed',{message:(error as Error)?.message});return null;}
 export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):Promise<CatalogResult>{
  const selected=tlds.filter(t=>CATALOG_TLDS.includes(t));
- const savedRows=db&&page===1?await readSavedFeeds(db,selected).catch(logStorageError):undefined;
+ // Only read lightweight timestamps up front. Reassembling every large saved
+ // feed (notably .sk) before a live fetch wastes CPU on Workers Free.
+ const savedRows=db&&page===1&&selected.length?await db.prepare(
+   'SELECT tld,checked_at FROM catalog_feeds WHERE tld IN ('+selected.map(()=>'?').join(',')+')'
+ ).bind(...selected).all<{tld:string;checked_at:string}>().then(r=>r.results).catch(logStorageError):undefined;
  const savedBy=new Map((savedRows||[]).map(row=>[row.tld,row]));
+ const stored=async(tld:string,error?:string)=>{
+   if(!db)return null;
+   const row=await readSavedFeed(db,tld);
+   return row?storedFeed(tld,row,error):null;
+ };
  // Never-saved feeds first, then the oldest; fresh ones (under 15 minutes) are not refreshed.
  const stale=selected.filter(tld=>{const row=savedBy.get(tld);return !row||Date.now()-new Date(row.checked_at).getTime()>=900000;})
   .sort((a,b)=>(savedBy.has(a)?Date.parse(savedBy.get(a)!.checked_at):0)-(savedBy.has(b)?Date.parse(savedBy.get(b)!.checked_at):0));
  const refresh=new Set(db&&page===1?stale.slice(0,MAX_REFRESH):selected);
  const results=await Promise.all(selected.map(async tld=>{try{
  const saved=savedBy.get(tld);
- if(saved&&!refresh.has(tld))return storedFeed(tld,saved);
+ if(saved&&!refresh.has(tld)){const existing=await stored(tld);if(existing)return existing;}
  const result=await feed(tld,page);
  if(db)await recordOk(db,'feed:'+tld);
  // Storage problems (e.g. the D1 daily limit) must not hide listings that were just fetched.
@@ -134,7 +143,7 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):P
  return result;
  }catch(e){
  if(db)await recordError(db,'feed:'+tld,e);
- if(db&&page===1){const saved=savedBy.get(tld);if(saved)return storedFeed(tld,saved,publicFeedError(e));}
+ if(db&&page===1&&savedBy.has(tld)){const existing=await stored(tld,publicFeedError(e));if(existing)return existing;}
  return {records:[],feed:{tld,source:feedSource(tld),url:feedPage(tld),loaded:0,more:false,limited:false,checkedAt:new Date().toISOString(),error:publicFeedError(e),retryAfter:e instanceof FeedSourceError?e.retryAfter:undefined}}}}));
  return {records:results.flatMap(r=>r.records),feeds:results.map(r=>r.feed)};
 }
