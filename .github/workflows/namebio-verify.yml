@@ -31,5 +31,9 @@ jobs:
           rows=[x for x in content.splitlines() if re.match(r'^[a-z0-9-]+\.(?:com|net):',x,re.I)]
           print('recognized rows in first 2MB:',len(rows))
           print('one sample:',rows[0][:120] if rows else 'none')
+          com=sum(x.lower().split(':',1)[0].endswith('.com') for x in rows)
+          net=sum(x.lower().split(':',1)[0].endswith('.net') for x in rows)
+          print('com:',com,'net:',net)
+          assert com>0 and net>0,'Both com and net must be present in the bounded sample'
           assert len(rows)>0,'Feed sample does not match parser format'
           PY
