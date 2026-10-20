@@ -141,7 +141,7 @@ export async function upcomingCatalog(tlds=CATALOG_TLDS,page=1,db?:D1Database):P
  // .sk and .cz currently have working public, credential-free feeds.
  // Other TLDs use saved snapshots until a reliable replacement exists.
  const liveTlds=new Set(['sk','cz','com','net']);
- const refresh=new Set((db&&page===1?stale.slice(0,MAX_REFRESH):selected).filter(tld=>liveTlds.has(tld)));
+ const refresh=new Set((db&&page===1?stale.filter(tld=>liveTlds.has(tld)).slice(0,MAX_REFRESH):selected.filter(tld=>liveTlds.has(tld))));
  const results=await Promise.all(selected.map(async tld=>{try{
  const saved=savedBy.get(tld);
  if(!refresh.has(tld)){
