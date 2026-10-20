@@ -16,7 +16,7 @@ ScopeFlux helps people research domains approaching deletion or registry auction
 
 ## Additional application views
 
-- [Recently expired domains](https://scopeflux.io/#recent): source-reported deletions and past release estimates, displayed as an interactive application view rather than a separate canonical web page.
+- [Recently expired domains](https://scopeflux.io/#recent): source-reported deletions and release estimates from the past seven days, displayed as an interactive application view rather than a separate canonical web page.
 - [Watchlist](https://scopeflux.io/#watch): personal saved domains; optional sign-in.
 
 ## Where the data comes from

@@ -12,14 +12,14 @@ export type CatalogFilters = {
 };
 export const RESULTS_PER_PAGE = 100;
 export function defaultPeriod(view: string): string {
-  return view === 'recent' ? '30' : view === 'watch' ? 'all' : '7';
+  return view === 'recent' ? '7' : view === 'watch' ? 'all' : '7';
 }
 export function expectedRelease(record: DomainRecord): string | null {
   return record.drop || record.conditionalRelease || null;
 }
 export function matchesDateRange(record: DomainRecord, view: CatalogView, period: string, now = Date.now()): boolean {
   if (view === 'discover' && !isUpcomingDate(record.drop, now)) return false;
-  if (view === 'recent' && !isRecentDate(historicalDate(record), now)) return false;
+  if (view === 'recent' && !isRecentDate(historicalDate(record), now, 7)) return false;
   if (period === 'all') return true;
   const days = Number(period);
   const offset = calendarDaysFromToday((view === 'recent' ? historicalDate(record) : expectedRelease(record)) || record.listedDate || record.expiration, now);

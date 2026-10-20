@@ -41,8 +41,9 @@ test('past timestamp releases move out of upcoming, but date-only estimates stay
 test('past 7/30 days use historical dates and retain only actual past observations', () => {
   const rows = ['2026-10-14', '2026-10-08', '2026-10-07', '2026-09-16', '2026-09-14', '2026-10-16'].map((date, i) => record('old' + i + '.sk', date));
   assert.equal(filterListings(rows, {...filters, period: '7'}, 'recent', now).length, 2);
-  assert.equal(filterListings(rows, {...filters, period: '30'}, 'recent', now).length, 4);
-  assert.equal(defaultPeriod('recent'), '30');
+  assert.equal(filterListings(rows, {...filters, period: '30'}, 'recent', now).length, 2);
+  assert.equal(filterListings(rows, filters, 'recent', now).length, 2);
+  assert.equal(defaultPeriod('recent'), '7');
   assert.equal(defaultPeriod('watch'), 'all');
 });
 

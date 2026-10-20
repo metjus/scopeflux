@@ -47,13 +47,13 @@ export async function saveCatalogFeed(db:D1Database,tld:string,records:DomainRec
  parts.slice(1).forEach((part,index)=>statements.push(db.prepare('INSERT INTO catalog_feed_parts(tld,part,records) VALUES(?,?,?)').bind(tld,index+1,JSON.stringify(part))));
  await db.batch(statements);
 }
-export function isRecentRelease(record:DomainRecord,now=Date.now(),days=30){
+export function isRecentRelease(record:DomainRecord,now=Date.now(),days=7){
  return isRecentDate(historicalDate(record),now,days);
 }
 export async function recentCatalog(db:D1Database,tlds:string[],now=Date.now(),limit?:number){
  await db.prepare('DELETE FROM catalog_history WHERE release_at<?').bind(new Date(now-31*86400000).toISOString().slice(0,10)).run();
- if(!tlds.length)return {records:[],historyDays:30,historyTotal:0};
- const from=new Date(now-31*86400000).toISOString().slice(0,10),until=new Date(now).toISOString();
+ if(!tlds.length)return {records:[],historyDays:7,historyTotal:0};
+ const from=new Date(now-7*86400000).toISOString().slice(0,10),until=new Date(now).toISOString();
  const result=await db.prepare(`SELECT snapshot FROM catalog_history WHERE tld IN (${tlds.map(()=>'?').join(',')}) AND release_at>=? AND release_at<? ORDER BY release_at DESC${limit?' LIMIT '+Math.floor(limit):''}`).bind(...tlds,from,until).all<{snapshot:string}>();
  const records=result.results.map(row=>JSON.parse(row.snapshot) as DomainRecord).filter(r=>isRecentRelease(r,now)).map(r=>r.reportedDrop?r:({...r,status:'Release estimate passed',note:'This source-listed release date has passed. This historical observation does not confirm current registration status or availability. Open the domain details for a fresh check.'}));
  return {records,historyDays:30,historyTotal:records.length};
